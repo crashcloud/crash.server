@@ -56,8 +56,10 @@
 	  <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.10" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\SpeckLib\SpeckLib.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+	  <Reference Include="Crash.Changes">
+	    <HintPath>..\..\Crash.Changes\src\bin\Debug\netstandard2.0\Crash.Changes.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
 
 </Project>

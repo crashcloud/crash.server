@@ -21,4 +21,3 @@ app.MapGet("/", () => "Hello World!");
 app.MapHub<CrashHub>("/Crash");
 app.MigrateDatabase<CrashContext>();
 app.Run();
-// Tell Client we're ready!
