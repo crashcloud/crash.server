@@ -3,7 +3,6 @@ using System;
 using Crash.Server.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
@@ -14,16 +13,12 @@ namespace Crash.Server.Migrations
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
-#pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.10");
 
             modelBuilder.Entity("ChangeLib.Change", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("LockedBy")
+                        .ValueGeneratedOnAdd() // Should this be removed?
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Owner")
@@ -35,14 +30,13 @@ namespace Crash.Server.Migrations
                     b.Property<DateTime>("Stamp")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("Temporary")
+                    b.Property<int>("Action")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
                     b.ToTable("Changes");
                 });
-#pragma warning restore 612, 618
         }
     }
 }

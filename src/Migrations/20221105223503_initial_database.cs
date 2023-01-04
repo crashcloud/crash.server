@@ -16,9 +16,8 @@ namespace Crash.Server.Migrations
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Stamp = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Owner = table.Column<string>(type: "TEXT", nullable: true),
-                    Temporary = table.Column<bool>(type: "INTEGER", nullable: false),
-                    LockedBy = table.Column<string>(type: "TEXT", nullable: true),
-                    Payload = table.Column<string>(type: "TEXT", nullable: true)
+                    Payload = table.Column<string>(type: "TEXT", nullable: true),
+                    Action = table.Column<int>(type: "int", nullable: false),
                 },
                 constraints: table =>
                 {
