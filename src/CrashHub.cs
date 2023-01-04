@@ -1,9 +1,4 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using Crash.Server.Model;
-using static Humanizer.In;
-
-
-/// <summary>
+﻿/// <summary>
 /// Server Implementation of ICrashClient EndPoints
 /// </summary>
 public sealed class CrashHub : Hub<ICrashClient>
