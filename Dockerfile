@@ -7,11 +7,10 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /
-COPY ["src/Crash.Server/Crash.Server.csproj", "src/Crash.Server/"]
-COPY ["src/ChangeLib/ChangeLib.csproj", "src/ChangeLib/"]
-RUN dotnet restore "src/Crash.Server/Crash.Server.csproj"
+COPY ["src/Crash.Server.csproj", "src/"]
+RUN dotnet restore "src/Crash.Server.csproj"
 COPY . .
-WORKDIR "/src/Crash.Server"
+WORKDIR "/src"
 RUN dotnet build "Crash.Server.csproj" -c Release -o /app/build
 
 FROM build AS publish
