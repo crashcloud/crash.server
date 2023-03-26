@@ -1,32 +1,36 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-public static class Extensions
+namespace Crash.Server
 {
-    /// <summary>
-    /// Creates new Database based on DbContext
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="webHost"></param>
-    /// <returns></returns>
-    /// <exception cref="InvalidOperationException"></exception>
-    public static IHost MigrateDatabase<T>(this IHost webHost) where T : DbContext
+    public static class Extensions
     {
-        SQLitePCL.Batteries.Init();
-        var serviceScopeFactory = (IServiceScopeFactory?)webHost
-            .Services.GetService(typeof(IServiceScopeFactory));
-
-        if (serviceScopeFactory == null)
-            throw new InvalidOperationException("Cannot Get IServiceScopeFactory");
-
-        using (var scope = serviceScopeFactory.CreateScope())
+        /// <summary>
+        /// Creates new Database based on DbContext
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="webHost"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public static IHost MigrateDatabase<T>(this IHost webHost) where T : DbContext
         {
-            var services = scope.ServiceProvider;
+            SQLitePCL.Batteries.Init();
+            var serviceScopeFactory = (IServiceScopeFactory?)webHost
+                .Services.GetService(typeof(IServiceScopeFactory));
 
-            var dbContext = services.GetRequiredService<T>();
-            dbContext.Database.Migrate();
+            if (serviceScopeFactory == null)
+                throw new InvalidOperationException("Cannot Get IServiceScopeFactory");
+
+            using (var scope = serviceScopeFactory.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+
+                var dbContext = services.GetRequiredService<T>();
+                dbContext.Database.Migrate();
+            }
+
+            return webHost;
         }
 
-        return webHost;
     }
 
 }

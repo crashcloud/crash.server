@@ -5,6 +5,10 @@ VisualStudioVersion = 17.4.33122.133
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Crash.Server", "src\Crash.Server.csproj", "{46E4FE33-E424-4D29-86C3-66600F5534A9}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{DFFDAFE0-A738-44DD-A529-76889CBCC7EA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Crash.Server.Tests", "tests\Crash.Server.Tests.csproj", "{F8D97400-10B6-4C11-85BA-0B8F7A1947DA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,9 +19,16 @@ Global
 		{46E4FE33-E424-4D29-86C3-66600F5534A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{46E4FE33-E424-4D29-86C3-66600F5534A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{46E4FE33-E424-4D29-86C3-66600F5534A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8D97400-10B6-4C11-85BA-0B8F7A1947DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8D97400-10B6-4C11-85BA-0B8F7A1947DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8D97400-10B6-4C11-85BA-0B8F7A1947DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8D97400-10B6-4C11-85BA-0B8F7A1947DA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F8D97400-10B6-4C11-85BA-0B8F7A1947DA} = {DFFDAFE0-A738-44DD-A529-76889CBCC7EA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FA1835DB-DFA8-4A36-87DE-F3FC8944FF62}
