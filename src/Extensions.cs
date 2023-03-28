@@ -2,8 +2,10 @@
 
 namespace Crash.Server
 {
+
     public static class Extensions
     {
+
         /// <summary>
         /// Creates new Database based on DbContext
         /// </summary>
