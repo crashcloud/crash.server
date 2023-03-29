@@ -149,7 +149,7 @@ namespace Crash.Server.Tests
 						}).Returns(true);
 					}
 
-					/* Just FIlenames don't work currently
+					/* Just Filenames don't work currently
 					yield return new TestCaseData(new List<string> {
 							"--path", "fileName.db",
 						}).Returns(true);
@@ -192,7 +192,7 @@ namespace Crash.Server.Tests
 				string fileNameWithDbExt = $"{fileName}.db";
 				string path = Directory.GetCurrentDirectory();
 
-				return Path.Combine(path, fileName);
+				return Path.Combine(path, fileNameWithDbExt);
 			}
 
 			static readonly string[] validPrefixes = new string[] { "http://", "https://", "" };
