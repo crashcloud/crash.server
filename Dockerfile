@@ -20,4 +20,4 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 
-ENTRYPOINT ["dotnet", "Crash.Server.dll"]
+ENTRYPOINT ["dotnet", "Crash.Server.exe"]
