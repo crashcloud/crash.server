@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
@@ -20,13 +20,9 @@
 		<Company>Crash</Company>
 		<Copyright>Crash</Copyright>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackAsTool>True</PackAsTool>
-		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
-		<IsPackable>true</IsPackable>
 		<TypeScriptJSXEmit>none</TypeScriptJSXEmit>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<IncludeSymbols>True</IncludeSymbols>
-		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<AnalysisLevel>6.0-recommended</AnalysisLevel>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<ErrorReport>send</ErrorReport>

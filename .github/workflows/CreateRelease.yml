@@ -1,0 +1,45 @@
+---
+name: CreateRelease
+on: 
+    workflow_dispatch:
+        inputs:
+            version:
+                description: 'Release Version'
+                required: true
+                default: 'latest'
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+        - uses: actions/checkout@v3
+
+        - name: Setup NuGet
+          uses: NuGet/setup-nuget@v1
+        
+        - name: Restore Packages
+          run: nuget restore Crash.Server.sln
+    
+        - uses: actions/setup-dotnet@v3
+          with:
+            dotnet-version: |
+              6.0
+    
+        - name: Build Crash
+          run: dotnet build Crash.Server.sln --configuration Release
+    
+        - name: Test
+          run: |
+            dotnet test Crash.Server.sln
+
+        - name: Package
+          shell: pwsh
+          run: |
+            scripts/Package.ps1
+
+        - name: Create Release
+          uses: softprops/action-gh-release@v1
+          with:
+            files: |
+                src/bin/Crash.Server.zip
+                tag_name: ${{ github.event.inputs.version }}
