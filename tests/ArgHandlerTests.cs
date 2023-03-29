@@ -81,6 +81,8 @@ namespace Crash.Server.Tests
 			ArgumentHandler defaultArgHandler = new();
 			defaultArgHandler.EnsureDefaults();
 
+			Console.WriteLine($"Expected {argHandler.DatabaseFileName}, got {defaultArgHandler.DatabaseFileName}");
+
 			return argHandler.DatabaseFileName != defaultArgHandler.DatabaseFileName;
 		}
 
