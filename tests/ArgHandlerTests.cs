@@ -71,7 +71,8 @@ namespace Crash.Server.Tests
 
 		#region DBPaths
 
-		[TestCaseSource(typeof(ArgHandlerData), nameof(ArgHandlerData.DBPathArguments))]
+		[TestCaseSource(typeof(ArgHandlerData), nameof(ArgHandlerData.Invalid_DBPathArguments))]
+		[TestCaseSource(typeof(ArgHandlerData), nameof(ArgHandlerData.Valid_DBPathArguments))]
 		public bool ParseDBArgs(List<string> args)
 		{
 			ArgumentHandler argHandler = new();
@@ -137,11 +138,10 @@ namespace Crash.Server.Tests
 				}
 			}
 
-			public static IEnumerable DBPathArguments
+			public static IEnumerable Valid_DBPathArguments
 			{
 				get
 				{
-					// Trues
 					for (int i = 0; i < 5; i++)
 					{
 						yield return new TestCaseData(new List<string> {
@@ -149,16 +149,24 @@ namespace Crash.Server.Tests
 						}).Returns(true);
 					}
 
-					/* Just FIlenames don't work currently
+					/* Relative paths not supported yet
+					yield return new TestCaseData(new List<string> {
+							"--path", @"\App_Data\fileName.db",
+						}).Returns(true);
+					*/
+
+					/* Just Filenames don't work currently
 					yield return new TestCaseData(new List<string> {
 							"--path", "fileName.db",
 						}).Returns(true);
 					*/
+				}
+			}
 
-					yield return new TestCaseData(new List<string> {
-							"--path", @"\App_Data\fileName.db",
-						}).Returns(true);
-
+			public static IEnumerable Invalid_DBPathArguments
+			{
+				get
+				{
 					// Falses
 					yield return new TestCaseData(new List<string> {
 							"--pth", GetRandomValidDbFileName(),
@@ -192,7 +200,7 @@ namespace Crash.Server.Tests
 				string fileNameWithDbExt = $"{fileName}.db";
 				string path = Directory.GetCurrentDirectory();
 
-				return Path.Combine(path, fileName);
+				return Path.Combine(path, fileNameWithDbExt);
 			}
 
 			static readonly string[] validPrefixes = new string[] { "http://", "https://", "" };
