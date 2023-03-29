@@ -28,11 +28,3 @@ jobs:
     - name: Test
       run: |
         dotnet test Crash.Server.sln
-
-    - name: Test Report
-      uses: dorny/test-reporter@v1
-      if: success() || failure()
-      with:
-        name: Tests
-        path: tests/**/TestResults/*.trx    # Path to test results
-        reporter: dotnet-trx                # Format of test results
