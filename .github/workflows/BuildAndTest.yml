@@ -1,39 +1,30 @@
 ---
-    name: BuildAndTest
-    on:
-      pull_request:
-        paths-ignore:
-          - '*.md'
+name: BuildAndTest
+on:
+  pull_request:
+    paths-ignore:
+      - '*.md'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1
     
-    jobs:
-      build:
-        runs-on: ubuntu-latest
-        steps:
-        - uses: actions/checkout@v3
-    
-        - name: Setup NuGet
-          uses: NuGet/setup-nuget@v1
-        
-        - name: Restore Packages
-          run: nuget restore Crash.Server.sln
-    
-        - uses: actions/setup-dotnet@v3
-          with:
-            dotnet-version: |
-              6.0
-    
-        - name: Build Crash
-          run: dotnet build Crash.Server.sln --configuration Release
-    
-        - name: Test
-          run: |
-            dotnet test Crash.Server.sln
-    
-        - name: Test Report
-          uses: dorny/test-reporter@v1
-          if: success() || failure()
-          with:
-            name: Tests
-            path: tests/**/TestResults/*.trx    # Path to test results
-            reporter: dotnet-trx                # Format of test results
-    
+    - name: Restore Packages
+      run: nuget restore Crash.Server.sln
+
+    - uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: |
+          6.0
+
+    - name: Build Crash
+      run: dotnet build Crash.Server.sln --configuration Release
+
+    - name: Test
+      run: |
+        dotnet test Crash.Server.sln
