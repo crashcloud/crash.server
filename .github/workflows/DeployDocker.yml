@@ -25,4 +25,4 @@ jobs:
       with:
         context: .
         push: true
-        tags: ${{ github.repository }}:${{ github.event.inputs.branch }}, ${{ github.repository }}:latest
+        tags: crashserver/${{ github.repository }}:${{ github.event.inputs.branch }}, crashserver/${{ github.repository }}:latest
