@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
-		<TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+		<TargetFrameworks>net6.0</TargetFrameworks>
 		<RuntimeIdentifiers>win-x64;win-x86;osx-x64;osx-arm64</RuntimeIdentifiers>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -14,7 +14,7 @@
 		<ApplicationIcon>logo.ico</ApplicationIcon>
 		<UserSecretsId>4fb370be-a5a8-47da-b302-e271468d44a7</UserSecretsId>
 		<Version>$(AssemblyVersion)</Version>
-		<AssemblyVersion>1.2.0</AssemblyVersion>
+		<AssemblyVersion>1.2.1</AssemblyVersion>
 		<FileVersion>$(AssemblyVersion)</FileVersion>
 		<Authors>Callum Sykes, Curtis Wensley, Erika Santos, Lukas Fuhrimann, Morteza Karimi, Moustafa El-Sawy, Russell Feathers</Authors>
 		<Company>Crash</Company>
@@ -55,7 +55,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Crash.Changes" Version="1.0.1" />
+		<PackageReference Include="Crash.Changes" Version="1.0.2" />
 		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
