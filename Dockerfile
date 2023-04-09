@@ -14,7 +14,7 @@ WORKDIR "/src"
 RUN dotnet build "Crash.Server.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "Crash.Server.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "Crash.Server.csproj" -c Release -o /app/publish /p:UseAppHost=false -f net6.0
 
 FROM base AS final
 WORKDIR /app
