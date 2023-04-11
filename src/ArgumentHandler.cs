@@ -7,37 +7,62 @@ namespace Crash.Server
 	/// <summary>Handles Arguments for the start up program</summary>
 	public sealed class ArgumentHandler
 	{
+		internal sealed class Command
+		{
+			internal readonly string Name;
+			internal readonly Action<string> Action;
+			internal readonly string Description;
+			internal readonly string Example;
 
-		const string pattern = @"--([\w]+ [\S]+)";
-		private static Version? vers = typeof(ArgumentHandler).Assembly.GetName().Version;
+			internal Command(string name, Action<string> action, string description, string example = "")
+			{
+				Name = name;
+				Action = action;
+				Description = description;
+				Example = example;
+			}
+		}
+
+		const string pattern = @"--([\w]+ [\S]*)";
+		private static readonly Version? vers = typeof(ArgumentHandler).Assembly.GetName().Version;
 		internal static string dbName = $"Database_{vers?.Major}_{vers?.Minor}_{vers?.Build}.db";
 		internal const string appName = "Crash";
 		internal const string dbDirectory = "App_Data";
-		internal const string defaultURL = "http://0.0.0.0:8080";
+		internal const string defaultURL = "http://0.0.0.0:5000";
 
+		/// <summary>The Server URL</summary>
 		public string URL { get; private set; }
 
+		/// <summary>The file name for the Database</summary>
 		public string DatabaseFileName { get; private set; }
 
-		public bool FreshDb { get; private set; }
+		/// <summary>Resets the Database</summary>
+		public bool ResetDB { get; private set; }
+		public bool Exit { get; private set; }
 
-		private readonly Dictionary<string, Action<string>> argDict;
+		private readonly List<Command> _commands;
 
 		// TODO : Add logging level
 		public ArgumentHandler()
 		{
-			argDict = new Dictionary<string, Action<string>>
+			_commands = new List<Command>
 			{
-				{ "URLS", HandleUrlArgs },
-				{ "PATH", _handleDatabasePath },
-				{ "RESET", HandleRegenDb },
-				{ "HELP", HandleHelpRequest }
+				new Command("urls", HandleUrlArgs, "Supply a custom URL for the serer", "\"http://0.0.0.0:5000\""),
+				new Command("path", _handleDatabasePath, "Supply a custom Path for the Database", "C:\\Crash\\data.db"),
+				new Command("reset", HandleRegenDb, "Empty the current Database", "true"),
+				new Command("help", HandleHelpRequest, "Help! You're here now."),
 			};
 		}
 
+		/// <summary>Parses the input Arguments</summary>
 		public void ParseArgs(string[] args)
 		{
-			string flatArgs = string.Join(' ', args);
+			string? flatArgs = string.Join(' ', args)?.ToLower();
+			if (flatArgs.Contains("help"))
+			{
+				HandleHelpRequest(flatArgs);
+			}
+
 			MatchCollection argMatches = Regex.Matches(flatArgs, pattern, RegexOptions.IgnoreCase);
 
 			foreach (Match argMatch in argMatches)
@@ -59,6 +84,7 @@ namespace Crash.Server
 			}
 		}
 
+		/// <summary>Ensures defaults are set incase of no Arguments</summary>
 		public void EnsureDefaults()
 		{
 			if (string.IsNullOrEmpty(URL))
@@ -75,21 +101,23 @@ namespace Crash.Server
 
 		private void HandleArgs(string argPreposition, string argValue)
 		{
-			if (argDict.TryGetValue(argPreposition.ToUpper(CultureInfo.InvariantCulture), out var @action))
+			foreach (var command in _commands)
 			{
+				if (command.Name != argPreposition.ToLower(CultureInfo.InvariantCulture)) continue;
+
 				try
 				{
-					action.Invoke(argValue);
+					command.Action.Invoke(argValue);
 				}
-				catch (Exception ex)
+				catch
 				{
-					Console.WriteLine(ex.Message);
+					Console.WriteLine($"Command {command.Name} threw an error, your args might be invalid. Check --help");
 				}
+
+				return;
 			}
-			else
-			{
-				Console.WriteLine($"Invalid argument {argPreposition} and value {argValue}");
-			}
+
+			Console.WriteLine($"Invalid argument {argPreposition} and value {argValue}");
 		}
 
 		#region URL Args
@@ -258,7 +286,7 @@ namespace Crash.Server
 
 		private void SetRegenenerateDatabaseValue(bool value)
 		{
-			FreshDb = value;
+			ResetDB = value;
 		}
 
 		private void RegenerateDatabase(bool value)
@@ -276,17 +304,30 @@ namespace Crash.Server
 		#region Help
 		private void HandleHelpRequest(string helpArg)
 		{
-			// ... print help
-			string supportedMessage = $"There are 3 supported commands : {string.Join(", ", argDict)} ";
-			Console.WriteLine(supportedMessage);
+			Console.WriteLine("\nusage: crash.server <command> [<args>...]\n");
+			Console.WriteLine("Examples:");
+			foreach (var command in _commands.GetRange(0, 3))
+			{
+				Console.WriteLine($"    crash.server --{command.Name} {command.Example}");
+			}
+			Console.WriteLine("\nThe available crash.server commands are:");
 
-			string syntaxMessages = "Commands must be prefixed with --";
-			Console.WriteLine(syntaxMessages);
+			int extraSpace = 8;
+			int maxLength = _commands.Max(c => c.Name.Length);
+			int overallLength = extraSpace + maxLength;
+			foreach (var command in _commands)
+			{
+				int spacing = overallLength - command.Name.Length;
+				string spaces = string.Join("", Enumerable.Range(0, spacing).Select(r => " "));
+				Console.WriteLine($"    {command.Name}{spaces}{command.Description}");
+			}
 
+			Console.WriteLine("\nSee 'crash.server --help <command>' to read about a specific subcommand.\n");
+
+			Exit = true;
 		}
 
 		#endregion
 
 	}
-
 }

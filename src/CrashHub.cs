@@ -9,28 +9,18 @@ using Microsoft.AspNetCore.SignalR;
 namespace Crash.Server
 {
 
-	/// <summary>
-	/// Server Implementation of ICrashClient EndPoints
-	/// </summary>
-	public sealed class CrashHub : Hub<ICrashClient>, IAsyncEnumerable<Change>
+	///<summary>Server Implementation of ICrashClient EndPoints</summary>
+	public sealed class CrashHub : Hub<ICrashClient>
 	{
 		readonly CrashContext _context;
 
-		/// <summary>
-		/// Initialize with SqLite DB
-		/// </summary>
-		/// <param name="context"></param>
+		/// <summary>Initialize with SqLite DB</summary>
 		public CrashHub(CrashContext context)
 		{
 			_context = context;
 		}
 
-		/// <summary>
-		/// Add Change to SqLite DB and notify other clients
-		/// </summary>
-		/// <param name="user"></param>
-		/// <param name="Change"></param>
-		/// <returns></returns>
+		/// <summary>Add Change to SqLite DB and notify other clients</summary>
 		public async Task Add(string user, Change Change)
 		{
 			try
@@ -47,13 +37,7 @@ namespace Crash.Server
 			await Clients.Others.Add(user, new Change(Change));
 		}
 
-		/// <summary>
-		/// Update Item in SqLite DB and notify other clients
-		/// </summary>
-		/// <param name="user"></param>
-		/// <param name="id"></param>
-		/// <param name="Change"></param>
-		/// <returns></returns>
+		/// <summary>Update Item in SqLite DB and notify other clients</summary>
 		public async Task Update(string user, Guid id, Change Change)
 		{
 			try
@@ -73,12 +57,7 @@ namespace Crash.Server
 			await Clients.Others.Update(user, id, Change);
 		}
 
-		/// <summary>
-		/// Delete Item in SqLite DB and notify other clients
-		/// </summary>
-		/// <param name="user"></param>
-		/// <param name="id"></param>
-		/// <returns></returns>
+		/// <summary>Delete Item in SqLite DB and notify other clients</summary>
 		public async Task Delete(string user, Guid id)
 		{
 			try
@@ -96,11 +75,7 @@ namespace Crash.Server
 			await Clients.Others.Delete(user, id);
 		}
 
-		/// <summary>
-		/// Unlock Item in SqLite DB and notify other clients
-		/// </summary>
-		/// <param name="user"></param>
-		/// <returns></returns>
+		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
 		public async Task Done(string user)
 		{
 			try
@@ -125,12 +100,7 @@ namespace Crash.Server
 
 		}
 
-		/// <summary>
-		/// Lock Item in SqLite DB and notify other clients
-		/// </summary>
-		/// <param name="user"></param>
-		/// <param name="id"></param>
-		/// <returns></returns>
+		/// <summary>Lock Item in SqLite DB and notify other clients</summary>
 		public async Task Select(string user, Guid id)
 		{
 			try
@@ -153,12 +123,7 @@ namespace Crash.Server
 			await Clients.Others.Select(user, id);
 		}
 
-		/// <summary>
-		/// Unlock Item in SqLite DB and notify other clients
-		/// </summary>
-		/// <param name="user"></param>
-		/// <param name="id"></param>
-		/// <returns></returns>
+		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
 		public async Task Unselect(string user, Guid id)
 		{
 			try
@@ -181,12 +146,7 @@ namespace Crash.Server
 			await Clients.Others.Unselect(user, id);
 		}
 
-		/// <summary>
-		/// Add Change to SqLite DB and notify other clients
-		/// </summary>
-		/// <param name="user"></param>
-		/// <param name="Change"></param>
-		/// <returns></returns>
+		/// <summary>Add Change to SqLite DB and notify other clients</summary>
 		public async Task CameraChange(string user, Change Change)
 		{
 			try
@@ -211,10 +171,7 @@ namespace Crash.Server
 			return base.OnDisconnectedAsync(exception);
 		}
 
-		/// <summary>
-		/// On Connected send user Changes from DB
-		/// </summary>
-		/// <returns></returns>
+		/// <summary>On Connected send user Changes from DB</summary>
 		public override async Task OnConnectedAsync()
 		{
 			await base.OnConnectedAsync();
@@ -223,15 +180,16 @@ namespace Crash.Server
 			await Clients.Caller.Initialize(Changes);
 		}
 
-		public IAsyncEnumerator<Change> GetAsyncEnumerator(CancellationToken cancellationToken = default)
-			=> _context.Changes.GetAsyncEnumerator(cancellationToken);
-
+		/// <summary>The Number of Changes</summary>
 		public int Count => _context.Changes.Count();
 
 		internal bool TryGet(Guid changeId, out Change change)
 		{
+#pragma warning disable CS8601 // Possible null reference assignment.
 			change = _context.Changes.FirstOrDefault(c => c.Id == changeId);
-			return change is object;
+#pragma warning restore CS8601 // Possible null reference assignment.
+
+			return change is not default(Change);
 		}
 	}
 }

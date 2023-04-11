@@ -1,7 +1,9 @@
-﻿using Crash.Server;
+﻿using System.Diagnostics;
+
+using Crash.Server;
 using Crash.Server.Model;
+
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
 
 // TODO : Improve logging
 
@@ -10,11 +12,15 @@ var argHandler = new ArgumentHandler();
 
 argHandler.EnsureDefaults();
 argHandler.ParseArgs(args);
+if (argHandler.Exit)
+{
+	return;
+}
 
 builder.Services.AddSignalR();
 
 builder.Services.AddDbContext<CrashContext>(options =>
-               options.UseSqlite($"Data Source={argHandler.DatabaseFileName}"));
+			   options.UseSqlite($"Data Source={argHandler.DatabaseFileName}"));
 
 // Do we need this?
 // builder.WebHost.UseUrls(argHandler.URL);
@@ -27,11 +33,8 @@ app.MapHub<CrashHub>("/Crash");
 
 if (Debugger.IsAttached)
 {
-    app.MapGet("/debug", () => "Debugging is enabled!");
+	app.MapGet("/debug", () => "Debugging is enabled!");
 }
 
 app.MigrateDatabase<CrashContext>();
 app.Run();
-
-app.Logger.LogInformation($"Running Version {typeof(CrashHub).Assembly.GetName().Version} " +
-                        $"of Crash.Server");

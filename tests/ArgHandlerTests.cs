@@ -17,8 +17,8 @@ namespace Crash.Server.Tests
 			argHandler.EnsureDefaults();
 			Assert.Multiple(() =>
 			{
-				Assert.That(Uri.TryCreate(argHandler.URL, UriKind.Absolute, out Uri? result), Is.True);
-				Assert.That(result.AbsoluteUri, Does.StartWith(argHandler.URL), "URLs are not similiar enough", Is.True);
+				Assert.That(Uri.TryCreate(argHandler.URL, UriKind.Absolute, out Uri? result), Is.True, "Failed to create the URI");
+				Assert.That(result.AbsoluteUri, Does.StartWith(argHandler.URL), "URLs are not similiar enough");
 			});
 		}
 
@@ -30,9 +30,9 @@ namespace Crash.Server.Tests
 			var directory = Path.GetDirectoryName(argHandler.DatabaseFileName);
 			Assert.Multiple(() =>
 			{
-				Assert.That(argHandler.DatabaseFileName, Does.EndWith(".db"), "File does not end with .db", Is.True);
-				Assert.That(Directory.Exists(directory), "Directory does not exist", Is.True);
-				Assert.That(argHandler.DatabaseFileName, Has.Length.LessThan(255));
+				Assert.That(argHandler.DatabaseFileName, Does.EndWith(".db"), "File does not end with .db");
+				Assert.That(Directory.Exists(directory), Is.True, "Directory does not exist");
+				Assert.That(argHandler.DatabaseFileName, Has.Length.LessThan(255), "Filename is too long");
 			});
 		}
 
@@ -42,7 +42,17 @@ namespace Crash.Server.Tests
 			ArgumentHandler argHandler = new();
 			argHandler.EnsureDefaults();
 
-			Assert.That(argHandler.FreshDb, Is.False);
+			Assert.That(argHandler.ResetDB, Is.False);
+		}
+
+		[Test]
+		public void EnsureHelp()
+		{
+			ArgumentHandler argHandler = new();
+			argHandler.EnsureDefaults();
+			argHandler.ParseArgs(new string[] { "--help" });
+
+			Assert.That(argHandler.Exit, Is.True);
 		}
 
 		#endregion
@@ -54,7 +64,8 @@ namespace Crash.Server.Tests
 
 		#region URLs
 
-		[TestCaseSource(typeof(ArgHandlerData), nameof(ArgHandlerData.URLArguments))]
+		[TestCaseSource(typeof(ArgHandlerData), nameof(ArgHandlerData.Invalid_URLArguments))]
+		[TestCaseSource(typeof(ArgHandlerData), nameof(ArgHandlerData.Valid_URLArguments))]
 		public bool ParseURLArgs(List<string> args)
 		{
 			ArgumentHandler argHandler = new();
@@ -96,7 +107,22 @@ namespace Crash.Server.Tests
 		public sealed class ArgHandlerData
 		{
 
-			public static IEnumerable URLArguments
+			public static IEnumerable Invalid_URLArguments
+			{
+				get
+				{
+					yield return new TestCaseData(new List<string> { "--urls", null }).Returns(false);
+					yield return new TestCaseData(new List<string> { "--urls", "htp:/ww.com" }).Returns(false);
+					yield return new TestCaseData(new List<string> { "--urls", "192.145.1.1" }).Returns(false);
+					yield return new TestCaseData(new List<string> { "--urls", "0.1.2" }).Returns(false);
+					yield return new TestCaseData(new List<string> { "--urls", "error;;" }).Returns(false);
+					yield return new TestCaseData(new List<string> { "urls", GetRandomValidFullURL() }).Returns(false);
+					yield return new TestCaseData(new List<string> { "--rls", GetRandomValidFullURL() }).Returns(false);
+					yield return new TestCaseData(new List<string> { GetRandomValidFullURL() }).Returns(false);
+				}
+			}
+
+			public static IEnumerable Valid_URLArguments
 			{
 				get
 				{
@@ -115,26 +141,6 @@ namespace Crash.Server.Tests
 							"--urls", GetRandomValidFullIpAddress(),
 						}).Returns(true);
 					}
-
-
-					// Falses
-					yield return new TestCaseData(new List<string> {
-							"--rls", GetRandomValidFullURL(),
-						}).Returns(false);
-
-					yield return new TestCaseData(new List<string> {
-							GetRandomValidFullURL(),
-						}).Returns(false);
-
-					/* Should this fail?
-					yield return new TestCaseData(new List<string> {
-							"--urls", "error", GetRandomValidFullURL(),
-						}).Returns(false);
-					*/
-
-					yield return new TestCaseData(new List<string> {
-							"URLS", GetRandomValidFullURL(),
-						}).Returns(false);
 				}
 			}
 
@@ -167,7 +173,6 @@ namespace Crash.Server.Tests
 			{
 				get
 				{
-					// Falses
 					yield return new TestCaseData(new List<string> {
 							"--pth", GetRandomValidDbFileName(),
 						}).Returns(false);
@@ -259,7 +264,7 @@ namespace Crash.Server.Tests
 				{
 					int ipNum = TestContext.CurrentContext.Random.Next(0, maxIPNumber);
 					ipAddress += ipNum.ToString();
-					if (i < ipNumberCount)
+					if (i < ipNumberCount - 1)
 					{
 						ipAddress += separator;
 					}
@@ -267,12 +272,9 @@ namespace Crash.Server.Tests
 
 				return ipAddress;
 			}
-
-
 		}
 
 		#endregion
 
 	}
-
 }

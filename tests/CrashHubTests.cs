@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 using Moq;
 
-namespace Crash.Server.Tests2
+namespace Crash.Server.Tests
 {
 
 	public sealed class CrashHubTests
