@@ -21,12 +21,18 @@ namespace Crash.Server
 		}
 
 		/// <summary>Add Change to SqLite DB and notify other clients</summary>
-		public async Task Add(string user, Change Change)
+		public async Task Add(string user, Change change)
 		{
+			if (null == user || user == string.Empty)
+				throw new ArgumentNullException($"Input {nameof(user)} is null or empty!");
+
+			if (null == change)
+				throw new ArgumentNullException($"Input {nameof(change)} is null");
+
 			try
 			{
-				_context.Changes.Remove(Change);
-				_context.Changes.Add(Change);
+				_context.Changes.Remove(change);
+				_context.Changes.Add(change);
 				await _context.SaveChangesAsync();
 			}
 			catch (Exception ex)
@@ -34,12 +40,21 @@ namespace Crash.Server
 				Console.WriteLine($"Exception: {ex}");
 			}
 
-			await Clients.Others.Add(user, new Change(Change));
+			await Clients.Others.Add(user, new Change(change));
 		}
 
 		/// <summary>Update Item in SqLite DB and notify other clients</summary>
-		public async Task Update(string user, Guid id, Change Change)
+		public async Task Update(string user, Guid id, Change change)
 		{
+			if (null == user || user == string.Empty)
+				throw new ArgumentNullException($"Input {nameof(user)} is null or empty!");
+
+			if (id == Guid.Empty)
+				throw new ArgumentNullException($"Input {nameof(id)} is null");
+
+			if (null == change)
+				throw new ArgumentNullException($"Input {nameof(change)} is null");
+
 			try
 			{
 				var removeChange = _context.Changes.FirstOrDefault(r => r.Id == id);
@@ -47,25 +62,35 @@ namespace Crash.Server
 				{
 					_context.Changes.Remove(removeChange);
 				}
-				_context.Changes.Add(new Change(Change));
+				_context.Changes.Add(new Change(change));
 				await _context.SaveChangesAsync();
 			}
 			catch (Exception ex)
 			{
 				Console.WriteLine($"Exception: {ex}");
 			}
-			await Clients.Others.Update(user, id, Change);
+			await Clients.Others.Update(user, id, change);
 		}
 
 		/// <summary>Delete Item in SqLite DB and notify other clients</summary>
 		public async Task Delete(string user, Guid id)
 		{
+			if (null == user || user == string.Empty)
+			{
+				Console.WriteLine($"Input {nameof(user)} is null or empty!");
+				return;
+			}
+
+			if (id == Guid.Empty)
+				throw new ArgumentNullException($"Input {nameof(id)} is null");
+
 			try
 			{
-				var Change = _context.Changes.FirstOrDefault(r => r.Id == id);
-				if (Change == null)
+				var change = _context.Changes.FirstOrDefault(r => r.Id == id);
+				if (null == change)
 					return;
-				_context.Changes.Remove(Change);
+
+				_context.Changes.Remove(change);
 				await _context.SaveChangesAsync();
 			}
 			catch (Exception ex)
@@ -78,6 +103,9 @@ namespace Crash.Server
 		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
 		public async Task Done(string user)
 		{
+			if (null == user || user == string.Empty)
+				throw new ArgumentNullException($"Input {nameof(user)} is null or empty!");
+
 			try
 			{
 				List<Change> done = new List<Change>();
@@ -85,7 +113,7 @@ namespace Crash.Server
 				{
 					Change.RemoveAction(ChangeAction.Temporary);
 					Change.RemoveAction(ChangeAction.Lock);
-					Change.AddAction(ChangeAction.Unlock);
+					// Change.AddAction(ChangeAction.Unlock);
 
 					done.Add(Change);
 				}
@@ -97,19 +125,25 @@ namespace Crash.Server
 				Console.WriteLine($"Exception: {ex}");
 			}
 			await Clients.Others.Done(user);
-
 		}
 
 		/// <summary>Lock Item in SqLite DB and notify other clients</summary>
 		public async Task Select(string user, Guid id)
 		{
+			if (null == user || user == string.Empty)
+				throw new ArgumentNullException($"Input {nameof(user)} is null or empty!");
+
+			if (id == Guid.Empty)
+				throw new ArgumentNullException($"Input {nameof(id)} is null");
+
 			try
 			{
 				var modSpec = _context.Changes.FirstOrDefault(r => r.Id == id);
 				if (modSpec == null)
 					return;
 
-				modSpec.RemoveAction(ChangeAction.Temporary);
+				// modSpec.RemoveAction(ChangeAction.Temporary); // THIS COULD HAVE CAUSED ISSUES!
+				// ADDING SELECT TO A CHANGE WOULD PREVENT RECIVING!!
 				modSpec.RemoveAction(ChangeAction.Unlock);
 				modSpec.AddAction(ChangeAction.Lock);
 
@@ -126,15 +160,19 @@ namespace Crash.Server
 		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
 		public async Task Unselect(string user, Guid id)
 		{
+			if (null == user || user == string.Empty)
+				throw new ArgumentNullException($"Input {nameof(user)} is null or empty!");
+
+			if (id == Guid.Empty)
+				throw new ArgumentNullException($"Input {nameof(id)} is null");
+
 			try
 			{
 				var modSpec = _context.Changes.FirstOrDefault(r => r.Id == id);
 				if (modSpec == null)
 					return;
 
-				modSpec.RemoveAction(ChangeAction.Temporary);
 				modSpec.RemoveAction(ChangeAction.Lock);
-				modSpec.AddAction(ChangeAction.Unlock);
 
 				_context.Changes.Update(modSpec);
 				await _context.SaveChangesAsync();
@@ -147,21 +185,15 @@ namespace Crash.Server
 		}
 
 		/// <summary>Add Change to SqLite DB and notify other clients</summary>
-		public async Task CameraChange(string user, Change Change)
+		public async Task CameraChange(string user, Change change)
 		{
-			try
-			{
-				;
+			if (null == user || user == string.Empty)
+				throw new ArgumentNullException($"Input {nameof(user)} is null or empty!");
 
-				// _context.Changes.Add(Change);
-				// await _context.SaveChangesAsync();
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine($"Exception: {ex}");
-			}
+			if (null == change)
+				throw new ArgumentNullException($"Input {nameof(change)} is null");
 
-			await Clients.Others.CameraChange(user, Change);
+			await Clients.Others.CameraChange(user, change);
 		}
 
 		/// <summary>User disconnects</summary>
@@ -191,5 +223,7 @@ namespace Crash.Server
 
 			return change is not default(Change);
 		}
+
+		internal IEnumerable<Change> GetChanges() => _context.Changes;
 	}
 }
