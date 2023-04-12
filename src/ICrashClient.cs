@@ -7,11 +7,14 @@
 
 		// TODO : Change to Just Change
 		/// <summary>Updates the Change</summary>
-		Task Update(string user, Guid id, Change Change);
+		Task Update(string user, Guid id, Change change);
 
 		// TODO : Change to just Change
 		/// <summary>Adds a Change</summary>
-		Task Add(string user, Change Change);
+		Task Add(string user, Change change);
+
+		/// <summary>Adds a Change Stream</summary>
+		Task AddStream(IAsyncEnumerable<Change> changes);
 
 		// TODO : Change to Just ID
 		/// <summary>Deletes a Change</summary>
@@ -32,7 +35,7 @@
 
 		// TODO : Change to just Change
 		/// <summary>Communicates View Changes</summary>
-		Task CameraChange(string user, Change Change);
+		Task CameraChange(string user, Change change);
 
 	}
 }

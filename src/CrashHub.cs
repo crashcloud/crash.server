@@ -40,6 +40,15 @@ namespace Crash.Server
 			await Clients.Others.Add(user, new Change(change));
 		}
 
+		/// <summary>Adds a Change Stream</summary>
+		public async Task AddStream(IAsyncEnumerable<Change> changes)
+		{
+			await foreach (var change in changes)
+			{
+				await Add(change.Owner, change);
+			}
+		}
+
 		/// <summary>Update Item in SqLite DB and notify other clients</summary>
 		public async Task Update(string user, Guid id, Change change)
 		{
