@@ -23,11 +23,7 @@ namespace Crash.Server
 		/// <summary>Add Change to SqLite DB and notify other clients</summary>
 		public async Task Add(string user, Change change)
 		{
-			if (null == user || user == string.Empty)
-				throw new ArgumentNullException($"Input {nameof(user)} is null or empty!");
-
-			if (null == change)
-				throw new ArgumentNullException($"Input {nameof(change)} is null");
+			if (InvalidUser(user) || InvalidChange(change)) return;
 
 			try
 			{
@@ -38,6 +34,7 @@ namespace Crash.Server
 			catch (Exception ex)
 			{
 				Console.WriteLine($"Exception: {ex}");
+				return;
 			}
 
 			await Clients.Others.Add(user, new Change(change));
@@ -46,14 +43,7 @@ namespace Crash.Server
 		/// <summary>Update Item in SqLite DB and notify other clients</summary>
 		public async Task Update(string user, Guid id, Change change)
 		{
-			if (null == user || user == string.Empty)
-				throw new ArgumentNullException($"Input {nameof(user)} is null or empty!");
-
-			if (id == Guid.Empty)
-				throw new ArgumentNullException($"Input {nameof(id)} is null");
-
-			if (null == change)
-				throw new ArgumentNullException($"Input {nameof(change)} is null");
+			if (InvalidUser(user) || InvalidChange(change) || InvalidGuid(id)) return;
 
 			try
 			{
@@ -68,6 +58,7 @@ namespace Crash.Server
 			catch (Exception ex)
 			{
 				Console.WriteLine($"Exception: {ex}");
+				return;
 			}
 			await Clients.Others.Update(user, id, change);
 		}
@@ -75,14 +66,7 @@ namespace Crash.Server
 		/// <summary>Delete Item in SqLite DB and notify other clients</summary>
 		public async Task Delete(string user, Guid id)
 		{
-			if (null == user || user == string.Empty)
-			{
-				Console.WriteLine($"Input {nameof(user)} is null or empty!");
-				return;
-			}
-
-			if (id == Guid.Empty)
-				throw new ArgumentNullException($"Input {nameof(id)} is null");
+			if (InvalidUser(user) || InvalidGuid(id)) return;
 
 			try
 			{
@@ -96,6 +80,7 @@ namespace Crash.Server
 			catch (Exception ex)
 			{
 				Console.WriteLine($"Exception: {ex}");
+				return;
 			}
 			await Clients.Others.Delete(user, id);
 		}
@@ -103,8 +88,7 @@ namespace Crash.Server
 		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
 		public async Task Done(string user)
 		{
-			if (null == user || user == string.Empty)
-				throw new ArgumentNullException($"Input {nameof(user)} is null or empty!");
+			if (InvalidUser(user)) return;
 
 			try
 			{
@@ -123,6 +107,7 @@ namespace Crash.Server
 			catch (Exception ex)
 			{
 				Console.WriteLine($"Exception: {ex}");
+				return;
 			}
 			await Clients.Others.Done(user);
 		}
@@ -130,11 +115,7 @@ namespace Crash.Server
 		/// <summary>Lock Item in SqLite DB and notify other clients</summary>
 		public async Task Select(string user, Guid id)
 		{
-			if (null == user || user == string.Empty)
-				throw new ArgumentNullException($"Input {nameof(user)} is null or empty!");
-
-			if (id == Guid.Empty)
-				throw new ArgumentNullException($"Input {nameof(id)} is null");
+			if (InvalidUser(user) || InvalidGuid(id)) return;
 
 			try
 			{
@@ -153,6 +134,7 @@ namespace Crash.Server
 			catch (Exception ex)
 			{
 				Console.WriteLine($"Exception: {ex}");
+				return;
 			}
 			await Clients.Others.Select(user, id);
 		}
@@ -160,11 +142,7 @@ namespace Crash.Server
 		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
 		public async Task Unselect(string user, Guid id)
 		{
-			if (null == user || user == string.Empty)
-				throw new ArgumentNullException($"Input {nameof(user)} is null or empty!");
-
-			if (id == Guid.Empty)
-				throw new ArgumentNullException($"Input {nameof(id)} is null");
+			if (InvalidUser(user) || InvalidGuid(id)) return;
 
 			try
 			{
@@ -180,6 +158,7 @@ namespace Crash.Server
 			catch (Exception ex)
 			{
 				Console.WriteLine($"Exception: {ex}");
+				return;
 			}
 			await Clients.Others.Unselect(user, id);
 		}
@@ -187,11 +166,7 @@ namespace Crash.Server
 		/// <summary>Add Change to SqLite DB and notify other clients</summary>
 		public async Task CameraChange(string user, Change change)
 		{
-			if (null == user || user == string.Empty)
-				throw new ArgumentNullException($"Input {nameof(user)} is null or empty!");
-
-			if (null == change)
-				throw new ArgumentNullException($"Input {nameof(change)} is null");
+			if (InvalidUser(user) || InvalidChange(change)) return;
 
 			await Clients.Others.CameraChange(user, change);
 		}
@@ -225,5 +200,34 @@ namespace Crash.Server
 		}
 
 		internal IEnumerable<Change> GetChanges() => _context.Changes;
+
+		#region Validity Checks
+
+		const string InvalidUserMessage = "Inputted user is null or empty!";
+		private static bool InvalidUser(string user)
+		{
+			if (!string.IsNullOrEmpty(user)) return false;
+			Console.WriteLine(InvalidUserMessage);
+			return true;
+		}
+
+		const string InvalidChangeMessage = $"Inputted Change is null";
+		private static bool InvalidChange(Change change)
+		{
+			if (change is not null) return false;
+			Console.WriteLine(InvalidChangeMessage);
+			return true;
+		}
+
+		const string InvalidGuidMessage = $"Inputtd Change Id is Guid.Empty";
+		private static bool InvalidGuid(Guid changeId)
+		{
+			if (Guid.Empty != changeId) return false;
+			Console.WriteLine(InvalidGuidMessage);
+			return true;
+		}
+
+		#endregion
+
 	}
 }

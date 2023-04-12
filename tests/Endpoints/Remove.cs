@@ -22,11 +22,11 @@
 		{
 			var currCount = _crashHub.Count;
 
-			Assert.ThrowsAsync<ArgumentNullException>(() => _crashHub.Delete(null, Guid.Empty));
-			Assert.ThrowsAsync<ArgumentNullException>(() => _crashHub.Delete(change.Owner, Guid.Empty));
-			Assert.ThrowsAsync<ArgumentNullException>(() => _crashHub.Delete(null, change.Id));
+			await _crashHub.Delete(null, Guid.Empty);
+			await _crashHub.Delete(change.Owner, Guid.Empty);
+			await _crashHub.Delete(null, change.Id);
 
-			for(int i = 0; i < 10; i++)
+			for (int i = 0; i < 10; i++)
 			{
 				string user = Path.GetRandomFileName().Replace(".", "");
 				Guid guid = Guid.NewGuid();

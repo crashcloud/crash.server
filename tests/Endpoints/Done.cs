@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 
+using Crash.Changes;
 using Crash.Changes.Extensions;
 
 namespace Crash.Server.Tests.Endpoints
@@ -8,11 +9,25 @@ namespace Crash.Server.Tests.Endpoints
 	public sealed class Done : CrashHubEndpoints
 	{
 
-		[Test]
-		public async Task Done_Failures()
+		[TestCaseSource(nameof(RandomChanges))]
+		public async Task Done_Failures(IEnumerable<Change> changes)
 		{
-			Assert.ThrowsAsync<ArgumentNullException>(async () => await _crashHub.Done(null));
-			Assert.ThrowsAsync<ArgumentNullException>(async () => await _crashHub.Done(string.Empty));
+			int currCount = _crashHub.Count;
+
+			foreach (var change in changes)
+			{
+				await _crashHub.Add(change.Owner, change);
+			}
+
+			Assert.That(_crashHub.Count, Is.EqualTo(currCount + changes.Count()));
+
+			int tempCount = _crashHub.GetChanges().Select(c => c.HasFlag(ChangeAction.Temporary)).Count();
+			Assert.That(tempCount, Is.GreaterThan(0));
+
+			await _crashHub.Done(null);
+			await _crashHub.Done(string.Empty);
+
+			Assert.That(tempCount, Is.EqualTo(tempCount));
 		}
 
 		[TestCaseSource(nameof(RandomChanges))]

@@ -17,12 +17,14 @@
 		}
 
 		[TestCaseSource(nameof(ValidChanges))]
-		public void Add_Failure(Change change)
+		public async Task Add_Failure(Change change)
 		{
-			Assert.ThrowsAsync<ArgumentNullException>(() => _crashHub.Add(null, change));
-			Assert.ThrowsAsync<ArgumentNullException>(() => _crashHub.Add(null, change));
-			Assert.ThrowsAsync<ArgumentNullException>(() => _crashHub.Add(null, null));
-			Assert.ThrowsAsync<ArgumentNullException>(() => _crashHub.Add(change.Owner, null));
+			Assert.That(_crashHub.Count, Is.EqualTo(0));
+
+			await _crashHub.Add(null, change);
+			await _crashHub.Add(null, change);
+			await _crashHub.Add(null, null);
+			await _crashHub.Add(change.Owner, null);
 
 			Assert.That(_crashHub.Count, Is.EqualTo(0));
 		}
