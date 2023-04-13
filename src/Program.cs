@@ -2,6 +2,7 @@
 
 using Crash.Server;
 using Crash.Server.Model;
+using Crash.Server.Settings;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -17,7 +18,13 @@ if (argHandler.Exit)
 	return;
 }
 
-builder.Services.AddSignalR();
+var config = new ConfigHandler();
+
+builder.Services.AddSignalR()
+	.AddHubOptions<CrashHub>((hubOptions) =>
+		config.Crash.SignalR.BuildCrashHubConfig(hubOptions))
+	.AddJsonProtocol((jsonOptions) =>
+		config.Crash.SignalR.BuildJsonConfig(jsonOptions));
 
 builder.Services.AddDbContext<CrashContext>(options =>
 			   options.UseSqlite($"Data Source={argHandler.DatabaseFileName}"));
