@@ -12,11 +12,11 @@ namespace Crash.Server.Settings
 
 		internal CrashConfig Crash { get; set; }
 
-		internal ConfigHandler()
+		internal ConfigHandler(string jsonFile = "appsettings.json")
 		{
 			_configuration = new ConfigurationBuilder()
 						.SetBasePath(Directory.GetCurrentDirectory())
-						.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+						.AddJsonFile(jsonFile, optional: true, reloadOnChange: true)
 						// .AddEnvironmentVariables() // Handle this
 						.Build();
 
