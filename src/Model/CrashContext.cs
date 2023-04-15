@@ -14,6 +14,7 @@ namespace Crash.Server.Model
 
 		/// <summary>The Set of Changes</summary>
 		public DbSet<Change> Changes { get; set; }
+		public DbSet<User> Users { get; set; }
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{

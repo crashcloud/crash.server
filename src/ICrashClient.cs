@@ -28,11 +28,16 @@
 
 		// TODO : Change to IEnumerable?
 		/// <summary>On Init</summary>
-		Task Initialize(Change[] Changes);
+		Task Initialize(Change[] changes);
+
+		/// <summary>Initialises Users</summary>
+		// Task InitializeUsers(User[] users])
 
 		// TODO : Change to just Change
 		/// <summary>Communicates View Changes</summary>
 		Task CameraChange(string user, Change Change);
+
+		Task UpdateUser(Change change);
 
 	}
 }

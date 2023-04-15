@@ -163,12 +163,32 @@ namespace Crash.Server
 			await Clients.Others.Unselect(user, id);
 		}
 
-		/// <summary>Add Change to SqLite DB and notify other clients</summary>
-		public async Task CameraChange(string user, Change change)
+		/// <summary>Notify interested clients of Camera Changes</summary>
+		public async Task CameraChange(string userName, Change change)
 		{
-			if (InvalidUser(user) || InvalidChange(change)) return;
+			if (InvalidUser(userName) || InvalidChange(change)) return;
 
-			await Clients.Others.CameraChange(user, change);
+			var followerIds = _context.Users.Where(u => u.Follows == userName).Select(u => u.Id);
+			await Clients.Users(followerIds).CameraChange(userName, change);
+		}
+
+		/// <summary>Adds or Updates a User in the User Db</summary>
+		public async Task UpdateUser(Change change)
+		{
+			var existingUser = _context.Users.FirstOrDefault(r => r.Name == change.Owner);
+			if (null == existingUser)
+			{
+				User? user = User.FromChange(change);
+				if (null == user || string.IsNullOrEmpty(user.Name)) return;
+				user.Id = Context.ConnectionId;
+
+				_context.Users.Add(existingUser);
+				await _context.SaveChangesAsync();
+			}
+
+			// TODO : Is this required currently?
+			// Useful for connected/disconnected
+			// await Clients.Others.UpdateUser(change);
 		}
 
 		/// <summary>User disconnects</summary>
@@ -183,8 +203,11 @@ namespace Crash.Server
 		{
 			await base.OnConnectedAsync();
 
-			var Changes = _context.Changes.ToArray();
-			await Clients.Caller.Initialize(Changes);
+			var changes = _context.Changes.ToArray();
+			await Clients.Caller.Initialize(changes);
+
+			/*var users = _context.Users.ToArray();
+			await Clients.Caller.InitializeUsers(users);*/
 		}
 
 		/// <summary>The Number of Changes</summary>
