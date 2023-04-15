@@ -1,0 +1,68 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": ".NET Core Launch (web)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/bin/Debug/Crash.Server.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        },
+        {
+            "name": "Run Rhino 8 WIP",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-plugin",
+            "program": "/Applications/RhinoWIP.app/Contents/MacOS/Rhinoceros",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "console": "internalConsole",
+            "env": {
+                "RHINO_PLUGIN_PATH": "${workspaceFolder}/Crash/bin/Debug/net48/Crash.rhp"
+            } 
+        },
+        {
+            "name": "Run Rhino 7 (Mac)",
+            "type": "rhino",
+            "request": "launch",
+            "preLaunchTask": "build-plugin",
+            "program": "/Applications/Rhino 7.app/Contents/MacOS/Rhinoceros",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "env": {
+                "RHINO_PLUGIN_PATH": "${workspaceFolder}/Crash/bin/Debug/net48/Crash.rhp"
+            } 
+        },
+        {
+            "name": "Run Rhino 7 (Windows)",
+            "type": "clr",
+            "request": "launch",
+            "preLaunchTask": "build-plugin",
+            "program": "C:\\Program Files\\Rhino 7\\System\\Rhino.exe",
+            /*"args": [
+                "${workspaceFolder}\\Crash\\bin\\Debug\\net48\\Crash.rhp"
+            ],*/
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "env": {
+            } 
+        }
+
+    ],
+    "compounds": []
+}
