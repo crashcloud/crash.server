@@ -53,5 +53,5 @@ jobs:
         context: .
         push: true
         tags: |
-          ghcr.io/crashserver/crash.server:${{ github.event.inputs.branch }}
-          ghcr.io/crashserver/crash.server:latest
+          ghcr.io/crash.server/crash.server:${{ github.event.inputs.branch }}
+          ghcr.io/crash.server/crash.server:latest
