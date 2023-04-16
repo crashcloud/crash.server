@@ -38,6 +38,8 @@ namespace Crash.Server
 
 		/// <summary>Resets the Database</summary>
 		public bool ResetDB { get; private set; }
+
+		/// <summary>Instructs the program to exit</summary>
 		public bool Exit { get; private set; }
 
 		private readonly List<Command> _commands;
