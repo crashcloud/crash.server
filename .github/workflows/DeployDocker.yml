@@ -26,8 +26,8 @@ jobs:
         context: .
         push: true
         tags: |
-          crashserver/${{ github.repository }}:${{ github.event.inputs.branch }}
-          crashserver/${{ github.repository }}:latest
+          crashserver/crash.server:${{ github.event.inputs.branch }}
+          crashserver/crash.server:latest
           
   github:
     runs-on: ubuntu-latest
@@ -47,5 +47,5 @@ jobs:
         context: .
         push: true
         tags: |
-          ghcr.io/crashserver/${{ github.repository }}:${{ github.event.inputs.branch }}
-          ghcr.io/crashserver/${{ github.repository }}:latest
+          ghcr.io/crashserver/crash.server:${{ github.event.inputs.branch }}
+          ghcr.io/crashserver/crash.server:latest
