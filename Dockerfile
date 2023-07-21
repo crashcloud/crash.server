@@ -19,7 +19,5 @@ EXPOSE 5000
 EXPOSE 5001
 
 # https://stackoverflow.com/questions/40272341/how-to-pass-parameters-to-a-net-core-project-with-dockerfile
-# /publish/Crash.Server.dll
-# /publish/Crash.Server.exe
-# /publish/Crash.Server
 ENTRYPOINT ["dotnet", "/publish/Crash.Server.dll"]
+CMD ["--urls", "http://0.0.0.0:5000"]
