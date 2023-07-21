@@ -1,23 +1,23 @@
-#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+# syntax=docker/dockerfile:1
 
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
-WORKDIR /app
+FROM mcr.microsoft.com/dotnet/sdk:7.0 as build-env
+WORKDIR /src
+
+COPY src/Crash.Server.csproj /src
+RUN dotnet restore /src/Crash.Server.csproj
+COPY src /src/
+
+RUN dotnet publish /src/Crash.Server.csproj -c Release -f net7.0 --no-restore -o /publish
+
+FROM mcr.microsoft.com/dotnet/aspnet:7.0 as runtime
+
+WORKDIR /publish
+COPY --from=build-env /publish .
+
 EXPOSE 80
-EXPOSE 443
+EXPOSE 5000
+EXPOSE 5001
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
-WORKDIR /
-COPY ["src/Crash.Server.csproj", "src/"]
-RUN dotnet restore "src/Crash.Server.csproj"
-COPY . .
-WORKDIR "/src"
-RUN dotnet build "Crash.Server.csproj" -c Release -o /app/build
-
-FROM build AS publish
-RUN dotnet publish "Crash.Server.csproj" -c Release -o /app/publish /p:UseAppHost=false -f net6.0
-
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
-
-ENTRYPOINT ["dotnet", "Crash.Server.exe"]
+# https://stackoverflow.com/questions/40272341/how-to-pass-parameters-to-a-net-core-project-with-dockerfile
+ENTRYPOINT ["dotnet", "/publish/Crash.Server.dll"]
+CMD ["--urls", "http://0.0.0.0:5000"]
