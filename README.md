@@ -1,6 +1,6 @@
 # Crash.Server
 
-Crash.Server is a multi-user communication server designed to work alongside Rhino. This project was developed by [crashcloud](https://github.com/crashcloud) and is available for use under the [MIT License](https://github.com/crashcloud/Crash.Server/blob/main/LICENSE.md).
+Crash.Server is a multi-user communication server designed to work alongside Crash. This project was developed by [crashcloud](https://github.com/crashcloud) and is available for use under the [MIT License](https://github.com/crashcloud/Crash.Server/blob/main/LICENSE.md).
 
 ## Installation
 
