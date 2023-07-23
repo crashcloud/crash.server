@@ -1,6 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
 
-using Crash.Changes.Extensions;
 using Crash.Server.Model;
 
 using Microsoft.AspNetCore.SignalR;
@@ -21,14 +20,13 @@ namespace Crash.Server
 		}
 
 		/// <summary>Add Change to SqLite DB and notify other clients</summary>
-		public async Task Add(string user, Change change)
+		public async Task Add(Change change)
 		{
-			if (InvalidUser(user) || InvalidChange(change)) return;
+			if (InvalidChange(change)) return;
 
 			try
 			{
-				_context.Changes.Remove(change);
-				_context.Changes.Add(change);
+				await _context.AddChangeAsync(new ImmutableChange(change));
 				await _context.SaveChangesAsync();
 			}
 			catch (Exception ex)
@@ -37,22 +35,17 @@ namespace Crash.Server
 				return;
 			}
 
-			await Clients.Others.Add(user, new Change(change));
+			await Clients.Others.Add(change);
 		}
 
 		/// <summary>Update Item in SqLite DB and notify other clients</summary>
-		public async Task Update(string user, Guid id, Change change)
+		public async Task Update(Change change)
 		{
-			if (InvalidUser(user) || InvalidChange(change) || InvalidGuid(id)) return;
+			if (InvalidChange(change)) return;
 
 			try
 			{
-				var removeChange = _context.Changes.FirstOrDefault(r => r.Id == id);
-				if (removeChange != null)
-				{
-					_context.Changes.Remove(removeChange);
-				}
-				_context.Changes.Add(new Change(change));
+				await _context.AddChangeAsync(new ImmutableChange(change));
 				await _context.SaveChangesAsync();
 			}
 			catch (Exception ex)
@@ -60,21 +53,22 @@ namespace Crash.Server
 				Console.WriteLine($"Exception: {ex}");
 				return;
 			}
-			await Clients.Others.Update(user, id, change);
+			await Clients.Others.Update(change);
 		}
 
 		/// <summary>Delete Item in SqLite DB and notify other clients</summary>
-		public async Task Delete(string user, Guid id)
+		public async Task Delete(Guid id)
 		{
-			if (InvalidUser(user) || InvalidGuid(id)) return;
+			if (InvalidGuid(id)) return;
 
 			try
 			{
-				var change = _context.Changes.FirstOrDefault(r => r.Id == id);
-				if (null == change)
-					return;
-
-				_context.Changes.Remove(change);
+				await _context.AddChangeAsync(new ImmutableChange
+				{
+					Id = id,
+					Action = ChangeAction.Remove,
+					Stamp = DateTime.UtcNow,
+				});
 				await _context.SaveChangesAsync();
 			}
 			catch (Exception ex)
@@ -82,8 +76,9 @@ namespace Crash.Server
 				Console.WriteLine($"Exception: {ex}");
 				return;
 			}
-			await Clients.Others.Delete(user, id);
+			await Clients.Others.Delete(id);
 		}
+
 
 		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
 		public async Task Done(string user)
@@ -92,16 +87,8 @@ namespace Crash.Server
 
 			try
 			{
-				List<Change> done = new List<Change>();
-				foreach (var Change in _context.Changes)
-				{
-					Change.RemoveAction(ChangeAction.Temporary);
-					Change.RemoveAction(ChangeAction.Lock);
-					// Change.AddAction(ChangeAction.Unlock);
-
-					done.Add(Change);
-				}
-				_context.Changes.UpdateRange(done);
+				// TODO: hmm
+				await _context.DoneAsync(user);
 				await _context.SaveChangesAsync();
 			}
 			catch (Exception ex)
@@ -113,46 +100,26 @@ namespace Crash.Server
 		}
 
 		/// <summary>Lock Item in SqLite DB and notify other clients</summary>
-		public async Task Select(string user, Guid id)
-		{
-			if (InvalidUser(user) || InvalidGuid(id)) return;
-
-			try
-			{
-				var modSpec = _context.Changes.FirstOrDefault(r => r.Id == id);
-				if (modSpec == null)
-					return;
-
-				// modSpec.RemoveAction(ChangeAction.Temporary); // THIS COULD HAVE CAUSED ISSUES!
-				// ADDING SELECT TO A CHANGE WOULD PREVENT RECIVING!!
-				modSpec.RemoveAction(ChangeAction.Unlock);
-				modSpec.AddAction(ChangeAction.Lock);
-
-				_context.Changes.Update(modSpec);
-				await _context.SaveChangesAsync();
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine($"Exception: {ex}");
-				return;
-			}
-			await Clients.Others.Select(user, id);
-		}
+		public async Task Lock(string user, Guid id)
+			=> await ToggleLock(user, id, ChangeAction.Lock, () => Clients.Others.Lock(user, id));
 
 		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
-		public async Task Unselect(string user, Guid id)
+		public async Task Unlock(string user, Guid id)
+			=> await ToggleLock(user, id, ChangeAction.Unlock, () => Clients.Others.Unlock(user, id));
+
+		private async Task ToggleLock(string user, Guid id, ChangeAction lockStatus, Func<Task> others)
 		{
-			if (InvalidUser(user) || InvalidGuid(id)) return;
+			if (InvalidUser(user) || InvalidGuid(id))
+				return;
 
 			try
 			{
-				var modSpec = _context.Changes.FirstOrDefault(r => r.Id == id);
-				if (modSpec == null)
-					return;
-
-				modSpec.RemoveAction(ChangeAction.Lock);
-
-				_context.Changes.Update(modSpec);
+				await _context.AddChangeAsync(new ImmutableChange
+				{
+					Id = id,
+					Action = lockStatus,
+					Stamp = DateTime.UtcNow,
+				});
 				await _context.SaveChangesAsync();
 			}
 			catch (Exception ex)
@@ -160,15 +127,36 @@ namespace Crash.Server
 				Console.WriteLine($"Exception: {ex}");
 				return;
 			}
-			await Clients.Others.Unselect(user, id);
+			await others();
 		}
 
 		/// <summary>Add Change to SqLite DB and notify other clients</summary>
-		public async Task CameraChange(string user, Change change)
+		public async Task CameraChange(Change change)
 		{
-			if (InvalidUser(user) || InvalidChange(change)) return;
+			if (InvalidChange(change)) return;
 
-			await Clients.Others.CameraChange(user, change);
+			string? userName = change.Owner;
+			var followerIds = _context.Users.Where(u => u.Follows == userName).Select(u => u.Id);
+			await Clients.Users(followerIds).CameraChange(change);
+		}
+
+		/// <summary>Adds or Updates a User in the User Db</summary>
+		public async Task UpdateUser(Change change)
+		{
+			var existingUser = _context.Users.FirstOrDefault(r => r.Name == change.Owner);
+			if (null == existingUser)
+			{
+				User? user = User.FromChange(change);
+				if (null == user || string.IsNullOrEmpty(user.Name)) return;
+				user.Id = Context.ConnectionId;
+
+				_context.Users.Add(existingUser);
+				await _context.SaveChangesAsync();
+			}
+
+			// TODO : Is this required currently?
+			// Useful for connected/disconnected
+			// await Clients.Others.UpdateUser(change);
 		}
 
 		/// <summary>User disconnects</summary>
@@ -183,23 +171,20 @@ namespace Crash.Server
 		{
 			await base.OnConnectedAsync();
 
-			var Changes = _context.Changes.ToArray();
-			await Clients.Caller.Initialize(Changes);
+			var changes = _context.GetChanges();
+			await Clients.Caller.Initialize(changes);
+
+			var users = _context.Users;
+			await Clients.Caller.InitializeUsers(users);
 		}
 
 		/// <summary>The Number of Changes</summary>
 		public int Count => _context.Changes.Count();
 
-		internal bool TryGet(Guid changeId, out Change change)
-		{
-#pragma warning disable CS8601 // Possible null reference assignment.
-			change = _context.Changes.FirstOrDefault(c => c.Id == changeId);
-#pragma warning restore CS8601 // Possible null reference assignment.
+		internal bool TryGet(Guid changeId, out Change? change)
+			=> _context.TryGetChange(changeId, out change);
 
-			return change is not default(Change);
-		}
-
-		internal IEnumerable<Change> GetChanges() => _context.Changes;
+		internal IEnumerable<Change> GetChanges() => _context.GetChanges();
 
 		#region Validity Checks
 

@@ -1,38 +1,40 @@
-﻿namespace Crash.Server
+﻿using Crash.Server.Model;
+
+namespace Crash.Server
 {
 
 	/// <summary>EndPoints Interface</summary>
 	public interface ICrashClient
 	{
 
-		// TODO : Change to Just Change
 		/// <summary>Updates the Change</summary>
-		Task Update(string user, Guid id, Change Change);
+		Task Update(Change change);
 
-		// TODO : Change to just Change
 		/// <summary>Adds a Change</summary>
-		Task Add(string user, Change Change);
+		Task Add(Change change);
 
-		// TODO : Change to Just ID
 		/// <summary>Deletes a Change</summary>
-		Task Delete(string user, Guid id);
+		Task Delete(Guid id);
 
 		/// <summary>Informs when a user has Released</summary>
 		Task Done(string user);
 
 		/// <summary>Selects a Change</summary>
-		Task Select(string user, Guid id);
+		Task Lock(string user, Guid id);
 
 		/// <summary>Unselects a Change</summary>
-		Task Unselect(string user, Guid id);
+		Task Unlock(string user, Guid id);
 
-		// TODO : Change to IEnumerable?
 		/// <summary>On Init</summary>
-		Task Initialize(Change[] Changes);
+		Task Initialize(IEnumerable<Change> changes);
 
-		// TODO : Change to just Change
+		/// <summary>Initialises Users</summary>
+		Task InitializeUsers(IEnumerable<User> users);
+
+		Task UpdateUser(Change change);
+
 		/// <summary>Communicates View Changes</summary>
-		Task CameraChange(string user, Change Change);
+		Task CameraChange(Change change);
 
 	}
 }

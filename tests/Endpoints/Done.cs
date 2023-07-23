@@ -1,7 +1,4 @@
-﻿using System.Collections;
-
-using Crash.Changes;
-using Crash.Changes.Extensions;
+﻿using Crash.Changes.Extensions;
 
 namespace Crash.Server.Tests.Endpoints
 {
@@ -16,7 +13,7 @@ namespace Crash.Server.Tests.Endpoints
 
 			foreach (var change in changes)
 			{
-				await _crashHub.Add(change.Owner, change);
+				await _crashHub.Add(change);
 			}
 
 			Assert.That(_crashHub.Count, Is.EqualTo(currCount + changes.Count()));
@@ -36,9 +33,9 @@ namespace Crash.Server.Tests.Endpoints
 			int currCount = _crashHub.Count;
 			HashSet<string> owners = changes.Select(c => c.Owner).ToHashSet();
 
-			foreach(var change in changes)
+			foreach (var change in changes)
 			{
-				await _crashHub.Add(change.Owner, change);
+				await _crashHub.Add(change);
 			}
 
 			Assert.That(_crashHub.Count, Is.EqualTo(currCount + changes.Count()));
@@ -47,8 +44,8 @@ namespace Crash.Server.Tests.Endpoints
 			foreach (string owner in owners)
 			{
 				await _crashHub.Done(owner);
-				
-				foreach(Change change in _crashHub.GetChanges())
+
+				foreach (Change change in _crashHub.GetChanges())
 				{
 					if (change.Owner.Equals(owner))
 					{

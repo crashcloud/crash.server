@@ -9,7 +9,7 @@
 		{
 			var currCount = _crashHub.Count;
 
-			await _crashHub.Add(change.Owner, change);
+			await _crashHub.Add(change);
 			Assert.That(_crashHub.Count, Is.EqualTo(currCount + 1));
 
 			Assert.That(_crashHub.TryGet(change.Id, out var changeOut), Is.True);
@@ -21,10 +21,7 @@
 		{
 			Assert.That(_crashHub.Count, Is.EqualTo(0));
 
-			await _crashHub.Add(null, change);
-			await _crashHub.Add(null, change);
-			await _crashHub.Add(null, null);
-			await _crashHub.Add(change.Owner, null);
+			await _crashHub.Add(null);
 
 			Assert.That(_crashHub.Count, Is.EqualTo(0));
 		}

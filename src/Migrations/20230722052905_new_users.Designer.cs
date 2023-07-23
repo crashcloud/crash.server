@@ -3,6 +3,7 @@ using System;
 using Crash.Server.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,14 +11,16 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Crash.Server.Migrations
 {
     [DbContext(typeof(CrashContext))]
-    partial class CrashContextModelSnapshot : ModelSnapshot
+    [Migration("20230722052905_new_users")]
+    partial class new_users
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.9");
 
-            modelBuilder.Entity("Crash.Server.Model.ImmutableChange", b =>
+            modelBuilder.Entity("Crash.Changes.Change", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -39,9 +42,6 @@ namespace Crash.Server.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("UniqueId")
-                        .HasColumnType("TEXT");
-
                     b.HasKey("Id");
 
                     b.ToTable("Changes");
@@ -49,11 +49,8 @@ namespace Crash.Server.Migrations
 
             modelBuilder.Entity("Crash.Server.Model.User", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Follows")
-                        .IsRequired()
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
