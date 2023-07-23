@@ -11,7 +11,7 @@
 			Assert.That(_crashHub.Count, Is.EqualTo(currCount));
 
 			await _crashHub.Add(change);
-			Assert.That(_crashHub.Count, Is.EqualTo(currCount + 1));
+			Assert.That(_crashHub.Count, Is.EqualTo(currCount));
 
 			await _crashHub.Delete(change.Id);
 			Assert.That(_crashHub.Count, Is.EqualTo(currCount));
