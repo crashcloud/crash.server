@@ -1,5 +1,9 @@
-﻿using Crash.Changes.Extensions;
+﻿using System.Text.Json;
 
+using Crash.Changes.Extensions;
+using Crash.Geometry;
+
+// https://learn.microsoft.com/en-us/ef/core/modeling/
 namespace Crash.Server.Model
 {
 
@@ -55,7 +59,7 @@ namespace Crash.Server.Model
 			}
 
 			// Update Add/Remove
-			SetToggleableChange(newChange, ChangeAction.Add, ChangeAction.Remove);
+			SetToggleableChange(newChange, current, ChangeAction.Add, ChangeAction.Remove);
 
 			// Toggle Temporary)
 			if (newChange.HasFlag(ChangeAction.Temporary))
@@ -68,24 +72,45 @@ namespace Crash.Server.Model
 			}
 
 			// Update Lock/Unlock
-			SetToggleableChange(newChange, ChangeAction.Lock, ChangeAction.Unlock);
+			SetToggleableChange(newChange, current, ChangeAction.Lock, ChangeAction.Unlock);
+
+			if (newChange.HasFlag(ChangeAction.Transform))
+			{
+				// TODO : Make sure we get JUST the transform, what if it is combined?
+				CTransform transform = JsonSerializer.Deserialize<CTransform>(newChange.Payload);
+				if (transform.IsValid() && current.HasFlag(ChangeAction.Transform))
+				{
+					// TODO : Make sure we get JUST the transform, what if it is combined?
+					CTransform currentTransform = JsonSerializer.Deserialize<CTransform>(current.Payload);
+
+					// TODO : Enable
+					// transform = CTransform.Combine(transform, currentTransform);
+				}
+
+				// TODO : Make sure we get JUST the transform, what if it is combined?
+				current.Payload = JsonSerializer.Serialize(transform);
+
+				current.Action |= ChangeAction.Transform;
+			}
 
 			// Update steps ??
-			// Transform steps ??
 		}
 
-		private void SetToggleableChange(IChange change, ChangeAction affirmative, ChangeAction negative)
+		private void SetToggleableChange(IChange change, IChange currentChange, ChangeAction affirmative, ChangeAction negative)
 		{
-			if (change.HasFlag(affirmative))
+			var _action = change.Action;
+			if (currentChange.HasFlag(affirmative))
 			{
-				CurrentChange.RemoveAction(negative);
-				CurrentChange.AddAction(affirmative);
+				change.RemoveAction(affirmative);
+				change.AddAction(negative);
 			}
-			else if (change.HasFlag(negative))
+			else if (currentChange.HasFlag(negative))
 			{
-				CurrentChange.RemoveAction(affirmative);
-				CurrentChange.AddAction(negative);
+				change.RemoveAction(negative);
+				change.AddAction(affirmative);
 			}
+
+			change.Action = _action;
 		}
 
 		internal bool TryGetChange(Guid changeId, out Change? change)

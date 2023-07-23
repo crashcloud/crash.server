@@ -28,12 +28,19 @@ namespace Crash.Server.Tests.Endpoints
 			_crashContext = null;
 		}
 
-		private void SetUpContext()
+		internal static DbContextOptions<CrashContext> GetMockOptions()
 		{
-			// Create a mock DbContextOptions object
 			var mockOptions = new DbContextOptionsBuilder<CrashContext>()
 				.UseInMemoryDatabase(databaseName: "test")
 				.Options;
+
+			return mockOptions;
+		}
+
+		private void SetUpContext()
+		{
+			// Create a mock DbContextOptions object
+			var mockOptions = GetMockOptions();
 
 			_crashContext = new CrashContext(mockOptions);
 
