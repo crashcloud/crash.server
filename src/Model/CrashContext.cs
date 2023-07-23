@@ -13,8 +13,6 @@ namespace Crash.Server.Model
 			LatestChanges = new Dictionary<Guid, Change>();
 		}
 
-		// Change this to a DbSet of Changes. (ServerChange)
-		// Create a change wrapper?
 		/// <summary>The Set of Changes</summary>
 		public DbSet<ImmutableChange> Changes { get; set; }
 
@@ -28,9 +26,66 @@ namespace Crash.Server.Model
 			//optionsBuilder.UseSqlite();
 		}
 
-		internal async Task AddChangeAsync(ImmutableChange change)
+		internal async Task AddChangeAsync(ImmutableChange changeRecord)
 		{
-			await Changes.AddAsync(change);
+			if (changeRecord.Id == Guid.Empty || changeRecord.UniqueId == Guid.Empty)
+				return;
+
+			await Changes.AddAsync(changeRecord);
+
+			if (!LatestChanges.ContainsKey(changeRecord.Id))
+			{
+				LatestChanges.Add(changeRecord.Id, new Change(changeRecord));
+			}
+			else
+			{
+				await SetCurrentComputedChange(changeRecord);
+			}
+		}
+
+		private async Task SetCurrentComputedChange(IChange newChange)
+		{
+			if (!LatestChanges.TryGetValue(newChange.Id, out var current))
+				return;
+
+			// Set Payload
+			if (!string.IsNullOrEmpty(newChange.Payload))
+			{
+				current.Payload = newChange.Payload;
+			}
+
+			// Update Add/Remove
+			SetToggleableChange(newChange, ChangeAction.Add, ChangeAction.Remove);
+
+			// Toggle Temporary)
+			if (newChange.HasFlag(ChangeAction.Temporary))
+			{
+				current.AddAction(ChangeAction.Temporary);
+			}
+			else
+			{
+				current.RemoveAction(ChangeAction.Temporary);
+			}
+
+			// Update Lock/Unlock
+			SetToggleableChange(newChange, ChangeAction.Lock, ChangeAction.Unlock);
+
+			// Update steps ??
+			// Transform steps ??
+		}
+
+		private void SetToggleableChange(IChange change, ChangeAction affirmative, ChangeAction negative)
+		{
+			if (change.HasFlag(affirmative))
+			{
+				CurrentChange.RemoveAction(negative);
+				CurrentChange.AddAction(affirmative);
+			}
+			else if (change.HasFlag(negative))
+			{
+				CurrentChange.RemoveAction(affirmative);
+				CurrentChange.AddAction(negative);
+			}
 		}
 
 		internal bool TryGetChange(Guid changeId, out Change? change)
