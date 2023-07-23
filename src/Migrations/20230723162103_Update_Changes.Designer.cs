@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Crash.Server.Migrations
 {
     [DbContext(typeof(CrashContext))]
-    [Migration("20230723144218_Update_Changes")]
+    [Migration("20230723162103_Update_Changes")]
     partial class Update_Changes
     {
         /// <inheritdoc />
@@ -22,12 +22,15 @@ namespace Crash.Server.Migrations
 
             modelBuilder.Entity("Crash.Server.Model.ImmutableChange", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("UniqueId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Action")
                         .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Owner")
                         .HasColumnType("TEXT");
@@ -36,16 +39,15 @@ namespace Crash.Server.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Stamp")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("UniqueId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
+                    b.HasKey("UniqueId");
 
                     b.ToTable("Changes");
                 });

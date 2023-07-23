@@ -1,14 +1,22 @@
-﻿namespace Crash.Server.Model
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Crash.Server.Model
 {
 
+	/// <summary>A record of a Change</summary>
 	public sealed record ImmutableChange : IChange
 	{
+
+		[Key]
 		public Guid UniqueId { get; init; }
+
+		[Timestamp]
 		public DateTime Stamp { get; init; }
 		public Guid Id { get; init; }
 		public string? Owner { get; init; }
 		public string? Payload { get; init; }
 		public string Type { get; init; }
+
 		public ChangeAction Action { get; set; }
 
 		public ImmutableChange()

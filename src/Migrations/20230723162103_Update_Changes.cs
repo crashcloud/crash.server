@@ -14,17 +14,10 @@ namespace Crash.Server.Migrations
                 name: "PK_Changes",
                 table: "Changes");
 
-            migrationBuilder.AddColumn<string>(
-                name: "Follows",
-                table: "Users",
-                type: "TEXT",
-                nullable: false,
-                defaultValue: "");
-
             migrationBuilder.AddPrimaryKey(
                 name: "PK_Changes",
                 table: "Changes",
-                column: "Id");
+                column: "UniqueId");
         }
 
         /// <inheritdoc />
@@ -34,14 +27,10 @@ namespace Crash.Server.Migrations
                 name: "PK_Changes",
                 table: "Changes");
 
-            migrationBuilder.DropColumn(
-                name: "Follows",
-                table: "Users");
-
             migrationBuilder.AddPrimaryKey(
                 name: "PK_Changes",
                 table: "Changes",
-                column: "UniqueId");
+                column: "Id");
         }
     }
 }
