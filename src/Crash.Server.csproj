@@ -66,6 +66,8 @@
 		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.2" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.10" />
 		<PackageReference Include="System.Text.Json" Version="7.0.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="7.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.9" />
 	</ItemGroup>
 
 	<ItemGroup>
