@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using System.Text.Json.Serialization;
 
 using Crash.Geometry;
 
@@ -7,14 +6,13 @@ namespace Crash.Server.Model
 {
 	public static class Combinations
 	{
-
 		/// <summary>Takes two actions and combines them in a valid way for storage</summary>
 		/// <param name="left">The base Action</param>
 		/// <param name="right">he new action to add on top</param>
 		public static ChangeAction CombineActions(ChangeAction left, ChangeAction right)
 		{
-			ChangeAction result = left;
-			
+			var result = left;
+
 			if (right.HasFlag(ChangeAction.Add))
 			{
 				result &= ~ChangeAction.Remove;
@@ -25,7 +23,7 @@ namespace Crash.Server.Model
 				result |= ChangeAction.Remove;
 				result &= ~ChangeAction.Add;
 			}
-			
+
 			if (right.HasFlag(ChangeAction.Update))
 			{
 				result |= ChangeAction.Update;
@@ -67,18 +65,16 @@ namespace Crash.Server.Model
 
 			// TODO : Poke Lukas
 			// leftPayload.Transform = CTransform.Combine(leftPayload.Transform, rightPayload.Transform);
-			
-			
+
+
 			foreach (var keyValuePair in rightPayload.Updates)
 			{
 				leftPayload.Updates[keyValuePair.Key] = keyValuePair.Value;
 			}
-			
-			var payload = new Payload()
+
+			var payload = new Payload
 			{
-				Data = rightPayload.Data,
-				Transform = leftPayload.Transform,
-				Updates = leftPayload.Updates
+				Data = rightPayload.Data, Transform = leftPayload.Transform, Updates = leftPayload.Updates
 			};
 
 			var result = JsonSerializer.Serialize(payload);
@@ -88,15 +84,17 @@ namespace Crash.Server.Model
 		private static Payload Deserialize(string? json)
 		{
 			if (string.IsNullOrEmpty(json))
+			{
 				return new Payload();
-			
+			}
+
 			var payload = JsonSerializer.Deserialize<Payload>(json);
 			payload.Transform = new CTransform(0);
-			payload.Updates = new();
+			payload.Updates = new Dictionary<string, string>();
 
 			return payload;
 		}
-		
+
 		// Create Payload object?
 
 		internal record Payload
@@ -105,6 +103,5 @@ namespace Crash.Server.Model
 			internal CTransform Transform;
 			internal Dictionary<string, string> Updates = new();
 		}
-		
 	}
 }

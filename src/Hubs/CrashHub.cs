@@ -5,9 +5,9 @@ using Crash.Server.Model;
 using Microsoft.AspNetCore.SignalR;
 
 [assembly: InternalsVisibleTo("Crash.Server.Tests")]
+
 namespace Crash.Server.Hubs
 {
-
 	///<summary>Server Implementation of ICrashClient EndPoints</summary>
 	public sealed class CrashHub : Hub<ICrashClient>
 	{
@@ -22,7 +22,11 @@ namespace Crash.Server.Hubs
 		/// <summary>Add Change to SqLite DB and notify other clients</summary>
 		public async Task Add(Change change)
 		{
-			if (!HubUtils.IsChangeValid(change)) return;
+			// Validate? Check Action?
+			if (!HubUtils.IsChangeValid(change))
+			{
+				return;
+			}
 
 			try
 			{
@@ -41,7 +45,11 @@ namespace Crash.Server.Hubs
 		/// <summary>Update Item in SqLite DB and notify other clients</summary>
 		public async Task Update(Change change)
 		{
-			if (!HubUtils.IsChangeValid(change)) return;
+			// Validate? - Check Action?
+			if (!HubUtils.IsChangeValid(change))
+			{
+				return;
+			}
 
 			try
 			{
@@ -53,13 +61,17 @@ namespace Crash.Server.Hubs
 				Console.WriteLine($"Exception: {ex}");
 				return;
 			}
+
 			await Clients.Others.Update(change);
 		}
 
 		/// <summary>Delete Item in SqLite DB and notify other clients</summary>
 		public async Task Delete(Guid id)
 		{
-			if (HubUtils.IsGuidValid(id)) return;
+			if (HubUtils.IsGuidValid(id))
+			{
+				return;
+			}
 
 			try
 			{
@@ -71,13 +83,17 @@ namespace Crash.Server.Hubs
 				Console.WriteLine($"Exception: {ex}");
 				return;
 			}
+
 			await Clients.Others.Delete(id);
 		}
 
 		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
 		public async Task Done(string user)
 		{
-			if (HubUtils.IsUserValid(user)) return;
+			if (HubUtils.IsUserValid(user))
+			{
+				return;
+			}
 
 			try
 			{
@@ -89,34 +105,37 @@ namespace Crash.Server.Hubs
 				Console.WriteLine($"Exception: {ex}");
 				return;
 			}
+
 			await Clients.Others.Done(user);
 		}
 
 		/// <summary>Lock Item in SqLite DB and notify other clients</summary>
 		public async Task Lock(string user, Guid id)
-			=> await ToggleLock(user, id, ChangeAction.Lock, () => Clients.Others.Lock(user, id));
+		{
+			await ToggleLock(user, id, ChangeAction.Lock, () => Clients.Others.Lock(user, id));
+		}
 
 		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
 		public async Task Unlock(string user, Guid id)
-			=> await ToggleLock(user, id, ChangeAction.Unlock, () => Clients.Others.Unlock(user, id));
+		{
+			await ToggleLock(user, id, ChangeAction.Unlock, () => Clients.Others.Unlock(user, id));
+		}
 
 		private async Task ToggleLock(string user, Guid id, ChangeAction lockStatus, Func<Task> others)
 		{
 			if (!HubUtils.IsUserValid(user) || !HubUtils.IsGuidValid(id))
+			{
 				return;
+			}
 
 			try
 			{
-				if (!_context.TryGetChange(id, out Change? latestChange))
-					return;
-				
-				await _context.AddChangeAsync(new ImmutableChange
+				if (!_context.TryGetChange(id, out var latestChange))
 				{
-					Id = id,
-					Action = lockStatus,
-					Stamp = DateTime.UtcNow,
-					Type = latestChange.Type
-				});
+					return;
+				}
+
+				await _context.AddChangeAsync(ChangeFactory.CreateLockRecord(latestChange.Type, latestChange.Id));
 				await _context.SaveChangesAsync();
 			}
 			catch (Exception ex)
@@ -124,15 +143,19 @@ namespace Crash.Server.Hubs
 				Console.WriteLine($"Exception: {ex}");
 				return;
 			}
+
 			await others();
 		}
 
 		/// <summary>Add Change to SqLite DB and notify other clients</summary>
 		public async Task CameraChange(Change change)
 		{
-			if (!HubUtils.IsChangeValid(change)) return;
+			if (!HubUtils.IsChangeValid(change))
+			{
+				return;
+			}
 
-			string? userName = change.Owner;
+			var userName = change.Owner;
 			var followerIds = _context.Users.Where(u => u.Follows == userName).Select(u => u.Id);
 			await Clients.Users(followerIds).CameraChange(change);
 		}
@@ -143,8 +166,12 @@ namespace Crash.Server.Hubs
 			var existingUser = _context.Users.FirstOrDefault(r => r.Name == change.Owner);
 			if (null == existingUser)
 			{
-				User? user = User.FromChange(change);
-				if (null == user || string.IsNullOrEmpty(user.Name)) return;
+				var user = User.FromChange(change);
+				if (null == user || string.IsNullOrEmpty(user.Name))
+				{
+					return;
+				}
+
 				user.Id = Context.ConnectionId;
 
 				_context.Users.Add(existingUser);
@@ -167,6 +194,5 @@ namespace Crash.Server.Hubs
 			var users = _context.Users;
 			await Clients.Caller.InitializeUsers(users);
 		}
-
 	}
 }

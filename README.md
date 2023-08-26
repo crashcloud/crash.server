@@ -1,6 +1,8 @@
 # Crash.Server
 
-Crash.Server is a multi-user communication server designed to work alongside Crash. This project was developed by [crashcloud](https://github.com/crashcloud) and is available for use under the [MIT License](https://github.com/crashcloud/Crash.Server/blob/main/LICENSE.md).
+Crash.Server is a multi-user communication server designed to work alongside Crash. This project was developed
+by [crashcloud](https://github.com/crashcloud) and is available for use under
+the [MIT License](https://github.com/crashcloud/Crash.Server/blob/main/LICENSE.md).
 
 ## Installation
 
@@ -15,7 +17,9 @@ docker run -p 5000:5000 crashserver/crash.server
 
 ### Release
 
-You can download the latest release of Crash.Server from the [GitHub Releases](https://github.com/crashcloud/Crash.Server/releases) page. Once you have downloaded the release, extract it to a folder of your choice and then run the `crash.server.exe` file.
+You can download the latest release of Crash.Server from
+the [GitHub Releases](https://github.com/crashcloud/Crash.Server/releases) page. Once you have downloaded the release,
+extract it to a folder of your choice and then run the `crash.server.exe` file.
 
 ### Rhino Yak Package
 
@@ -25,7 +29,6 @@ You can also install Crash.Server through Rhino by using the Rhino Yak package m
 
 2. Run the `PackageManager` Command in the Rhino command prompt
 3. Search for `Crash` and install
-
 
 ## Contributing
 
@@ -39,7 +42,8 @@ We will review your pull request as soon as possible.
 
 ## Support
 
-If you have any questions or issues with Crash.Server, please create a new issue on the [Crash.Server GitHub page](https://github.com/crashcloud/Crash.Server/issues).
+If you have any questions or issues with Crash.Server, please create a new issue on
+the [Crash.Server GitHub page](https://github.com/crashcloud/Crash.Server/issues).
 
 ## License
 

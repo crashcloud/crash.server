@@ -5,8 +5,6 @@ using Crash.Server.Hubs;
 using Crash.Server.Model;
 using Crash.Server.Settings;
 
-using Microsoft.EntityFrameworkCore;
-
 // TODO : Improve logging
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,13 +20,13 @@ if (argHandler.Exit)
 var config = new ConfigHandler();
 
 builder.Services.AddSignalR()
-	.AddHubOptions<CrashHub>((hubOptions) =>
+	.AddHubOptions<CrashHub>(hubOptions =>
 		config.Crash.SignalR.BuildCrashHubConfig(hubOptions))
-	.AddJsonProtocol((jsonOptions) =>
+	.AddJsonProtocol(jsonOptions =>
 		config.Crash.SignalR.BuildJsonConfig(jsonOptions));
 
 builder.Services.AddDbContext<CrashContext>(options =>
-			   options.UseSqlite($"Data Source={argHandler.DatabaseFileName}"));
+	options.UseSqlite($"Data Source={argHandler.DatabaseFileName}"));
 
 // Do we need this?
 // builder.WebHost.UseUrls(argHandler.URL);

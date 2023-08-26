@@ -1,8 +1,8 @@
-﻿namespace Crash.Server.Tests.Hubs
+﻿// ReSharper disable HeapView.BoxingAllocation
+
+namespace Crash.Server.Tests.Hubs
 {
 	public class HubUtilsTests
 	{
-		
-		
 	}
 }

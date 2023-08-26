@@ -2,11 +2,9 @@
 
 namespace Crash.Server
 {
-
 	/// <summary>EndPoints Interface</summary>
 	public interface ICrashClient
 	{
-
 		/// <summary>Updates the Change</summary>
 		Task Update(Change change);
 
@@ -35,6 +33,5 @@ namespace Crash.Server
 
 		/// <summary>Communicates View Changes</summary>
 		Task CameraChange(Change change);
-
 	}
 }

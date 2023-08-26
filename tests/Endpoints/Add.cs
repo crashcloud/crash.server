@@ -1,8 +1,5 @@
-﻿using Crash.Server.Hubs;
-
-namespace Crash.Server.Tests.Endpoints
+﻿namespace Crash.Server.Tests.Endpoints
 {
-
 	// TODO : Should Add verify that given Change has Add Action?
 	public sealed class Add : CrashHubEndpoints
 	{

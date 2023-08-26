@@ -34,7 +34,7 @@
 		<SelfContained>false</SelfContained>
 		<PublishTrimmed>false</PublishTrimmed>
 	</PropertyGroup>
-		
+
 	<PropertyGroup Condition="$(Publish) == ''">
 		<RuntimeIdentifier Condition="$([MSBuild]::IsOSPlatform(Windows))">win-x64</RuntimeIdentifier>
 		<RuntimeIdentifier Condition="$([MSBuild]::IsOSPlatform(osx))">osx-x64</RuntimeIdentifier>
@@ -44,36 +44,36 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Content Include="logo.ico" />
+		<Content Include="logo.ico"/>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Include="..\README.md">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Crash.Changes" Version="1.0.2" />
+		<PackageReference Include="Crash.Changes" Version="1.0.2"/>
 		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.9" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="7.0.9" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="7.0.9" />
-		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
-		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.5" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.9"/>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="7.0.9"/>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="7.0.9"/>
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0"/>
+		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.5"/>
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.9">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="System.Text.Json" Version="7.0.2" />
+		<PackageReference Include="System.Text.Json" Version="7.0.2"/>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Using Include="Crash.Changes" />
+		<Using Include="Crash.Changes"/>
 	</ItemGroup>
 
 

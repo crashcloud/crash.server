@@ -1,20 +1,16 @@
-﻿using Crash.Changes.Extensions;
-using Crash.Server.Model;
+﻿// ReSharper disable HeapView.BoxingAllocation
 
-using NUnit.Framework;
-
-namespace Crash.Server.Tests.Hubs
+namespace Crash.Server.Tests.Model
 {
 	public class ChangeFactoryTests
 	{
-
-		[NUnit.Framework.Test]
-		public void CreateDelete()
+		[Test]
+		public void Create_Delete_Success()
 		{
-			// Act & Assert
+			// Act
 			var change = ChangeFactory.CreateDeleteRecord(Guid.NewGuid());
-			
-			// General Validity
+
+			// Assert
 			ValidateIds(change);
 			ValidateActions(change);
 
@@ -23,13 +19,13 @@ namespace Crash.Server.Tests.Hubs
 			Assert.That(change.Action, Is.Not.EqualTo(ChangeAction.None));
 		}
 
-		[NUnit.Framework.Test]
-		public void CreateLock()
+		[Test]
+		public void Create_Lock_Success()
 		{
-			// Act & Assert
+			// Act
 			var change = ChangeFactory.CreateLockRecord(nameof(ChangeFactoryTests), Guid.NewGuid());
-			
-			// General Validity
+
+			// Assert
 			ValidateIds(change);
 			ValidateActions(change);
 
@@ -38,13 +34,13 @@ namespace Crash.Server.Tests.Hubs
 			Assert.That(change.Action, Is.Not.EqualTo(ChangeAction.None));
 		}
 
-		[NUnit.Framework.Test]
-		public void CreateUnlock()
+		[Test]
+		public void Create_Unlock_Success()
 		{
-			// Act & Assert
+			// Act
 			var change = ChangeFactory.CreateUnlockRecord(nameof(ChangeFactoryTests), Guid.NewGuid());
-			
-			// General Validity
+
+			// Assert
 			ValidateIds(change);
 			ValidateActions(change);
 
@@ -53,13 +49,38 @@ namespace Crash.Server.Tests.Hubs
 			Assert.That(change.Action, Is.Not.EqualTo(ChangeAction.None));
 		}
 
-		[NUnit.Framework.Test]
-		public void CreateDoneRecord()
+		[Test]
+		public void Create_DoneRecord_Success()
 		{
-			// Act & Assert
+			// Act
 			var change = ChangeFactory.CreateDoneRecord(nameof(ChangeFactoryTests), "Done", Guid.NewGuid());
-			
-			// General Validity
+
+			// Assert
+			ValidateIds(change);
+			ValidateActions(change);
+		}
+
+		[Test]
+		public void Create_MergedDoneRecord_Success()
+		{
+			var id = Guid.NewGuid();
+			ImmutableChange latestChange = new()
+			{
+				Action = ChangeAction.Add |
+				         ChangeAction.Temporary |
+				         ChangeAction.Update |
+				         ChangeAction.Transform |
+				         ChangeAction.Lock,
+				Payload = "{}",
+				Id = id,
+				Type = nameof(ChangeAction.Camera)
+			};
+			// Arrange
+
+			// Act
+			var change = ChangeFactory.CreateDoneRecord(nameof(ChangeFactoryTests), "Done", id);
+
+			// Assert
 			ValidateIds(change);
 			ValidateActions(change);
 		}
@@ -80,10 +101,9 @@ namespace Crash.Server.Tests.Hubs
 
 			var hasAddAndDelete = change.Action.HasFlag(ChangeAction.Add | ChangeAction.Remove);
 			var hasLockAndUnlock = change.Action.HasFlag(ChangeAction.Lock | ChangeAction.Unlock);
-			
+
 			Assert.False(hasAddAndDelete);
 			Assert.False(hasLockAndUnlock);
 		}
-		
 	}
 }

@@ -1,26 +1,21 @@
-﻿using System.Text.Json;
-
-using Crash.Changes.Extensions;
-using Crash.Geometry;
+﻿
 
 // https://learn.microsoft.com/en-us/ef/core/modeling/
 namespace Crash.Server.Model
 {
-
 	/// <summary>Implementation of DbContext to be used as SqLite DB Session</summary>
 	public sealed class CrashContext : DbContext
 	{
-
 		/// <summary>Default Constructor</summary>
 		public CrashContext(DbContextOptions<CrashContext> options) : base(options)
 		{
-			LatestChanges = new ();
+			LatestChanges = new Dictionary<Guid, Change>();
 		}
 
 		/// <summary>The Set of Changes</summary>
 		public DbSet<ImmutableChange> Changes { get; set; }
 
-		private Dictionary<Guid, Change> LatestChanges { get; init; }
+		private Dictionary<Guid, Change> LatestChanges { get; }
 
 		public DbSet<User> Users { get; set; }
 
@@ -33,7 +28,9 @@ namespace Crash.Server.Model
 		internal async Task AddChangeAsync(ImmutableChange changeRecord)
 		{
 			if (changeRecord.Id == Guid.Empty || changeRecord.UniqueId == Guid.Empty)
+			{
 				return;
+			}
 
 			await Changes.AddAsync(changeRecord);
 
@@ -62,10 +59,14 @@ namespace Crash.Server.Model
 		}
 
 		internal bool TryGetChange(Guid changeId, out Change? change)
-			=> (LatestChanges.TryGetValue(changeId, out change));
+		{
+			return LatestChanges.TryGetValue(changeId, out change);
+		}
 
 		internal IEnumerable<Change> GetChanges()
-			=> LatestChanges.Values;
+		{
+			return LatestChanges.Values;
+		}
 
 		internal async Task DoneAsync(string user)
 		{
@@ -74,14 +75,13 @@ namespace Crash.Server.Model
 			{
 				// Does this include null owners? That's good!
 				if (latestChange.Value.Owner != user)
+				{
 					continue;
-				
+				}
+
 				var doneChange = ChangeFactory.CreateDoneRecord(latestChange.Value);
 				await AddChangeAsync(doneChange);
 			}
 		}
-
 	}
-
 }
-

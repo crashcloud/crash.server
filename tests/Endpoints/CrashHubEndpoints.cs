@@ -1,7 +1,4 @@
-﻿using System.Collections;
-
-using Crash.Server.Hubs;
-using Crash.Server.Model;
+﻿using Crash.Server.Hubs;
 
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -10,11 +7,70 @@ using Moq;
 
 namespace Crash.Server.Tests.Endpoints
 {
-
 	public abstract class CrashHubEndpoints
 	{
-		internal CrashHub? _crashHub;
+		private const string payload = "Payload Example";
 		protected CrashContext? _crashContext;
+		internal CrashHub? _crashHub;
+
+		public static IEnumerable ValidChanges
+		{
+			get
+			{
+				for (var i = 0; i < 100; i++)
+				{
+					yield return new Change
+					{
+						Id = Guid.NewGuid(),
+						Owner = Path.GetRandomFileName().Replace(".", ""),
+						Payload = "payload",
+						Type = nameof(Change),
+						Action = ChangeAction.Add | ChangeAction.Temporary,
+						Stamp = DateTime.UtcNow
+					};
+				}
+			}
+		}
+
+		public static IEnumerable RandomChanges
+		{
+			get
+			{
+				var random = TestContext.CurrentContext.Random;
+
+				var scenarioCount = 10;
+				var randomOwnerCount = 5;
+				var changeCount = 100;
+
+				var owners = new string[randomOwnerCount];
+				for (var i = 0; i < randomOwnerCount; i++)
+				{
+					owners[i] = Path.GetRandomFileName().Replace(".", "");
+				}
+
+				for (var i = 0; i < scenarioCount; i++)
+				{
+					var changes = new List<Change>(changeCount);
+					for (var j = 0; j < changeCount; j++)
+					{
+						var ownerIndex = random.Next(0, randomOwnerCount);
+						var randomOwner = owners[ownerIndex];
+
+						changes.Add(new Change
+						{
+							Id = Guid.NewGuid(),
+							Action = getRandomAction(),
+							Owner = randomOwner,
+							Payload = payload,
+							Stamp = DateTime.UtcNow,
+							Type = nameof(Change)
+						});
+					}
+
+					yield return changes;
+				}
+			}
+		}
 
 		[SetUp]
 		public void Init()
@@ -32,7 +88,7 @@ namespace Crash.Server.Tests.Endpoints
 		internal static DbContextOptions<CrashContext> GetMockOptions()
 		{
 			var mockOptions = new DbContextOptionsBuilder<CrashContext>()
-				.UseInMemoryDatabase(databaseName: "test")
+				.UseInMemoryDatabase("test")
 				.Options;
 
 			return mockOptions;
@@ -62,76 +118,16 @@ namespace Crash.Server.Tests.Endpoints
 			_crashHub.Context = mockClientContext.Object;
 		}
 
-		public static IEnumerable ValidChanges
-		{
-			get
-			{
-				for (var i = 0; i < 100; i++)
-				{
-					yield return new Change()
-					{
-						Id = Guid.NewGuid(),
-						Owner = Path.GetRandomFileName().Replace(".", ""),
-						Payload = "payload",
-						Type = nameof(Change),
-						Action = ChangeAction.Add | ChangeAction.Temporary,
-						Stamp = DateTime.UtcNow
-					};
-				}
-			}
-		}
-
-		const string payload = "Payload Example";
-		public static IEnumerable RandomChanges
-		{
-			get
-			{
-				var random = TestContext.CurrentContext.Random;
-
-				int scenarioCount = 10;
-				int randomOwnerCount = 5;
-				int changeCount = 100;
-
-				string[] owners = new string[randomOwnerCount];
-				for (int i = 0; i < randomOwnerCount; i++)
-				{
-					owners[i] = Path.GetRandomFileName().Replace(".", "");
-				}
-
-				for (int i = 0; i < scenarioCount; i++)
-				{
-					List<Change> changes = new List<Change>(changeCount);
-					for (int j = 0; j < changeCount; j++)
-					{
-						int ownerIndex = random.Next(0, randomOwnerCount);
-						string randomOwner = owners[ownerIndex];
-
-						changes.Add(new Change()
-						{
-							Id = Guid.NewGuid(),
-							Action = getRandomAction(),
-							Owner = randomOwner,
-							Payload = payload,
-							Stamp = DateTime.UtcNow,
-							Type = nameof(Change)
-						});
-					}
-
-					yield return changes;
-				}
-			}
-		}
-
 		private static ChangeAction getRandomAction()
 		{
 			var random = TestContext.CurrentContext.Random;
 			var changes = Enum.GetValues<ChangeAction>();
 
-			ChangeAction action = ChangeAction.None;
+			var action = ChangeAction.None;
 
-			int startIndex = random.Next(0, changes.Length);
-			int numOfChanges = random.Next(startIndex, changes.Length);
-			for (int i = startIndex; i < numOfChanges; i++)
+			var startIndex = random.Next(0, changes.Length);
+			var numOfChanges = random.Next(startIndex, changes.Length);
+			for (var i = startIndex; i < numOfChanges; i++)
 			{
 				action |= changes[i];
 			}

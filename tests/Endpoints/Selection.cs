@@ -1,5 +1,4 @@
-﻿
-namespace Crash.Server.Tests.Endpoints
+﻿namespace Crash.Server.Tests.Endpoints
 {
 	public sealed class Selection : CrashHubEndpoints
 	{
@@ -13,7 +12,7 @@ namespace Crash.Server.Tests.Endpoints
 
 			await _crashHub.Lock(change.Owner, change.Id);
 			Assert.That(_crashHub._context.Changes.Count(), Is.EqualTo(currCount + 2));
-			
+
 			Assert.That(_crashHub._context.TryGetChange(change.Id, out var changeOut), Is.True);
 
 			Assert.That(changeOut.Action.HasFlag(ChangeAction.Lock), Is.True);

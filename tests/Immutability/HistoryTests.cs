@@ -1,17 +1,20 @@
-﻿using System.Collections;
-using System.Text.Json;
+﻿// ReSharper disable HeapView.BoxingAllocation
 
-using Crash.Geometry;
-using Crash.Server.Model;
 using Crash.Server.Tests.Endpoints;
-
-using Microsoft.EntityFrameworkCore;
 
 namespace Crash.Server.Tests.Immutability
 {
-
 	public sealed class HistoryTests : CrashHubEndpoints
 	{
+		private static IEnumerable NonConflictingChangeStacks
+		{
+			get
+			{
+				yield return initialOnly();
+				yield return addRemoveStack();
+				yield return generateLifetimeStack();
+			}
+		}
 
 		[Test]
 		public void nullChage()
@@ -22,36 +25,35 @@ namespace Crash.Server.Tests.Immutability
 		[TestCaseSource(nameof(NonConflictingChangeStacks))]
 		public async Task TestContext(ValueTuple<Stack<Change>, Change> changeTuple)
 		{
-			Stack<Change> changeHistory = changeTuple.Item1;
-			Change latestChange = changeTuple.Item2;
+			var changeHistory = changeTuple.Item1;
+			var latestChange = changeTuple.Item2;
 
-			DbContextOptions<CrashContext> options = CrashHubEndpoints.GetMockOptions();
+			var options = GetMockOptions();
 			CrashContext context = new(options);
 
 			Task.WaitAll(changeHistory.Select(
-					c => context.AddChangeAsync(new ImmutableChange
+				c => context.AddChangeAsync(new ImmutableChange
 					{
 						UniqueId = Guid.NewGuid(),
-
 						Id = c.Id,
 						Owner = c.Owner,
 						Action = c.Action,
 						Payload = c.Payload,
 						Stamp = c.Stamp,
-						Type = c.Type,
+						Type = c.Type
 					}
-			)).ToArray());
+				)).ToArray());
 
 			Assert.Multiple(() =>
 			{
-
 				// Assert court?
 
-				Assert.That(context.TryGetChange(latestChange.Id, out Change? latestFound), Is.True);
+				Assert.That(context.TryGetChange(latestChange.Id, out var latestFound), Is.True);
 
 				Assert.That(latestFound.Stamp, Is.GreaterThan(DateTime.MinValue));
 				Assert.That(latestFound.Stamp, Is.LessThan(DateTime.MaxValue));
-				Assert.That(latestFound.Stamp, Is.GreaterThanOrEqualTo(latestChange.Stamp)); // May be unecessary to verify?
+				Assert.That(latestFound.Stamp,
+					Is.GreaterThanOrEqualTo(latestChange.Stamp)); // May be unecessary to verify?
 
 				// Guid must not be null
 				Assert.That(Guid.Empty, Is.Not.EqualTo(latestFound.Id));
@@ -60,7 +62,8 @@ namespace Crash.Server.Tests.Immutability
 
 				// Payload Can be null or not null?
 				// It'd be more efficient if null
-				Assert.That(latestFound.Payload, Is.EqualTo(latestChange.Payload)); // This should be a combination of geom and transform
+				Assert.That(latestFound.Payload,
+					Is.EqualTo(latestChange.Payload)); // This should be a combination of geom and transform
 
 				// Type must never be null
 				Assert.That(string.IsNullOrEmpty(latestFound.Type), Is.False);
@@ -70,16 +73,6 @@ namespace Crash.Server.Tests.Immutability
 				Assert.That(latestFound.Action, Is.Not.EqualTo(ChangeAction.None));
 				Assert.That(latestFound.Action, Is.EqualTo(latestChange.Action));
 			});
-		}
-
-		private static IEnumerable NonConflictingChangeStacks
-		{
-			get
-			{
-				yield return initialOnly();
-				yield return addRemoveStack();
-				yield return generateLifetimeStack();
-			}
 		}
 
 		private static (Stack<Change>, Change) initialOnly()
@@ -94,9 +87,9 @@ namespace Crash.Server.Tests.Immutability
 		private static (Stack<Change>, Change) addRemoveStack()
 		{
 			Stack<Change> firstHistory = new();
-			Guid stackId = Guid.NewGuid();
+			var stackId = Guid.NewGuid();
 
-			string payload = "{ \"example\": \"payload\" }";
+			var payload = "{ \"example\": \"payload\" }";
 			var add = getNewChange(stackId, ChangeAction.Add, payload);
 			var remove = getNewChange(stackId, ChangeAction.Remove, payload);
 
@@ -109,13 +102,13 @@ namespace Crash.Server.Tests.Immutability
 		private static (Stack<Change>, Change) generateLifetimeStack()
 		{
 			Stack<Change> firstHistory = new();
-			Guid stackId = Guid.NewGuid();
+			var stackId = Guid.NewGuid();
 			var first = getNewChange(stackId, ChangeAction.Add, "{ \"example\": \"payload\" }");
 			firstHistory.Push(first);
 			firstHistory.Push(getNewChange(stackId, ChangeAction.Lock, null));
 
-			CTransform transform = new CTransform(1, 2, 3, 4);
-			string json = JsonSerializer.Serialize(transform);
+			var transform = new CTransform(1, 2, 3, 4);
+			var json = JsonSerializer.Serialize(transform);
 
 			firstHistory.Push(getNewChange(stackId, ChangeAction.Transform, json));
 			firstHistory.Push(getNewChange(stackId, ChangeAction.Temporary, null));
@@ -125,21 +118,22 @@ namespace Crash.Server.Tests.Immutability
 			firstHistory.Push(last);
 			// firstHistory.Push(getNewChange(stackId, ChangeAction.Update, null)); // Undefined
 
-			Change liveChange = new Change
+			var liveChange = new Change
 			{
 				Id = stackId,
 				Action = ChangeAction.Add | ChangeAction.Transform,
 				Owner = first.Owner,
 				Payload = first.Payload,
 				Stamp = last.Stamp,
-				Type = first.Type,
+				Type = first.Type
 			};
 
 			return new ValueTuple<Stack<Change>, Change>(firstHistory, liveChange);
 		}
 
 		private static Change getNewChange(Guid id, ChangeAction action, string? payload)
-			=> new Change
+		{
+			return new Change()
 			{
 				Id = id,
 				Action = action,
@@ -148,6 +142,6 @@ namespace Crash.Server.Tests.Immutability
 				Stamp = DateTime.UtcNow,
 				Type = nameof(HistoryTests)
 			};
-
+		}
 	}
 }

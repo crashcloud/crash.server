@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using System.Text.Json.Serialization;
 
 using Crash.Server.Hubs;
 
@@ -7,23 +6,22 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Crash.Server.Settings
 {
-
 	internal sealed class ConfigHandler
 	{
 		private readonly IConfiguration _configuration;
 
-		internal CrashConfig Crash { get; set; }
-
 		internal ConfigHandler(string jsonFile = "appsettings.json")
 		{
 			_configuration = new ConfigurationBuilder()
-						.SetBasePath(Directory.GetCurrentDirectory())
-						.AddJsonFile(jsonFile, optional: true, reloadOnChange: true)
-						// .AddEnvironmentVariables() // Handle this
-						.Build();
+				.SetBasePath(Directory.GetCurrentDirectory())
+				.AddJsonFile(jsonFile, true, true)
+				// .AddEnvironmentVariables() // Handle this
+				.Build();
 
-			Crash = new(_configuration.GetSection(nameof(Crash)));
+			Crash = new CrashConfig(_configuration.GetSection(nameof(Crash)));
 		}
+
+		internal CrashConfig Crash { get; set; }
 	}
 
 	internal sealed class CrashConfig
@@ -32,7 +30,7 @@ namespace Crash.Server.Settings
 
 		internal CrashConfig(IConfigurationSection section)
 		{
-			SignalR = new(section.GetSection(nameof(SignalR)));
+			SignalR = new SignalRConfig(section.GetSection(nameof(SignalR)));
 		}
 	}
 
@@ -45,17 +43,23 @@ namespace Crash.Server.Settings
 			Section = section;
 		}
 
-		internal void BuildCrashHubConfig<THub>(HubOptions<THub> options) where THub : Microsoft.AspNetCore.SignalR.Hub
+		internal void BuildCrashHubConfig<THub>(HubOptions<THub> options) where THub : Hub
 		{
 			HubOptions<CrashHub> _default = new();
 			var crashHubSection = Section.GetSection(nameof(CrashHub));
 
-			options.MaximumParallelInvocationsPerClient = crashHubSection.GetValue<int>(nameof(HubOptions.MaximumParallelInvocationsPerClient), _default.MaximumParallelInvocationsPerClient);
-			options.MaximumReceiveMessageSize = crashHubSection.GetValue<long?>(nameof(HubOptions.MaximumReceiveMessageSize), _default.MaximumReceiveMessageSize);
-			options.StreamBufferCapacity = crashHubSection.GetValue<int?>(nameof(HubOptions.StreamBufferCapacity), _default.StreamBufferCapacity);
-			options.KeepAliveInterval = TimeSpan.FromMilliseconds(crashHubSection.GetValue<int>(nameof(HubOptions.KeepAliveInterval), 10_000));
-			options.HandshakeTimeout = TimeSpan.FromMilliseconds(crashHubSection.GetValue<int>(nameof(HubOptions.HandshakeTimeout), 10_000));
-			options.EnableDetailedErrors = crashHubSection.GetValue<bool?>(nameof(HubOptions.EnableDetailedErrors), _default.EnableDetailedErrors);
+			options.MaximumParallelInvocationsPerClient = crashHubSection.GetValue(
+				nameof(HubOptions.MaximumParallelInvocationsPerClient), _default.MaximumParallelInvocationsPerClient);
+			options.MaximumReceiveMessageSize = crashHubSection.GetValue(nameof(HubOptions.MaximumReceiveMessageSize),
+				_default.MaximumReceiveMessageSize);
+			options.StreamBufferCapacity =
+				crashHubSection.GetValue(nameof(HubOptions.StreamBufferCapacity), _default.StreamBufferCapacity);
+			options.KeepAliveInterval =
+				TimeSpan.FromMilliseconds(crashHubSection.GetValue(nameof(HubOptions.KeepAliveInterval), 10_000));
+			options.HandshakeTimeout =
+				TimeSpan.FromMilliseconds(crashHubSection.GetValue(nameof(HubOptions.HandshakeTimeout), 10_000));
+			options.EnableDetailedErrors =
+				crashHubSection.GetValue(nameof(HubOptions.EnableDetailedErrors), _default.EnableDetailedErrors);
 
 			if (options?.SupportedProtocols is not null)
 			{
@@ -72,19 +76,30 @@ namespace Crash.Server.Settings
 
 			var jsonSection = Section.GetSection("Json");
 
-			string name = nameof(JsonSerializerOptions.IgnoreReadOnlyFields);
+			var name = nameof(JsonSerializerOptions.IgnoreReadOnlyFields);
 			Console.WriteLine(name);
 
-			options.PayloadSerializerOptions.DefaultIgnoreCondition = jsonSection.GetValue<JsonIgnoreCondition>(nameof(JsonSerializerOptions.DefaultIgnoreCondition), _default.DefaultIgnoreCondition);
-			options.PayloadSerializerOptions.PropertyNameCaseInsensitive = jsonSection.GetValue<bool>(nameof(JsonSerializerOptions.PropertyNameCaseInsensitive), _default.PropertyNameCaseInsensitive);
-			options.PayloadSerializerOptions.ReadCommentHandling = jsonSection.GetValue<JsonCommentHandling>(nameof(JsonSerializerOptions.ReadCommentHandling), _default.ReadCommentHandling);
-			options.PayloadSerializerOptions.IgnoreReadOnlyProperties = jsonSection.GetValue<bool>(nameof(JsonSerializerOptions.IgnoreReadOnlyProperties), _default.IgnoreReadOnlyProperties);
-			options.PayloadSerializerOptions.IgnoreReadOnlyFields = jsonSection.GetValue<bool>(nameof(JsonSerializerOptions.IgnoreReadOnlyFields), _default.IgnoreReadOnlyFields);
-			options.PayloadSerializerOptions.AllowTrailingCommas = jsonSection.GetValue<bool>(nameof(JsonSerializerOptions.AllowTrailingCommas), _default.AllowTrailingCommas);
-			options.PayloadSerializerOptions.NumberHandling = jsonSection.GetValue<JsonNumberHandling>(nameof(JsonSerializerOptions.NumberHandling), _default.NumberHandling);
-			options.PayloadSerializerOptions.IncludeFields = jsonSection.GetValue<bool>(nameof(JsonSerializerOptions.IncludeFields), _default.IncludeFields);
-			options.PayloadSerializerOptions.WriteIndented = jsonSection.GetValue<bool>(nameof(JsonSerializerOptions.WriteIndented), _default.WriteIndented);
-			options.PayloadSerializerOptions.MaxDepth = jsonSection.GetValue<int>(nameof(JsonSerializerOptions.MaxDepth), _default.MaxDepth);
+			options.PayloadSerializerOptions.DefaultIgnoreCondition =
+				jsonSection.GetValue(nameof(JsonSerializerOptions.DefaultIgnoreCondition),
+					_default.DefaultIgnoreCondition);
+			options.PayloadSerializerOptions.PropertyNameCaseInsensitive = jsonSection.GetValue(
+				nameof(JsonSerializerOptions.PropertyNameCaseInsensitive), _default.PropertyNameCaseInsensitive);
+			options.PayloadSerializerOptions.ReadCommentHandling =
+				jsonSection.GetValue(nameof(JsonSerializerOptions.ReadCommentHandling), _default.ReadCommentHandling);
+			options.PayloadSerializerOptions.IgnoreReadOnlyProperties = jsonSection.GetValue(
+				nameof(JsonSerializerOptions.IgnoreReadOnlyProperties), _default.IgnoreReadOnlyProperties);
+			options.PayloadSerializerOptions.IgnoreReadOnlyFields =
+				jsonSection.GetValue(nameof(JsonSerializerOptions.IgnoreReadOnlyFields), _default.IgnoreReadOnlyFields);
+			options.PayloadSerializerOptions.AllowTrailingCommas =
+				jsonSection.GetValue(nameof(JsonSerializerOptions.AllowTrailingCommas), _default.AllowTrailingCommas);
+			options.PayloadSerializerOptions.NumberHandling =
+				jsonSection.GetValue(nameof(JsonSerializerOptions.NumberHandling), _default.NumberHandling);
+			options.PayloadSerializerOptions.IncludeFields =
+				jsonSection.GetValue(nameof(JsonSerializerOptions.IncludeFields), _default.IncludeFields);
+			options.PayloadSerializerOptions.WriteIndented =
+				jsonSection.GetValue(nameof(JsonSerializerOptions.WriteIndented), _default.WriteIndented);
+			options.PayloadSerializerOptions.MaxDepth =
+				jsonSection.GetValue(nameof(JsonSerializerOptions.MaxDepth), _default.MaxDepth);
 		}
 	}
 }

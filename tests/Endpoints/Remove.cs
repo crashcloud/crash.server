@@ -24,10 +24,10 @@
 
 			await _crashHub.Delete(Guid.Empty);
 
-			for (int i = 0; i < 10; i++)
+			for (var i = 0; i < 10; i++)
 			{
-				string user = Path.GetRandomFileName().Replace(".", "");
-				Guid guid = Guid.NewGuid();
+				var user = Path.GetRandomFileName().Replace(".", "");
+				var guid = Guid.NewGuid();
 				await _crashHub.Delete(guid);
 				Assert.That(_crashHub._context.Changes.Count(), Is.EqualTo(currCount));
 			}
