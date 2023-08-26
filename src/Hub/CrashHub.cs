@@ -5,7 +5,7 @@ using Crash.Server.Model;
 using Microsoft.AspNetCore.SignalR;
 
 [assembly: InternalsVisibleTo("Crash.Server.Tests")]
-namespace Crash.Server
+namespace Crash.Server.Hub
 {
 
 	///<summary>Server Implementation of ICrashClient EndPoints</summary>
@@ -22,7 +22,7 @@ namespace Crash.Server
 		/// <summary>Add Change to SqLite DB and notify other clients</summary>
 		public async Task Add(Change change)
 		{
-			if (InvalidChange(change)) return;
+			if (!HubUtils.IsChangeValid(change)) return;
 
 			try
 			{
@@ -41,7 +41,7 @@ namespace Crash.Server
 		/// <summary>Update Item in SqLite DB and notify other clients</summary>
 		public async Task Update(Change change)
 		{
-			if (InvalidChange(change)) return;
+			if (!HubUtils.IsChangeValid(change)) return;
 
 			try
 			{
@@ -59,7 +59,7 @@ namespace Crash.Server
 		/// <summary>Delete Item in SqLite DB and notify other clients</summary>
 		public async Task Delete(Guid id)
 		{
-			if (InvalidGuid(id)) return;
+			if (HubUtils.IsGuidValid(id)) return;
 
 			try
 			{
@@ -79,15 +79,13 @@ namespace Crash.Server
 			await Clients.Others.Delete(id);
 		}
 
-
 		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
 		public async Task Done(string user)
 		{
-			if (InvalidUser(user)) return;
+			if (HubUtils.IsUserValid(user)) return;
 
 			try
 			{
-				// TODO: hmm
 				await _context.DoneAsync(user);
 				await _context.SaveChangesAsync();
 			}
@@ -114,12 +112,15 @@ namespace Crash.Server
 
 			try
 			{
+				if (!_context.TryGetChange(id, out Change? latestChange))
+					return;
+				
 				await _context.AddChangeAsync(new ImmutableChange
 				{
 					Id = id,
 					Action = lockStatus,
 					Stamp = DateTime.UtcNow,
-					Type = lockStatus.ToString()
+					Type = latestChange.Type
 				});
 				await _context.SaveChangesAsync();
 			}
@@ -160,13 +161,6 @@ namespace Crash.Server
 			// await Clients.Others.UpdateUser(change);
 		}
 
-		/// <summary>User disconnects</summary>
-		public override Task OnDisconnectedAsync(Exception? exception)
-		{
-			// Does this account for not reconnecting?
-			return base.OnDisconnectedAsync(exception);
-		}
-
 		/// <summary>On Connected send user Changes from DB</summary>
 		public override async Task OnConnectedAsync()
 		{
@@ -178,42 +172,6 @@ namespace Crash.Server
 			var users = _context.Users;
 			await Clients.Caller.InitializeUsers(users);
 		}
-
-		/// <summary>The Number of Changes</summary>
-		public int Count => _context.Changes.Count();
-
-		internal bool TryGet(Guid changeId, out Change? change)
-			=> _context.TryGetChange(changeId, out change);
-
-		internal IEnumerable<Change> GetChanges() => _context.GetChanges();
-
-		#region Validity Checks
-
-		const string InvalidUserMessage = "Inputted user is null or empty!";
-		private static bool InvalidUser(string user)
-		{
-			if (!string.IsNullOrEmpty(user)) return false;
-			Console.WriteLine(InvalidUserMessage);
-			return true;
-		}
-
-		const string InvalidChangeMessage = $"Inputted Change is null";
-		private static bool InvalidChange(Change change)
-		{
-			if (change is not null) return false;
-			Console.WriteLine(InvalidChangeMessage);
-			return true;
-		}
-
-		const string InvalidGuidMessage = $"Inputtd Change Id is Guid.Empty";
-		private static bool InvalidGuid(Guid changeId)
-		{
-			if (Guid.Empty != changeId) return false;
-			Console.WriteLine(InvalidGuidMessage);
-			return true;
-		}
-
-		#endregion
 
 	}
 }

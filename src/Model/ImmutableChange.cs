@@ -20,12 +20,16 @@ namespace Crash.Server.Model
 		
 		///<inheritdoc/>
 		public Guid Id { get; init; }
+		
 		///<inheritdoc/>
 		public string? Owner { get; init; }
+		
 		///<inheritdoc/>
 		public string? Payload { get; init; }
+		
 		///<inheritdoc/>
 		public string Type { get; init; }
+		
 		///<inheritdoc/>
 		public ChangeAction Action { get; set; }
 
