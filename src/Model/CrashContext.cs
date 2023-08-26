@@ -43,6 +43,8 @@ namespace Crash.Server.Model
 			{
 				await SetCurrentComputedChange(changeRecord);
 			}
+
+			return true;
 		}
 
 		private async Task SetCurrentComputedChange(ImmutableChange newChange)

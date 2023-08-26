@@ -108,7 +108,7 @@ namespace Crash.Server.Hubs
 			}
 
 			// Record
-			var lockChange = ChangeFactory.CreateLockRecord(latestChange.Type, latestChange.Id));
+			var lockChange = ChangeFactory.CreateLockRecord(latestChange.Type, latestChange.Id);
 			if (await _context.AddChangeAsync(lockChange))
 			{
 				// Update
@@ -132,7 +132,7 @@ namespace Crash.Server.Hubs
 			}
 
 			// Record
-			var lockChange = ChangeFactory.CreateUnlockRecord(latestChange.Type, latestChange.Id));
+			var lockChange = ChangeFactory.CreateUnlockRecord(latestChange.Type, latestChange.Id);
 			if (await _context.AddChangeAsync(lockChange))
 			{
 				// Update
