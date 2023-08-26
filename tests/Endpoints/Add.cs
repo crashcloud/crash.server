@@ -1,4 +1,6 @@
-﻿namespace Crash.Server.Tests.Endpoints
+﻿using Crash.Server.Hubs;
+
+namespace Crash.Server.Tests.Endpoints
 {
 
 	// TODO : Should Add verify that given Change has Add Action?
@@ -7,23 +9,21 @@
 		[TestCaseSource(nameof(ValidChanges))]
 		public async Task Add_Succesful(Change change)
 		{
-			var currCount = _crashHub.Count;
+			var currCount = _crashHub._context.Changes.Count();
 
 			await _crashHub.Add(change);
-			Assert.That(_crashHub.Count, Is.EqualTo(currCount + 1));
+			Assert.That(_crashHub._context.Changes.Count(), Is.EqualTo(currCount + 1));
 
-			Assert.That(_crashHub.TryGet(change.Id, out var changeOut), Is.True);
+			Assert.That(_crashHub._context.TryGetChange(change.Id, out var changeOut), Is.True);
 			Assert.That(change, Is.EqualTo(changeOut));
 		}
 
 		[TestCaseSource(nameof(ValidChanges))]
 		public async Task Add_Failure(Change change)
 		{
-			Assert.That(_crashHub.Count, Is.EqualTo(0));
-
+			Assert.IsEmpty(_crashHub._context.Changes);
 			await _crashHub.Add(null);
-
-			Assert.That(_crashHub.Count, Is.EqualTo(0));
+			Assert.IsEmpty(_crashHub._context.Changes);
 		}
 	}
 }

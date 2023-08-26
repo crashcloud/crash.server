@@ -9,16 +9,16 @@ namespace Crash.Server.Tests.Endpoints
 		[TestCaseSource(nameof(RandomChanges))]
 		public async Task Done_Failures(IEnumerable<Change> changes)
 		{
-			int currCount = _crashHub.Count;
+			int currCount = _crashHub._context.Changes.Count();
 
 			foreach (var change in changes)
 			{
 				await _crashHub.Add(change);
 			}
 
-			Assert.That(_crashHub.Count, Is.EqualTo(currCount + changes.Count()));
+			Assert.That(_crashHub._context.Changes.Count(), Is.EqualTo(currCount + changes.Count()));
 
-			int tempCount = _crashHub.GetChanges().Select(c => c.HasFlag(ChangeAction.Temporary)).Count();
+			int tempCount = _crashHub._context.GetChanges().Select(c => c.HasFlag(ChangeAction.Temporary)).Count();
 			Assert.That(tempCount, Is.GreaterThan(0));
 
 			await _crashHub.Done(null);
@@ -30,7 +30,7 @@ namespace Crash.Server.Tests.Endpoints
 		[TestCaseSource(nameof(RandomChanges))]
 		public async Task Done_Success(IEnumerable<Change> changes)
 		{
-			int currCount = _crashHub.Count;
+			int currCount = _crashHub._context.Changes.Count();
 			HashSet<string> owners = changes.Select(c => c.Owner).ToHashSet();
 
 			foreach (var change in changes)
@@ -38,14 +38,14 @@ namespace Crash.Server.Tests.Endpoints
 				await _crashHub.Add(change);
 			}
 
-			Assert.That(_crashHub.Count, Is.EqualTo(currCount + changes.Count()));
-			Assert.That(_crashHub.GetChanges().Any(c => c.HasFlag(ChangeAction.Temporary)), Is.True);
+			Assert.That(_crashHub._context.Changes.Count(), Is.EqualTo(currCount + changes.Count()));
+			Assert.That(_crashHub._context.GetChanges().Any(c => c.HasFlag(ChangeAction.Temporary)), Is.True);
 
 			foreach (string owner in owners)
 			{
 				await _crashHub.Done(owner);
 
-				foreach (Change change in _crashHub.GetChanges())
+				foreach (Change change in _crashHub._context.GetChanges())
 				{
 					if (change.Owner.Equals(owner))
 					{
@@ -54,7 +54,7 @@ namespace Crash.Server.Tests.Endpoints
 				}
 			}
 
-			Assert.That(_crashHub.GetChanges().Any(c => c.HasFlag(ChangeAction.Temporary)), Is.False);
+			Assert.That(_crashHub._context.GetChanges().Any(c => c.HasFlag(ChangeAction.Temporary)), Is.False);
 		}
 
 	}

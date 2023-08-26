@@ -6,9 +6,8 @@
 	{
 
 		/// <summary>Creates a Delete Record</summary>
-		/// <param name="type">Likely the latest Type</param>
 		/// <param name="id">The id of the Change to lock</param>
-		public static ImmutableChange CreateDeleteRecord(string type, Guid id)
+		public static ImmutableChange CreateDeleteRecord(Guid id)
 			=> new ()
 			{
 				Id = id,
@@ -36,7 +35,7 @@
 			{
 				Id = id,
 				Action = ChangeAction.Unlock,
-				Stamp = DateTime.Now,
+				Stamp = DateTime.UtcNow,
 				Type = type,
 			};
 		
@@ -68,6 +67,32 @@
 				Type = change.Type,
 				Payload = change.Payload,
 			};
+
+		public static Change CombineRecords(IChange previousRecord, IChange newRecord)
+		{
+			if (previousRecord is null)
+				throw new ArgumentException($"{nameof(previousRecord)} is null");
+
+			if (newRecord is null)
+				throw new ArgumentException($"{nameof(newRecord)} is null");
+			
+			Guid combinedId = Guid.Empty;
+			if (previousRecord.Id == Guid.Empty ||
+			    previousRecord.Id != newRecord.Id)
+				throw new ArgumentException("Id is Invalid!");
+			
+			Change result = new ()
+			{
+				Id = combinedId,
+				Stamp = DateTime.UtcNow,
+				Owner = newRecord.Owner ?? previousRecord.Owner,
+				Payload = Combinations.CombinePayloads(previousRecord.Payload, newRecord.Payload),
+				Type = previousRecord.Type,
+				Action = Combinations.CombineActions(previousRecord.Action, newRecord.Action),
+			};
+
+			return result;
+		}
 
 	}
 	

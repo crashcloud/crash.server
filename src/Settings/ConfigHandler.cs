@@ -1,6 +1,8 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
+using Crash.Server.Hubs;
+
 using Microsoft.AspNetCore.SignalR;
 
 namespace Crash.Server.Settings
@@ -43,7 +45,7 @@ namespace Crash.Server.Settings
 			Section = section;
 		}
 
-		internal void BuildCrashHubConfig<THub>(HubOptions<THub> options) where THub : Hub
+		internal void BuildCrashHubConfig<THub>(HubOptions<THub> options) where THub : Microsoft.AspNetCore.SignalR.Hub
 		{
 			HubOptions<CrashHub> _default = new();
 			var crashHubSection = Section.GetSection(nameof(CrashHub));

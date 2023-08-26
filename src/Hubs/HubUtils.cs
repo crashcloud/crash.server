@@ -1,4 +1,4 @@
-﻿namespace Crash.Server.Hub
+﻿namespace Crash.Server.Hubs
 {
 	
 	

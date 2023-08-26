@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 
 using Crash.Server;
+using Crash.Server.Hubs;
 using Crash.Server.Model;
 using Crash.Server.Settings;
 

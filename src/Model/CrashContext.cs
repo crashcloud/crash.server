@@ -47,71 +47,18 @@ namespace Crash.Server.Model
 			}
 		}
 
-		private async Task SetCurrentComputedChange(IChange newChange)
+		private async Task SetCurrentComputedChange(ImmutableChange newChange)
 		{
+			// Set as is if not there?
 			if (!LatestChanges.TryGetValue(newChange.Id, out var current))
+			{
+				LatestChanges.Add(newChange.Id, new Change(newChange));
 				return;
-
-			// Set Payload
-			if (!string.IsNullOrEmpty(newChange.Payload))
-			{
-				current.Payload = newChange.Payload;
 			}
 
-			// Update Add/Remove
-			SetToggleableChange(newChange, current, ChangeAction.Add, ChangeAction.Remove);
+			var change = ChangeFactory.CombineRecords(current, newChange);
 
-			// Toggle Temporary)
-			if (newChange.HasFlag(ChangeAction.Temporary))
-			{
-				current.AddAction(ChangeAction.Temporary);
-			}
-			else
-			{
-				current.RemoveAction(ChangeAction.Temporary);
-			}
-
-			// Update Lock/Unlock
-			SetToggleableChange(newChange, current, ChangeAction.Lock, ChangeAction.Unlock);
-
-			if (newChange.HasFlag(ChangeAction.Transform))
-			{
-				// TODO : Make sure we get JUST the transform, what if it is combined?
-				CTransform transform = JsonSerializer.Deserialize<CTransform>(newChange.Payload);
-				if (transform.IsValid() && current.HasFlag(ChangeAction.Transform))
-				{
-					// TODO : Make sure we get JUST the transform, what if it is combined?
-					CTransform currentTransform = JsonSerializer.Deserialize<CTransform>(current.Payload);
-
-					// TODO : Enable
-					// transform = CTransform.Combine(transform, currentTransform);
-				}
-
-				// TODO : Make sure we get JUST the transform, what if it is combined?
-				current.Payload = JsonSerializer.Serialize(transform);
-
-				current.Action |= ChangeAction.Transform;
-			}
-
-			// Update steps ??
-		}
-
-		private void SetToggleableChange(IChange newChange, IChange currentChange, ChangeAction affirmative, ChangeAction negative)
-		{
-			var _action = newChange.Action;
-			
-			if (newChange.HasFlag(affirmative))
-			{
-				currentChange.RemoveAction(negative);
-				currentChange.AddAction(affirmative);
-			}
-			else if (newChange.HasFlag(negative))
-			{
-				currentChange.RemoveAction(affirmative);
-				currentChange.AddAction(negative);
-			}
-
-			newChange.Action = _action;
+			LatestChanges[newChange.Id] = change;
 		}
 
 		internal bool TryGetChange(Guid changeId, out Change? change)
@@ -125,24 +72,11 @@ namespace Crash.Server.Model
 			// Wrap in a Task.Run call!
 			foreach (var latestChange in LatestChanges)
 			{
-				// Doest this include null owners? That's good!
+				// Does this include null owners? That's good!
 				if (latestChange.Value.Owner != user)
 					continue;
-
-				// Do we need to check for Temporary?
-
-				var doneChange = new ImmutableChange
-				{
-					Action = 0,
-					Id = latestChange.Value.Id,
-					Owner = latestChange.Value.Owner,
-					Stamp = DateTime.UtcNow,
-					Type = latestChange.Value.Type,
-				};
-				doneChange.RemoveAction(ChangeAction.Temporary);
-				doneChange.RemoveAction(ChangeAction.Lock);
-				doneChange.RemoveAction(ChangeAction.Unlock);
-
+				
+				var doneChange = ChangeFactory.CreateDoneRecord(latestChange.Value);
 				await AddChangeAsync(doneChange);
 			}
 		}

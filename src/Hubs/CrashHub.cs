@@ -5,13 +5,13 @@ using Crash.Server.Model;
 using Microsoft.AspNetCore.SignalR;
 
 [assembly: InternalsVisibleTo("Crash.Server.Tests")]
-namespace Crash.Server.Hub
+namespace Crash.Server.Hubs
 {
 
 	///<summary>Server Implementation of ICrashClient EndPoints</summary>
 	public sealed class CrashHub : Hub<ICrashClient>
 	{
-		readonly CrashContext _context;
+		internal readonly CrashContext _context;
 
 		/// <summary>Initialize with SqLite DB</summary>
 		public CrashHub(CrashContext context)
@@ -63,12 +63,7 @@ namespace Crash.Server.Hub
 
 			try
 			{
-				await _context.AddChangeAsync(new ImmutableChange
-				{
-					Id = id,
-					Action = ChangeAction.Remove,
-					Stamp = DateTime.UtcNow,
-				});
+				await _context.AddChangeAsync(ChangeFactory.CreateDeleteRecord(id));
 				await _context.SaveChangesAsync();
 			}
 			catch (Exception ex)
@@ -107,7 +102,7 @@ namespace Crash.Server.Hub
 
 		private async Task ToggleLock(string user, Guid id, ChangeAction lockStatus, Func<Task> others)
 		{
-			if (InvalidUser(user) || InvalidGuid(id))
+			if (!HubUtils.IsUserValid(user) || !HubUtils.IsGuidValid(id))
 				return;
 
 			try
@@ -135,7 +130,7 @@ namespace Crash.Server.Hub
 		/// <summary>Add Change to SqLite DB and notify other clients</summary>
 		public async Task CameraChange(Change change)
 		{
-			if (InvalidChange(change)) return;
+			if (!HubUtils.IsChangeValid(change)) return;
 
 			string? userName = change.Owner;
 			var followerIds = _context.Users.Where(u => u.Follows == userName).Select(u => u.Id);

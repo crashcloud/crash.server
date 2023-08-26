@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 
+using Crash.Server.Hubs;
 using Crash.Server.Model;
 
 using Microsoft.AspNetCore.SignalR;
@@ -12,7 +13,7 @@ namespace Crash.Server.Tests.Endpoints
 
 	public abstract class CrashHubEndpoints
 	{
-		protected CrashHub? _crashHub;
+		internal CrashHub? _crashHub;
 		protected CrashContext? _crashContext;
 
 		[SetUp]

@@ -6,15 +6,15 @@ namespace Crash.Server.Tests.Endpoints
 		[TestCaseSource(nameof(ValidChanges))]
 		public async Task Select_Success(Change change)
 		{
-			var currCount = _crashHub.Count;
+			var currCount = _crashHub._context.Changes.Count();
 
 			await _crashHub.Add(change);
-			Assert.That(_crashHub.Count, Is.EqualTo(currCount + 1));
+			Assert.That(_crashHub._context.Changes.Count(), Is.EqualTo(currCount + 1));
 
 			await _crashHub.Lock(change.Owner, change.Id);
-			Assert.That(_crashHub.Count, Is.EqualTo(currCount + 2));
+			Assert.That(_crashHub._context.Changes.Count(), Is.EqualTo(currCount + 2));
 			
-			Assert.That(_crashHub.TryGet(change.Id, out var changeOut), Is.True);
+			Assert.That(_crashHub._context.TryGetChange(change.Id, out var changeOut), Is.True);
 
 			Assert.That(changeOut.Action.HasFlag(ChangeAction.Lock), Is.True);
 		}
@@ -22,13 +22,13 @@ namespace Crash.Server.Tests.Endpoints
 		[TestCaseSource(nameof(ValidChanges))]
 		public async Task UnSelect_Success(Change change)
 		{
-			var currCount = _crashHub.Count;
+			var currCount = _crashHub._context.Changes.Count();
 
 			await _crashHub.Add(change);
-			Assert.That(_crashHub.Count, Is.EqualTo(currCount + 1));
+			Assert.That(_crashHub._context.Changes.Count(), Is.EqualTo(currCount + 1));
 
 			await _crashHub.Unlock(change.Owner, change.Id);
-			Assert.That(_crashHub.TryGet(change.Id, out var changeOut), Is.True);
+			Assert.That(_crashHub._context.TryGetChange(change.Id, out var changeOut), Is.True);
 
 			Assert.That(changeOut.Action.HasFlag(ChangeAction.Lock), Is.False);
 		}
