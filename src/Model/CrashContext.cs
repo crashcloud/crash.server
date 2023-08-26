@@ -96,21 +96,22 @@ namespace Crash.Server.Model
 			// Update steps ??
 		}
 
-		private void SetToggleableChange(IChange change, IChange currentChange, ChangeAction affirmative, ChangeAction negative)
+		private void SetToggleableChange(IChange newChange, IChange currentChange, ChangeAction affirmative, ChangeAction negative)
 		{
-			var _action = change.Action;
-			if (currentChange.HasFlag(affirmative))
+			var _action = newChange.Action;
+			
+			if (newChange.HasFlag(affirmative))
 			{
-				change.RemoveAction(affirmative);
-				change.AddAction(negative);
+				currentChange.RemoveAction(negative);
+				currentChange.AddAction(affirmative);
 			}
-			else if (currentChange.HasFlag(negative))
+			else if (newChange.HasFlag(negative))
 			{
-				change.RemoveAction(negative);
-				change.AddAction(affirmative);
+				currentChange.RemoveAction(affirmative);
+				currentChange.AddAction(negative);
 			}
 
-			change.Action = _action;
+			newChange.Action = _action;
 		}
 
 		internal bool TryGetChange(Guid changeId, out Change? change)

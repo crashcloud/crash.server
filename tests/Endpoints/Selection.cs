@@ -12,6 +12,8 @@ namespace Crash.Server.Tests.Endpoints
 			Assert.That(_crashHub.Count, Is.EqualTo(currCount + 1));
 
 			await _crashHub.Lock(change.Owner, change.Id);
+			Assert.That(_crashHub.Count, Is.EqualTo(currCount + 2));
+			
 			Assert.That(_crashHub.TryGet(change.Id, out var changeOut), Is.True);
 
 			Assert.That(changeOut.Action.HasFlag(ChangeAction.Lock), Is.True);

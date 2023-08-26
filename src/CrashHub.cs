@@ -119,6 +119,7 @@ namespace Crash.Server
 					Id = id,
 					Action = lockStatus,
 					Stamp = DateTime.UtcNow,
+					Type = lockStatus.ToString()
 				});
 				await _context.SaveChangesAsync();
 			}
