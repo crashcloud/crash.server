@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
+using Crash.Changes.Extensions;
 using Crash.Server.Model;
 
 using Microsoft.AspNetCore.SignalR;
@@ -22,139 +23,137 @@ namespace Crash.Server.Hubs
 		/// <summary>Add Change to SqLite DB and notify other clients</summary>
 		public async Task Add(Change change)
 		{
-			// Validate? Check Action?
-			if (!HubUtils.IsChangeValid(change))
+			// Validate
+			if (!HubUtils.IsChangeValid(change) ||
+			    !HubUtils.IsPayloadValid(change) ||
+			    !change.HasFlag(ChangeAction.Add))
 			{
 				return;
 			}
 
-			try
+			// Record
+			if (await _context.AddChangeAsync(new ImmutableChange(change)))
 			{
-				await _context.AddChangeAsync(new ImmutableChange(change));
-				await _context.SaveChangesAsync();
+				// Update
+				await Clients.Others.Add(change);
 			}
-			catch (Exception ex)
-			{
-				Console.WriteLine($"Exception: {ex}");
-				return;
-			}
-
-			await Clients.Others.Add(change);
 		}
 
 		/// <summary>Update Item in SqLite DB and notify other clients</summary>
 		public async Task Update(Change change)
 		{
-			// Validate? - Check Action?
-			if (!HubUtils.IsChangeValid(change))
+			// Validate
+			if (!HubUtils.IsChangeValid(change) ||
+			    !HubUtils.IsPayloadValid(change) ||
+			    !change.HasFlag(ChangeAction.Update))
 			{
 				return;
 			}
 
-			try
+			// Record
+			if (await _context.AddChangeAsync(new ImmutableChange(change)))
 			{
-				await _context.AddChangeAsync(new ImmutableChange(change));
-				await _context.SaveChangesAsync();
+				// Update
+				await Clients.Others.Update(change);
 			}
-			catch (Exception ex)
-			{
-				Console.WriteLine($"Exception: {ex}");
-				return;
-			}
-
-			await Clients.Others.Update(change);
 		}
 
 		/// <summary>Delete Item in SqLite DB and notify other clients</summary>
 		public async Task Delete(Guid id)
 		{
+			// Validate
 			if (HubUtils.IsGuidValid(id))
 			{
 				return;
 			}
 
-			try
+			// Record
+			if (await _context.AddChangeAsync(ChangeFactory.CreateDeleteRecord(id)))
 			{
-				await _context.AddChangeAsync(ChangeFactory.CreateDeleteRecord(id));
-				await _context.SaveChangesAsync();
+				// Update
+				await Clients.Others.Delete(id);
 			}
-			catch (Exception ex)
-			{
-				Console.WriteLine($"Exception: {ex}");
-				return;
-			}
-
-			await Clients.Others.Delete(id);
 		}
 
 		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
 		public async Task Done(string user)
 		{
+			// Validate
 			if (HubUtils.IsUserValid(user))
 			{
 				return;
 			}
 
-			try
+			// Record
+			if (await _context.DoneAsync(user))
 			{
-				await _context.DoneAsync(user);
-				await _context.SaveChangesAsync();
+				// Update
+				await Clients.Others.Done(user);
 			}
-			catch (Exception ex)
-			{
-				Console.WriteLine($"Exception: {ex}");
-				return;
-			}
-
-			await Clients.Others.Done(user);
 		}
 
 		/// <summary>Lock Item in SqLite DB and notify other clients</summary>
 		public async Task Lock(string user, Guid id)
 		{
-			await ToggleLock(user, id, ChangeAction.Lock, () => Clients.Others.Lock(user, id));
-		}
-
-		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
-		public async Task Unlock(string user, Guid id)
-		{
-			await ToggleLock(user, id, ChangeAction.Unlock, () => Clients.Others.Unlock(user, id));
-		}
-
-		private async Task ToggleLock(string user, Guid id, ChangeAction lockStatus, Func<Task> others)
-		{
+			// Validate
 			if (!HubUtils.IsUserValid(user) || !HubUtils.IsGuidValid(id))
 			{
 				return;
 			}
 
-			try
+			// Lock or Unlock impossible if nothing to Lock or Unlock
+			if (!_context.TryGetChange(id, out var latestChange))
 			{
-				if (!_context.TryGetChange(id, out var latestChange))
-				{
-					return;
-				}
-
-				await _context.AddChangeAsync(ChangeFactory.CreateLockRecord(latestChange.Type, latestChange.Id));
-				await _context.SaveChangesAsync();
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine($"Exception: {ex}");
 				return;
 			}
 
-			await others();
+			// Record
+			var lockChange = ChangeFactory.CreateLockRecord(latestChange.Type, latestChange.Id));
+			if (await _context.AddChangeAsync(lockChange))
+			{
+				// Update
+				await Clients.Others.Lock(user, id);
+			}
+		}
+
+		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
+		public async Task Unlock(string user, Guid id)
+		{
+			// Validate
+			if (!HubUtils.IsUserValid(user) || !HubUtils.IsGuidValid(id))
+			{
+				return;
+			}
+
+			// Lock or Unlock impossible if nothing to Lock or Unlock
+			if (!_context.TryGetChange(id, out var latestChange))
+			{
+				return;
+			}
+
+			// Record
+			var lockChange = ChangeFactory.CreateUnlockRecord(latestChange.Type, latestChange.Id));
+			if (await _context.AddChangeAsync(lockChange))
+			{
+				// Update
+				await Clients.Others.Unlock(user, id);
+			}
 		}
 
 		/// <summary>Add Change to SqLite DB and notify other clients</summary>
 		public async Task CameraChange(Change change)
 		{
-			if (!HubUtils.IsChangeValid(change))
+			// validate
+			if (!HubUtils.IsChangeValid(change) ||
+			    !HubUtils.IsUserValid(change.Owner) ||
+			    !change.HasFlag(ChangeAction.Camera))
 			{
 				return;
 			}
 
+			// No Recording necessary
+
+			// Update
 			var userName = change.Owner;
 			var followerIds = _context.Users.Where(u => u.Follows == userName).Select(u => u.Id);
 			await Clients.Users(followerIds).CameraChange(change);
@@ -163,20 +162,30 @@ namespace Crash.Server.Hubs
 		/// <summary>Adds or Updates a User in the User Db</summary>
 		public async Task UpdateUser(Change change)
 		{
+			// validate
+			if (!HubUtils.IsChangeValid(change) ||
+			    !HubUtils.IsUserValid(change.Owner))
+			{
+				return;
+			}
+
 			var existingUser = _context.Users.FirstOrDefault(r => r.Name == change.Owner);
-			if (null == existingUser)
+			if (existingUser is null)
 			{
 				var user = User.FromChange(change);
-				if (null == user || string.IsNullOrEmpty(user.Name))
+				if (user is null || !HubUtils.IsUserValid(user.Name))
 				{
 					return;
 				}
 
 				user.Id = Context.ConnectionId;
 
-				_context.Users.Add(existingUser);
+				// Update
+				await _context.Users.AddAsync(existingUser);
 				await _context.SaveChangesAsync();
 			}
+
+			// TODO : What if user is not null?
 
 			// TODO : Is this required currently?
 			// Useful for connected/disconnected

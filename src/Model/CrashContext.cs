@@ -1,6 +1,5 @@
-﻿
+﻿// https://learn.microsoft.com/en-us/ef/core/modeling/
 
-// https://learn.microsoft.com/en-us/ef/core/modeling/
 namespace Crash.Server.Model
 {
 	/// <summary>Implementation of DbContext to be used as SqLite DB Session</summary>
@@ -25,15 +24,17 @@ namespace Crash.Server.Model
 			//optionsBuilder.UseSqlite();
 		}
 
-		internal async Task AddChangeAsync(ImmutableChange changeRecord)
+		internal async Task<bool> AddChangeAsync(ImmutableChange changeRecord)
 		{
 			if (changeRecord.Id == Guid.Empty || changeRecord.UniqueId == Guid.Empty)
 			{
-				return;
+				return false;
 			}
 
+			// Add to Storage
 			await Changes.AddAsync(changeRecord);
 
+			// 
 			if (!LatestChanges.ContainsKey(changeRecord.Id))
 			{
 				LatestChanges.Add(changeRecord.Id, new Change(changeRecord));
@@ -60,7 +61,7 @@ namespace Crash.Server.Model
 
 		internal bool TryGetChange(Guid changeId, out Change? change)
 		{
-			return LatestChanges.TryGetValue(changeId, out change);
+			return LatestChanges.TryGetValue(changeId, out change) && change is not null;
 		}
 
 		internal IEnumerable<Change> GetChanges()
@@ -68,20 +69,24 @@ namespace Crash.Server.Model
 			return LatestChanges.Values;
 		}
 
-		internal async Task DoneAsync(string user)
+		internal async Task<bool> DoneAsync(string user)
 		{
+			var result = false;
+
 			// Wrap in a Task.Run call!
-			foreach (var latestChange in LatestChanges)
+			foreach (var latestChange in LatestChanges.Values)
 			{
 				// Does this include null owners? That's good!
-				if (latestChange.Value.Owner != user)
+				if (latestChange.Owner != user)
 				{
 					continue;
 				}
 
-				var doneChange = ChangeFactory.CreateDoneRecord(latestChange.Value);
-				await AddChangeAsync(doneChange);
+				var doneChange = ChangeFactory.CreateDoneRecord(latestChange);
+				result &= await AddChangeAsync(doneChange);
 			}
+
+			return result;
 		}
 	}
 }
