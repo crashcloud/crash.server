@@ -14,7 +14,7 @@ namespace Crash.Server.Model
 		/// <summary>Default Constructor</summary>
 		public CrashContext(DbContextOptions<CrashContext> options) : base(options)
 		{
-			LatestChanges = new Dictionary<Guid, Change>();
+			LatestChanges = new ();
 		}
 
 		/// <summary>The Set of Changes</summary>

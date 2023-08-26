@@ -1,4 +1,5 @@
-﻿namespace Crash.Server.Tests.Endpoints
+﻿
+namespace Crash.Server.Tests.Endpoints
 {
 	public sealed class Selection : CrashHubEndpoints
 	{
