@@ -154,7 +154,7 @@ namespace Crash.Server.Hubs
 			// validate
 			if (!HubUtils.IsChangeValid(change) ||
 			    !HubUtils.IsUserValid(change.Owner) ||
-			    !change.HasFlag(ChangeAction.Camera))
+			    !change.HasFlag(ChangeAction.Add))
 			{
 				return;
 			}

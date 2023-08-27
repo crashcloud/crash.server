@@ -26,7 +26,7 @@ namespace Crash.Server.Tests.Endpoints
 						Type = nameof(Change),
 						Action = ChangeAction.Add | ChangeAction.Temporary,
 						Stamp = DateTime.UtcNow,
-						Payload = JsonSerializer.Serialize(new Combinations.Payload())
+						Payload = JsonSerializer.Serialize(new PayloadPacket())
 					};
 				}
 			}

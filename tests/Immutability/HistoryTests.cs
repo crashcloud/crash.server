@@ -105,14 +105,14 @@ namespace Crash.Server.Tests.Immutability
 			var stackId = Guid.NewGuid();
 			var first = getNewChange(stackId, ChangeAction.Add, "{ \"example\": \"payload\" }");
 			firstHistory.Push(first);
-			firstHistory.Push(getNewChange(stackId, ChangeAction.Lock, null));
+			firstHistory.Push(getNewChange(stackId, ChangeAction.Locked, null));
 
 			var transform = new CTransform(1, 2, 3, 4);
 			var json = JsonSerializer.Serialize(transform);
 
 			firstHistory.Push(getNewChange(stackId, ChangeAction.Transform, json));
 			firstHistory.Push(getNewChange(stackId, ChangeAction.Temporary, null));
-			firstHistory.Push(getNewChange(stackId, ChangeAction.Unlock, null));
+			firstHistory.Push(getNewChange(stackId, ChangeAction.Unlocked, null));
 			firstHistory.Push(getNewChange(stackId, ChangeAction.Remove, null));
 			var last = getNewChange(stackId, ChangeAction.Add, null);
 			firstHistory.Push(last);
@@ -133,7 +133,7 @@ namespace Crash.Server.Tests.Immutability
 
 		private static Change getNewChange(Guid id, ChangeAction action, string? payload)
 		{
-			return new Change()
+			return new Change
 			{
 				Id = id,
 				Action = action,

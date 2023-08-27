@@ -29,8 +29,8 @@ namespace Crash.Server.Tests.Model
 			ValidateIds(change);
 			ValidateActions(change);
 
-			Assert.That(change.HasFlag(ChangeAction.Unlock), Is.False);
-			Assert.That(change.HasFlag(ChangeAction.Lock), Is.True);
+			Assert.That(change.HasFlag(ChangeAction.Unlocked), Is.False);
+			Assert.That(change.HasFlag(ChangeAction.Locked), Is.True);
 			Assert.That(change.Action, Is.Not.EqualTo(ChangeAction.None));
 		}
 
@@ -44,8 +44,8 @@ namespace Crash.Server.Tests.Model
 			ValidateIds(change);
 			ValidateActions(change);
 
-			Assert.That(change.HasFlag(ChangeAction.Unlock), Is.True);
-			Assert.That(change.HasFlag(ChangeAction.Lock), Is.False);
+			Assert.That(change.HasFlag(ChangeAction.Unlocked), Is.True);
+			Assert.That(change.HasFlag(ChangeAction.Locked), Is.False);
 			Assert.That(change.Action, Is.Not.EqualTo(ChangeAction.None));
 		}
 
@@ -70,10 +70,10 @@ namespace Crash.Server.Tests.Model
 				         ChangeAction.Temporary |
 				         ChangeAction.Update |
 				         ChangeAction.Transform |
-				         ChangeAction.Lock,
+				         ChangeAction.Locked,
 				Payload = "{}",
 				Id = id,
-				Type = nameof(ChangeAction.Camera)
+				Type = "Camera"
 			};
 			// Arrange
 
@@ -100,7 +100,7 @@ namespace Crash.Server.Tests.Model
 			Assert.That(change.Stamp, Is.Not.EqualTo(DateTime.MaxValue));
 
 			var hasAddAndDelete = change.Action.HasFlag(ChangeAction.Add | ChangeAction.Remove);
-			var hasLockAndUnlock = change.Action.HasFlag(ChangeAction.Lock | ChangeAction.Unlock);
+			var hasLockAndUnlock = change.Action.HasFlag(ChangeAction.Locked | ChangeAction.Unlocked);
 
 			Assert.False(hasAddAndDelete);
 			Assert.False(hasLockAndUnlock);

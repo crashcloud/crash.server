@@ -15,7 +15,7 @@
 
 			Assert.That(_crashHub._context.TryGetChange(change.Id, out var changeOut), Is.True);
 
-			Assert.That(changeOut.Action.HasFlag(ChangeAction.Lock), Is.True);
+			Assert.That(changeOut.Action.HasFlag(ChangeAction.Locked), Is.True);
 		}
 
 		[TestCaseSource(nameof(ValidAddChanges))]
@@ -29,7 +29,7 @@
 			await _crashHub.Unlock(change.Owner, change.Id);
 			Assert.That(_crashHub._context.TryGetChange(change.Id, out var changeOut), Is.True);
 
-			Assert.That(changeOut.Action.HasFlag(ChangeAction.Lock), Is.False);
+			Assert.That(changeOut.Action.HasFlag(ChangeAction.Locked), Is.False);
 		}
 	}
 }

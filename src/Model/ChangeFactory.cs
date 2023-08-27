@@ -1,4 +1,8 @@
-﻿namespace Crash.Server.Model
+﻿using System.Text.Json;
+
+using Crash.Changes.Utils;
+
+namespace Crash.Server.Model
 {
 	/// <summary>Creates Changes</summary>
 	public static class ChangeFactory
@@ -15,7 +19,7 @@
 		/// <param name="id">The id of the Change to lock</param>
 		public static ImmutableChange CreateLockRecord(string type, Guid id)
 		{
-			return new ImmutableChange { Id = id, Action = ChangeAction.Lock, Stamp = DateTime.UtcNow, Type = type };
+			return new ImmutableChange { Id = id, Action = ChangeAction.Locked, Stamp = DateTime.UtcNow, Type = type };
 		}
 
 		/// <summary>Creates an Unlock Record</summary>
@@ -23,7 +27,10 @@
 		/// <param name="id">The id of the Change to unlock</param>
 		public static ImmutableChange CreateUnlockRecord(string type, Guid id)
 		{
-			return new ImmutableChange { Id = id, Action = ChangeAction.Unlock, Stamp = DateTime.UtcNow, Type = type };
+			return new ImmutableChange
+			{
+				Id = id, Action = ChangeAction.Unlocked, Stamp = DateTime.UtcNow, Type = type
+			};
 		}
 
 		/// <summary>Creates a Done Record</summary>
@@ -49,8 +56,8 @@
 			return new ImmutableChange
 			{
 				Action = change.Action & ~ChangeAction.Temporary
-				                       & ~ChangeAction.Lock
-				                       & ~ChangeAction.Unlock,
+				                       & ~ChangeAction.Locked
+				                       & ~ChangeAction.Unlocked,
 				Id = change.Id,
 				Owner = change.Owner,
 				Stamp = DateTime.Now,
@@ -78,14 +85,18 @@
 				throw new ArgumentException("Id is Invalid!");
 			}
 
+			PayloadUtils.TryGetPayloadFromChange(previousRecord, out var previousPacket);
+			PayloadUtils.TryGetPayloadFromChange(newRecord, out var newPacket);
+			var payload = PayloadUtils.Combine(previousPacket, newPacket);
+
 			Change result = new()
 			{
 				Id = combinedId,
 				Stamp = DateTime.UtcNow,
 				Owner = newRecord.Owner ?? previousRecord.Owner,
-				Payload = Combinations.CombinePayloads(previousRecord.Payload, newRecord.Payload),
+				Payload = JsonSerializer.Serialize(payload),
 				Type = previousRecord.Type,
-				Action = Combinations.CombineActions(previousRecord.Action, newRecord.Action)
+				Action = ChangeUtils.CombineActions(previousRecord.Action, newRecord.Action)
 			};
 
 			return result;
