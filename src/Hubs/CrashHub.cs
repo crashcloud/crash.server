@@ -62,7 +62,13 @@ namespace Crash.Server.Hubs
 		public async Task Delete(Guid id)
 		{
 			// Validate
-			if (HubUtils.IsGuidValid(id))
+			if (!HubUtils.IsGuidValid(id))
+			{
+				return;
+			}
+
+			// Cannot delete what does not already exist
+			if (!_context.TryGetChange(id, out _))
 			{
 				return;
 			}
@@ -73,13 +79,15 @@ namespace Crash.Server.Hubs
 				// Update
 				await Clients.Others.Delete(id);
 			}
+
+			;
 		}
 
 		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
 		public async Task Done(string user)
 		{
 			// Validate
-			if (HubUtils.IsUserValid(user))
+			if (!HubUtils.IsUserValid(user))
 			{
 				return;
 			}

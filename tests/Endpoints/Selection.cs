@@ -2,7 +2,7 @@
 {
 	public sealed class Selection : CrashHubEndpoints
 	{
-		[TestCaseSource(nameof(ValidChanges))]
+		[TestCaseSource(nameof(ValidAddChanges))]
 		public async Task Select_Success(Change change)
 		{
 			var currCount = _crashHub._context.Changes.Count();
@@ -18,7 +18,7 @@
 			Assert.That(changeOut.Action.HasFlag(ChangeAction.Lock), Is.True);
 		}
 
-		[TestCaseSource(nameof(ValidChanges))]
+		[TestCaseSource(nameof(ValidAddChanges))]
 		public async Task UnSelect_Success(Change change)
 		{
 			var currCount = _crashHub._context.Changes.Count();

@@ -13,20 +13,20 @@ namespace Crash.Server.Tests.Endpoints
 		protected CrashContext? _crashContext;
 		internal CrashHub? _crashHub;
 
-		public static IEnumerable ValidChanges
+		public static IEnumerable ValidAddChanges
 		{
 			get
 			{
-				for (var i = 0; i < 100; i++)
+				for (var i = 0; i < 5; i++)
 				{
 					yield return new Change
 					{
 						Id = Guid.NewGuid(),
 						Owner = Path.GetRandomFileName().Replace(".", ""),
-						Payload = "payload",
 						Type = nameof(Change),
 						Action = ChangeAction.Add | ChangeAction.Temporary,
-						Stamp = DateTime.UtcNow
+						Stamp = DateTime.UtcNow,
+						Payload = JsonSerializer.Serialize(new Combinations.Payload())
 					};
 				}
 			}

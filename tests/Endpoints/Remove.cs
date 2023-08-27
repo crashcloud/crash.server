@@ -2,22 +2,19 @@
 {
 	public sealed class Remove : CrashHubEndpoints
 	{
-		[TestCaseSource(nameof(ValidChanges))]
+		[TestCaseSource(nameof(ValidAddChanges))]
 		public async Task Delete_Succesful(Change change)
 		{
 			var currCount = _crashHub._context.Changes.Count();
 
-			await _crashHub.Delete(change.Id);
-			Assert.That(_crashHub._context.Changes.Count(), Is.EqualTo(currCount));
-
 			await _crashHub.Add(change);
-			Assert.That(_crashHub._context.Changes.Count(), Is.EqualTo(currCount));
+			Assert.That(_crashHub._context.Changes.Count(), Is.EqualTo(currCount + 1));
 
 			await _crashHub.Delete(change.Id);
 			Assert.That(_crashHub._context.Changes.Count(), Is.EqualTo(currCount));
 		}
 
-		[TestCaseSource(nameof(ValidChanges))]
+		[TestCaseSource(nameof(ValidAddChanges))]
 		public async Task Delete_Failure(Change change)
 		{
 			var currCount = _crashHub._context.Changes.Count();

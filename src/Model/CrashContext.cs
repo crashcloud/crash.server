@@ -44,7 +44,8 @@ namespace Crash.Server.Model
 				await SetCurrentComputedChange(changeRecord);
 			}
 
-			return true;
+			var added = await SaveChangesAsync();
+			return added == 1;
 		}
 
 		private async Task SetCurrentComputedChange(ImmutableChange newChange)

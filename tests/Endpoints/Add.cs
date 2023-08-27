@@ -1,10 +1,13 @@
-﻿namespace Crash.Server.Tests.Endpoints
+﻿// ReSharper disable HeapView.BoxingAllocation
+
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+
+namespace Crash.Server.Tests.Endpoints
 {
-	// TODO : Should Add verify that given Change has Add Action?
 	public sealed class Add : CrashHubEndpoints
 	{
-		[TestCaseSource(nameof(ValidChanges))]
-		public async Task Add_Succesful(Change change)
+		[TestCaseSource(nameof(ValidAddChanges))]
+		public async Task Add_Successful(Change change)
 		{
 			var currCount = _crashHub._context.Changes.Count();
 
@@ -15,7 +18,7 @@
 			Assert.That(change, Is.EqualTo(changeOut));
 		}
 
-		[TestCaseSource(nameof(ValidChanges))]
+		[TestCaseSource(nameof(ValidAddChanges))]
 		public async Task Add_Failure(Change change)
 		{
 			Assert.IsEmpty(_crashHub._context.Changes);
