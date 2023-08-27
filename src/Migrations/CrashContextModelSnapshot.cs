@@ -51,18 +51,18 @@ namespace Crash.Server.Migrations
 
             modelBuilder.Entity("Crash.Server.Model.User", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Follows")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Id")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.HasKey("Name");
 
                     b.ToTable("Users");
                 });
