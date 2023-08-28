@@ -1,6 +1,4 @@
-﻿using Crash.Server.Model;
-
-namespace Crash.Server
+﻿namespace Crash.Server
 {
 	/// <summary>EndPoints Interface</summary>
 	public interface ICrashClient
@@ -27,7 +25,7 @@ namespace Crash.Server
 		Task Initialize(IEnumerable<Change> changes);
 
 		/// <summary>Initialises Users</summary>
-		Task InitializeUsers(IEnumerable<User> users);
+		Task InitializeUsers(IEnumerable<string> users);
 
 		Task UpdateUser(Change change);
 

@@ -208,7 +208,7 @@ namespace Crash.Server.Hubs
 			var changes = _context.GetChanges();
 			await Clients.Caller.Initialize(changes);
 
-			var users = _context.Users;
+			var users = _context.Users.Select(u => u.Name);
 			await Clients.Caller.InitializeUsers(users);
 		}
 	}
