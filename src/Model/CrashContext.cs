@@ -14,7 +14,7 @@ namespace Crash.Server.Model
 		/// <summary>The Set of Changes</summary>
 		public DbSet<ImmutableChange> Changes { get; set; }
 
-		private Dictionary<Guid, Change> LatestChanges { get; }
+		internal Dictionary<Guid, Change> LatestChanges { get; }
 
 		public DbSet<User> Users { get; set; }
 
@@ -44,6 +44,11 @@ namespace Crash.Server.Model
 				await SetCurrentComputedChange(changeRecord);
 			}
 
+			if (!Users.Any(c => c.Name == changeRecord.Owner))
+			{
+				await Users.AddAsync(new User() { Name = changeRecord.Owner, Id = "", Follows = "" });
+			}
+
 			var added = await SaveChangesAsync();
 			return added == 1;
 		}
@@ -70,6 +75,11 @@ namespace Crash.Server.Model
 		internal IEnumerable<Change> GetChanges()
 		{
 			return LatestChanges.Values;
+		}
+
+		internal IEnumerable<string> GetUsers()
+		{
+			return Users.Select(u => u.Name).ToArray();
 		}
 
 		internal async Task<bool> DoneAsync(string user)

@@ -19,7 +19,7 @@ namespace Crash.Server.Model
 		/// <summary>Creates a User given a change</summary>
 		/// <param name="change"></param>
 		/// <returns></returns>
-		public static User? FromChange(Change change)
+		internal static User? FromChange(Change change)
 		{
 			if (string.IsNullOrEmpty(change?.Payload))
 			{

@@ -168,7 +168,7 @@ namespace Crash.Server.Hubs
 		}
 
 		/// <summary>Adds or Updates a User in the User Db</summary>
-		public async Task UpdateUser(Change change)
+		internal async Task UpdateUser(Change change)
 		{
 			// validate
 			if (!HubUtils.IsChangeValid(change) ||
@@ -208,7 +208,7 @@ namespace Crash.Server.Hubs
 			var changes = _context.GetChanges();
 			await Clients.Caller.Initialize(changes);
 
-			var users = _context.Users.Select(u => u.Name);
+			var users = _context.GetUsers();
 			await Clients.Caller.InitializeUsers(users);
 		}
 	}
