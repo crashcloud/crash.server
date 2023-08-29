@@ -5,16 +5,17 @@ namespace Crash.Server.Model
 	/// <summary>Implementation of DbContext to be used as SqLite DB Session</summary>
 	public sealed class CrashContext : DbContext
 	{
+
 		/// <summary>Default Constructor</summary>
 		public CrashContext(DbContextOptions<CrashContext> options) : base(options)
 		{
-			LatestChanges = new Dictionary<Guid, Change>();
+
 		}
 
 		/// <summary>The Set of Changes</summary>
 		public DbSet<ImmutableChange> Changes { get; set; }
 
-		internal Dictionary<Guid, Change> LatestChanges { get; }
+		internal DbSet<MutableChange> LatestChanges { get; }
 
 		public DbSet<User> Users { get; set; }
 
@@ -35,9 +36,9 @@ namespace Crash.Server.Model
 			await Changes.AddAsync(changeRecord);
 
 			// 
-			if (!LatestChanges.ContainsKey(changeRecord.Id))
+			if (!TryGetChange(changeRecord.Id, out _))
 			{
-				LatestChanges.Add(changeRecord.Id, new Change(changeRecord));
+				await LatestChanges.AddAsync(new MutableChange(changeRecord));
 			}
 			else
 			{
@@ -55,26 +56,29 @@ namespace Crash.Server.Model
 
 		private async Task SetCurrentComputedChange(ImmutableChange newChange)
 		{
-			// Set as is if not there?
-			if (!LatestChanges.TryGetValue(newChange.Id, out var current))
+			var latestChange = await LatestChanges.FindAsync(newChange.Id);
+
+			if (latestChange is null)
 			{
-				LatestChanges.Add(newChange.Id, new Change(newChange));
+				await LatestChanges.AddAsync(new MutableChange(newChange));
+				await SaveChangesAsync();
 				return;
 			}
 
-			var change = ChangeFactory.CombineRecords(current, newChange);
-
-			LatestChanges[newChange.Id] = change;
+			var change = ChangeFactory.CombineRecords(latestChange, newChange);
+			LatestChanges.Update(change);
+			await SaveChangesAsync();
 		}
 
-		internal bool TryGetChange(Guid changeId, out Change? change)
+		internal bool TryGetChange(Guid changeId, out MutableChange? change)
 		{
-			return LatestChanges.TryGetValue(changeId, out change) && change is not null;
+			change = LatestChanges.Find(changeId);
+			return change is not null;
 		}
 
-		internal IEnumerable<Change> GetChanges()
+		internal IEnumerable<MutableChange> GetChanges()
 		{
-			return LatestChanges.Values;
+			return LatestChanges.ToArray();
 		}
 
 		internal IEnumerable<string> GetUsers()
@@ -87,7 +91,7 @@ namespace Crash.Server.Model
 			var result = false;
 
 			// Wrap in a Task.Run call!
-			foreach (var latestChange in LatestChanges.Values)
+			foreach (var latestChange in LatestChanges)
 			{
 				// Does this include null owners? That's good!
 				if (latestChange.Owner != user)
@@ -98,6 +102,8 @@ namespace Crash.Server.Model
 				var doneChange = ChangeFactory.CreateDoneRecord(latestChange);
 				result &= await AddChangeAsync(doneChange);
 			}
+
+			await SaveChangesAsync();
 
 			return result;
 		}

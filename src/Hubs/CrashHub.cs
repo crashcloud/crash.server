@@ -12,12 +12,13 @@ namespace Crash.Server.Hubs
 	///<summary>Server Implementation of ICrashClient EndPoints</summary>
 	public sealed class CrashHub : Hub<ICrashClient>
 	{
-		internal readonly CrashContext _context;
+
+		internal readonly CrashContext Database;
 
 		/// <summary>Initialize with SqLite DB</summary>
 		public CrashHub(CrashContext context)
 		{
-			_context = context;
+			Database = context;
 		}
 
 		/// <summary>Add Change to SqLite DB and notify other clients</summary>
@@ -32,7 +33,7 @@ namespace Crash.Server.Hubs
 			}
 
 			// Record
-			if (await _context.AddChangeAsync(new ImmutableChange(change)))
+			if (await Database.AddChangeAsync(new ImmutableChange(change)))
 			{
 				// Update
 				await Clients.Others.Add(change);
@@ -51,7 +52,7 @@ namespace Crash.Server.Hubs
 			}
 
 			// Record
-			if (await _context.AddChangeAsync(new ImmutableChange(change)))
+			if (await Database.AddChangeAsync(new ImmutableChange(change)))
 			{
 				// Update
 				await Clients.Others.Update(change);
@@ -68,13 +69,13 @@ namespace Crash.Server.Hubs
 			}
 
 			// Cannot delete what does not already exist
-			if (!_context.TryGetChange(id, out _))
+			if (!Database.TryGetChange(id, out _))
 			{
 				return;
 			}
 
 			// Record
-			if (await _context.AddChangeAsync(ChangeFactory.CreateDeleteRecord(id)))
+			if (await Database.AddChangeAsync(ChangeFactory.CreateDeleteRecord(id)))
 			{
 				// Update
 				await Clients.Others.Delete(id);
@@ -93,7 +94,7 @@ namespace Crash.Server.Hubs
 			}
 
 			// Record
-			if (await _context.DoneAsync(user))
+			if (await Database.DoneAsync(user))
 			{
 				// Update
 				await Clients.Others.Done(user);
@@ -110,14 +111,14 @@ namespace Crash.Server.Hubs
 			}
 
 			// Lock or Unlock impossible if nothing to Lock or Unlock
-			if (!_context.TryGetChange(id, out var latestChange))
+			if (!Database.TryGetChange(id, out var latestChange))
 			{
 				return;
 			}
 
 			// Record
 			var lockChange = ChangeFactory.CreateLockRecord(latestChange.Type, latestChange.Id);
-			if (await _context.AddChangeAsync(lockChange))
+			if (await Database.AddChangeAsync(lockChange))
 			{
 				// Update
 				await Clients.Others.Lock(user, id);
@@ -134,14 +135,14 @@ namespace Crash.Server.Hubs
 			}
 
 			// Lock or Unlock impossible if nothing to Lock or Unlock
-			if (!_context.TryGetChange(id, out var latestChange))
+			if (!Database.TryGetChange(id, out var latestChange))
 			{
 				return;
 			}
 
 			// Record
 			var lockChange = ChangeFactory.CreateUnlockRecord(latestChange.Type, latestChange.Id);
-			if (await _context.AddChangeAsync(lockChange))
+			if (await Database.AddChangeAsync(lockChange))
 			{
 				// Update
 				await Clients.Others.Unlock(user, id);
@@ -163,7 +164,7 @@ namespace Crash.Server.Hubs
 
 			// Update
 			var userName = change.Owner;
-			var followerIds = _context.Users.Where(u => u.Follows == userName).Select(u => u.Id);
+			var followerIds = Database.Users.Where(u => u.Follows == userName).Select(u => u.Id);
 			await Clients.Users(followerIds).CameraChange(change);
 		}
 
@@ -177,7 +178,7 @@ namespace Crash.Server.Hubs
 				return;
 			}
 
-			var existingUser = _context.Users.FirstOrDefault(r => r.Name == change.Owner);
+			var existingUser = Database.Users.FirstOrDefault(r => r.Name == change.Owner);
 			if (existingUser is null)
 			{
 				var user = User.FromChange(change);
@@ -186,11 +187,11 @@ namespace Crash.Server.Hubs
 					return;
 				}
 
-				user.Id = Context.ConnectionId;
+				user.Id = base.Context.ConnectionId;
 
 				// Update
-				await _context.Users.AddAsync(existingUser);
-				await _context.SaveChangesAsync();
+				await Database.Users.AddAsync(existingUser);
+				await Database.SaveChangesAsync();
 			}
 
 			// TODO : What if user is not null?
@@ -205,10 +206,10 @@ namespace Crash.Server.Hubs
 		{
 			await base.OnConnectedAsync();
 
-			var changes = _context.GetChanges();
-			await Clients.Caller.Initialize(changes);
+			var changes = Database.GetChanges();
+			await Clients.Caller.Initialize(changes.Select(c => new Change(c)));
 
-			var users = _context.GetUsers();
+			var users = Database.GetUsers();
 			await Clients.Caller.InitializeUsers(users);
 		}
 	}

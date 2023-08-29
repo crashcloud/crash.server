@@ -1,5 +1,4 @@
-﻿using Crash.Changes;
-using Crash.Server.Hubs;
+﻿using Crash.Server.Hubs;
 using Crash.Server.Model;
 using Crash.Server.Settings;
 
@@ -52,7 +51,7 @@ namespace Crash.Server
 				var config = app.Configuration;
 				var life = app.Lifetime;
 
-				string debugMessage = "Debugging is enabled!\n";
+				var debugMessage = "Debugging is enabled!\n";
 				debugMessage += $"| OS		| {Environment.OSVersion} \n";
 				debugMessage += $"| DOTNET	| {Environment.Version} \n";
 				debugMessage += $"| CPU #		| {Environment.ProcessorCount} \n";
@@ -79,7 +78,7 @@ namespace Crash.Server
 
 
 			app.MapGet($"/Debug/Changes", () => {
-				string changeText = string.Empty;
+				var changeText = string.Empty;
 
 				var scope = app.Services.CreateScope();
 				var con = scope.ServiceProvider.GetService<CrashContext>();
@@ -92,7 +91,8 @@ namespace Crash.Server
 					changeText += $"| Stamp		| {change.Stamp}\n";
 					changeText += $"| Type		| {change.Type}\n";
 					changeText += $"| Owner		| {change.Owner}\n";
-					changeText += $"| Payload		| {change.Payload}\n";
+					var payload = change.Payload;
+					changeText += $"| Payload		| {payload[..Math.Min(payload.Length, 50)]}...\n";
 					changeText += "---------------\n\n";
 				}
 
@@ -100,7 +100,7 @@ namespace Crash.Server
 			});
 
 			app.MapGet($"/Debug/Users", () => {
-				string userText = string.Empty;
+				var userText = string.Empty;
 
 				var scope = app.Services.CreateScope();
 				var con = scope.ServiceProvider.GetService<CrashContext>();
@@ -116,12 +116,12 @@ namespace Crash.Server
 			});
 
 			app.MapGet($"/Debug/Latest/", () => {
-				string latestText = string.Empty;
+				var latestText = string.Empty;
 
 				var scope = app.Services.CreateScope();
 				var con = scope.ServiceProvider.GetService<CrashContext>();
 
-				foreach (var change in con.LatestChanges.Values)
+				foreach (var change in con.LatestChanges.ToArray())
 				{
 					latestText += $"| Id		| {change.Id}\n";
 					latestText += $"| Action		| {change.Action}\n";

@@ -66,7 +66,7 @@ namespace Crash.Server.Model
 			};
 		}
 
-		public static Change CombineRecords(IChange previousRecord, IChange newRecord)
+		public static MutableChange CombineRecords(IChange previousRecord, IChange newRecord)
 		{
 			if (previousRecord is null)
 			{
@@ -89,7 +89,7 @@ namespace Crash.Server.Model
 			PayloadUtils.TryGetPayloadFromChange(newRecord, out var newPacket);
 			var payload = PayloadUtils.Combine(previousPacket, newPacket);
 
-			Change result = new()
+			MutableChange result = new()
 			{
 				Id = combinedId,
 				Stamp = DateTime.UtcNow,
