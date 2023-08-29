@@ -30,7 +30,6 @@ namespace Crash.Server.Model
 		public Guid UniqueId { get; init; }
 
 		/// <summary>The Date of Creation</summary>
-		[Timestamp]
 		public DateTime Stamp { get; init; }
 
 		/// <inheritdoc />
