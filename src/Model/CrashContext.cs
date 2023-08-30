@@ -108,5 +108,29 @@ namespace Crash.Server.Model
 
 			return result;
 		}
+
+		internal async Task<bool> DoneAsync(IEnumerable<Guid> ids)
+		{
+			var result = true;
+
+			foreach(var id in ids)
+			{
+				if (!TryGetChange(id, out MutableChange? latestChange))
+					continue;
+
+				var doneRecord = new ImmutableChange()
+				{
+					Id = id,
+					Type = "Crash.Done",
+				};
+
+				result = await AddChangeAsync(doneRecord);
+			}
+
+			await SaveChangesAsync();
+
+			return result;
+		}
+
 	}
 }

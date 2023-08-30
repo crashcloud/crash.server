@@ -101,6 +101,17 @@ namespace Crash.Server.Hubs
 			}
 		}
 
+		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
+		public async Task DoneRange(IEnumerable<Guid> ids)
+		{
+			// Record
+			if (await Database.DoneAsync(ids))
+			{
+				// Update
+				await Clients.Others.DoneRange(ids);
+			}
+		}
+
 		/// <summary>Lock Item in SqLite DB and notify other clients</summary>
 		public async Task Lock(string user, Guid id)
 		{

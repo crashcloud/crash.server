@@ -15,6 +15,9 @@
 		/// <summary>Informs when a user has Released</summary>
 		Task Done(string user);
 
+		/// <summary>Informs when a user has Releaseda selection</summary>
+		Task DoneRange(IEnumerable<Guid> ids);
+
 		/// <summary>Selects a Change</summary>
 		Task Lock(string user, Guid id);
 
