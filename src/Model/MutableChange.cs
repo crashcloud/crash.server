@@ -39,7 +39,7 @@ namespace Crash.Server.Model
 		public string? Payload { get; init; }
 
 		/// <inheritdoc />
-		public string Type { get; init; }
+		public string? Type { get; init; }
 
 		/// <inheritdoc />
 		public ChangeAction Action { get; set; }

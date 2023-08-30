@@ -20,7 +20,7 @@ namespace Crash.Server.Migrations
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Owner = table.Column<string>(type: "TEXT", nullable: true),
                     Payload = table.Column<string>(type: "TEXT", nullable: true),
-                    Type = table.Column<string>(type: "TEXT", nullable: false),
+                    Type = table.Column<string>(type: "TEXT", nullable: true),
                     Action = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
@@ -36,7 +36,7 @@ namespace Crash.Server.Migrations
                     Stamp = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Owner = table.Column<string>(type: "TEXT", nullable: true),
                     Payload = table.Column<string>(type: "TEXT", nullable: true),
-                    Type = table.Column<string>(type: "TEXT", nullable: false),
+                    Type = table.Column<string>(type: "TEXT", nullable: true),
                     Action = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
@@ -49,8 +49,8 @@ namespace Crash.Server.Migrations
                 columns: table => new
                 {
                     Name = table.Column<string>(type: "TEXT", nullable: false),
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    Follows = table.Column<string>(type: "TEXT", nullable: false)
+                    Id = table.Column<string>(type: "TEXT", nullable: true),
+                    Follows = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {

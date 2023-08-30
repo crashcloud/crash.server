@@ -7,14 +7,14 @@ namespace Crash.Server.Model
 	public sealed class User
 	{
 		/// <summary>The Id of the User</summary>
-		public string Id { get; set; }
+		public string? Id { get; set; }
 
 		/// <summary>The Name of the User</summary>
 		[Key]
 		public string Name { get; set; }
 
 		/// <summary>The Users </summary>
-		public string Follows { get; set; }
+		public string? Follows { get; set; }
 
 		/// <summary>Creates a User given a change</summary>
 		/// <param name="change"></param>

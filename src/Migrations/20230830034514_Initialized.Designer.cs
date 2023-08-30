@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Crash.Server.Migrations
 {
     [DbContext(typeof(CrashContext))]
-    [Migration("20230829150753_Initialized")]
+    [Migration("20230830034514_Initialized")]
     partial class Initialized
     {
         /// <inheritdoc />
@@ -42,7 +42,6 @@ namespace Crash.Server.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Type")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("UniqueId");
@@ -69,7 +68,6 @@ namespace Crash.Server.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Type")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -83,11 +81,9 @@ namespace Crash.Server.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Follows")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Id")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Name");
