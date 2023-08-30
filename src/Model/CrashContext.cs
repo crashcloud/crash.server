@@ -45,7 +45,8 @@ namespace Crash.Server.Model
 				await SetCurrentComputedChange(changeRecord);
 			}
 
-			if (!Users.Any(c => c.Name == changeRecord.Owner))
+			if (!Users.Any(c => c.Name == changeRecord.Owner) &&
+				!string.IsNullOrEmpty(changeRecord.Owner))
 			{
 				await Users.AddAsync(new User() { Name = changeRecord.Owner, Id = "", Follows = "" });
 			}
@@ -88,7 +89,7 @@ namespace Crash.Server.Model
 
 		internal async Task<bool> DoneAsync(string user)
 		{
-			var result = false;
+			var result = true;
 
 			// Wrap in a Task.Run call!
 			foreach (var latestChange in LatestChanges)

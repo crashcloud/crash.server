@@ -69,9 +69,9 @@ namespace Crash.Server
 				debugMessage += "|-----------------------------------------------------------------------------------------------------\n";
 
 				debugMessage += $"| Users		| {con.Users.Count()}\n";
-				debugMessage += $"| Changes		| {con.Changes.Count()}\n";
-				debugMessage += $"| Latest		| {con.LatestChanges.Count()}\n";
-				debugMessage += $"| Tracker		| {con.ChangeTracker}\n";
+				debugMessage += $"| Changes	| {con.Changes.Count()}\n";
+				debugMessage += $"| Latest	| {con.LatestChanges.Count()}\n";
+				debugMessage += $"| Tracker	| {con.ChangeTracker}\n";
 
 				return debugMessage;
 			});
@@ -91,7 +91,7 @@ namespace Crash.Server
 					changeText += $"| Stamp		| {change.Stamp}\n";
 					changeText += $"| Type		| {change.Type}\n";
 					changeText += $"| Owner		| {change.Owner}\n";
-					var payload = change.Payload;
+					var payload = change.Payload ?? "";
 					changeText += $"| Payload		| {payload[..Math.Min(payload.Length, 50)]}...\n";
 					changeText += "---------------\n\n";
 				}
@@ -128,7 +128,7 @@ namespace Crash.Server
 					latestText += $"| Stamp		| {change.Stamp}\n";
 					latestText += $"| Type		| {change.Type}\n";
 					latestText += $"| Owner		| {change.Owner}\n";
-					var payload = change.Payload;
+					var payload = change.Payload ?? "";
 					latestText += $"| Payload		| {payload[..Math.Min(payload.Length, 50)]}...\n";
 					latestText += "---------------\n\n";
 				}
