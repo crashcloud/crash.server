@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Crash.Server.Migrations
 {
     [DbContext(typeof(CrashContext))]
-    [Migration("20230827214252_Update_Changes")]
-    partial class Update_Changes
+    [Migration("20230829150753_Initialized")]
+    partial class Initialized
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,8 +39,6 @@ namespace Crash.Server.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Stamp")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Type")
@@ -50,6 +48,33 @@ namespace Crash.Server.Migrations
                     b.HasKey("UniqueId");
 
                     b.ToTable("Changes");
+                });
+
+            modelBuilder.Entity("Crash.Server.Model.MutableChange", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Action")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Owner")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Payload")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Stamp")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LatestChanges");
                 });
 
             modelBuilder.Entity("Crash.Server.Model.User", b =>

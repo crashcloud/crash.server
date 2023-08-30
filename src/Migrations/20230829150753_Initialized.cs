@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Crash.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class Update_Changes : Migration
+    public partial class Initialized : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,7 +16,7 @@ namespace Crash.Server.Migrations
                 columns: table => new
                 {
                     UniqueId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Stamp = table.Column<DateTime>(type: "TEXT", rowVersion: true, nullable: false),
+                    Stamp = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Owner = table.Column<string>(type: "TEXT", nullable: true),
                     Payload = table.Column<string>(type: "TEXT", nullable: true),
@@ -26,6 +26,22 @@ namespace Crash.Server.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Changes", x => x.UniqueId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LatestChanges",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Stamp = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    Owner = table.Column<string>(type: "TEXT", nullable: true),
+                    Payload = table.Column<string>(type: "TEXT", nullable: true),
+                    Type = table.Column<string>(type: "TEXT", nullable: false),
+                    Action = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LatestChanges", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -47,6 +63,9 @@ namespace Crash.Server.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Changes");
+
+            migrationBuilder.DropTable(
+                name: "LatestChanges");
 
             migrationBuilder.DropTable(
                 name: "Users");
