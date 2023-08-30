@@ -128,7 +128,8 @@ namespace Crash.Server
 					latestText += $"| Stamp		| {change.Stamp}\n";
 					latestText += $"| Type		| {change.Type}\n";
 					latestText += $"| Owner		| {change.Owner}\n";
-					latestText += $"| Payload		| {change.Payload}\n";
+					var payload = change.Payload;
+					latestText += $"| Payload		| {payload[..Math.Min(payload.Length, 50)]}...\n";
 					latestText += "---------------\n\n";
 				}
 

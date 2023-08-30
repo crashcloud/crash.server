@@ -15,7 +15,7 @@ namespace Crash.Server.Model
 		/// <summary>The Set of Changes</summary>
 		public DbSet<ImmutableChange> Changes { get; set; }
 
-		internal DbSet<MutableChange> LatestChanges { get; }
+		public DbSet<MutableChange> LatestChanges { get; set; }
 
 		public DbSet<User> Users { get; set; }
 
