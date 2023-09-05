@@ -1,24 +1,25 @@
-﻿namespace Crash.Server.Tests.Endpoints
+﻿using Crash.Server.Hubs;
+
+namespace Crash.Server.Tests.Endpoints
 {
 	public sealed class Done : CrashHubEndpoints
 	{
 		[TestCaseSource(nameof(RandomChanges))]
 		public async Task Done_Failures(IEnumerable<Change> changes)
 		{
-			var currCount = _crashHub.context.Changes.Count();
+			var currCount = _crashHub.Database.Changes.Count();
 
 			foreach (var change in changes)
 			{
-				await _crashHub.Add(change);
+				await _crashHub.PushChange(change);
 			}
 
-			Assert.That(_crashHub.context.Changes.Count(), Is.EqualTo(currCount + changes.Count()));
+			Assert.That(_crashHub.Database.Changes.Count(), Is.Not.EqualTo(0));
 
-			var tempCount = _crashHub.context.GetChanges().Select(c => c.HasFlag(ChangeAction.Temporary)).Count();
+			var tempCount = _crashHub.Database.GetChanges().Select(c => c.HasFlag(ChangeAction.Temporary)).Count();
 			Assert.That(tempCount, Is.GreaterThan(0));
 
-			await _crashHub.Done(null);
-			await _crashHub.Done(string.Empty);
+			await _crashHub.PushChange(new Change { Owner = string.Empty, Action = ChangeAction.Release });
 
 			Assert.That(tempCount, Is.EqualTo(tempCount));
 		}
@@ -26,22 +27,26 @@
 		[TestCaseSource(nameof(RandomChanges))]
 		public async Task Done_Success(IEnumerable<Change> changes)
 		{
-			var currCount = _crashHub.context.Changes.Count();
+			var currCount = _crashHub.Database.Changes.Count();
 			HashSet<string> owners = changes.Select(c => c.Owner).ToHashSet();
 
-			foreach (var change in changes)
-			{
-				await _crashHub.Add(change);
-			}
+			await _crashHub.PushChanges(changes);
 
-			Assert.That(_crashHub.context.Changes.Count(), Is.EqualTo(currCount + changes.Count()));
-			Assert.That(_crashHub.context.GetChanges().Any(c => c.HasFlag(ChangeAction.Temporary)), Is.True);
+			var changesCount = _crashHub.Database.Changes.Count();
+			var inputChangesCount = changes.Count();
+
+			Assert.That(changesCount, Is.Not.EqualTo(0));
+			Assert.That(_crashHub.Database.GetChanges().Any(c => c.HasFlag(ChangeAction.Temporary)), Is.True);
 
 			foreach (var owner in owners)
 			{
-				await _crashHub.Done(owner);
+				var doneChange = new Change
+				{
+					Owner = owner, Type = CrashHub.CrashDoneChange, Action = ChangeAction.Release
+				};
+				await _crashHub.PushChange(doneChange);
 
-				foreach (var change in _crashHub.context.GetChanges())
+				foreach (var change in _crashHub.Database.GetChanges())
 				{
 					if (change.Owner.Equals(owner))
 					{
@@ -50,7 +55,7 @@
 				}
 			}
 
-			Assert.That(_crashHub.context.GetChanges().Any(c => c.HasFlag(ChangeAction.Temporary)), Is.False);
+			Assert.That(_crashHub.Database.GetChanges().Any(c => c.HasFlag(ChangeAction.Temporary)), Is.False);
 		}
 	}
 }

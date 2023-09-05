@@ -12,17 +12,21 @@ namespace Crash.Server.Hubs
 	///<summary>Server Implementation of ICrashClient EndPoints</summary>
 	public sealed class CrashHub : Hub<ICrashClient>
 	{
+		// TODO: Make this configurable
+		internal const string CrashGeometryChange = "CRASH.GEOMETRYCHANGE";
+		internal const string CrashCameraChange = "CRASH.CAMERACHANGE";
+		internal const string CrashDoneChange = "CRASH.DONECHANGE";
 
 		internal readonly CrashContext Database;
 
 		/// <summary>Initialize with SqLite DB</summary>
-		public CrashHub(CrashContext context)
+		public CrashHub(CrashContext database)
 		{
-			Database = context;
+			Database = database;
 		}
 
 		/// <summary>Add Change to SqLite DB and notify other clients</summary>
-		public async Task Add(Change change)
+		private async Task Add(IChange change)
 		{
 			// Validate
 			if (!HubUtils.IsChangeValid(change) ||
@@ -33,34 +37,11 @@ namespace Crash.Server.Hubs
 			}
 
 			// Record
-			if (await Database.AddChangeAsync(new ImmutableChange(change)))
-			{
-				// Update
-				await Clients.Others.Add(change);
-			}
-		}
-
-		/// <summary>Update Item in SqLite DB and notify other clients</summary>
-		public async Task Update(Change change)
-		{
-			// Validate
-			if (!HubUtils.IsChangeValid(change) ||
-			    !HubUtils.IsPayloadValid(change) ||
-			    !change.HasFlag(ChangeAction.Update))
-			{
-				return;
-			}
-
-			// Record
-			if (await Database.AddChangeAsync(new ImmutableChange(change)))
-			{
-				// Update
-				await Clients.Others.Update(change);
-			}
+			await Database.AddChangeAsync(new ImmutableChange(change));
 		}
 
 		/// <summary>Delete Item in SqLite DB and notify other clients</summary>
-		public async Task Delete(Guid id)
+		private async Task Remove(Guid id)
 		{
 			// Validate
 			if (!HubUtils.IsGuidValid(id))
@@ -75,17 +56,11 @@ namespace Crash.Server.Hubs
 			}
 
 			// Record
-			if (await Database.AddChangeAsync(ChangeFactory.CreateDeleteRecord(id)))
-			{
-				// Update
-				await Clients.Others.Delete(id);
-			}
-
-			;
+			await Database.AddChangeAsync(ChangeFactory.CreateDeleteRecord(id));
 		}
 
 		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
-		public async Task Done(string user)
+		private async Task Done(string user)
 		{
 			// Validate
 			if (!HubUtils.IsUserValid(user))
@@ -102,7 +77,7 @@ namespace Crash.Server.Hubs
 		}
 
 		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
-		public async Task DoneRange(IEnumerable<Guid> ids)
+		private async Task DoneRange(IEnumerable<Guid> ids)
 		{
 			// Record
 			if (await Database.DoneAsync(ids))
@@ -113,14 +88,8 @@ namespace Crash.Server.Hubs
 		}
 
 		/// <summary>Lock Item in SqLite DB and notify other clients</summary>
-		public async Task Lock(string user, Guid id)
+		private async Task Lock(string user, Guid id)
 		{
-			// Validate
-			if (!HubUtils.IsUserValid(user) || !HubUtils.IsGuidValid(id))
-			{
-				return;
-			}
-
 			// Lock or Unlock impossible if nothing to Lock or Unlock
 			if (!Database.TryGetChange(id, out var latestChange))
 			{
@@ -129,15 +98,11 @@ namespace Crash.Server.Hubs
 
 			// Record
 			var lockChange = ChangeFactory.CreateLockRecord(latestChange.Type, latestChange.Id);
-			if (await Database.AddChangeAsync(lockChange))
-			{
-				// Update
-				await Clients.Others.Lock(user, id);
-			}
+			await Database.AddChangeAsync(lockChange);
 		}
 
 		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
-		public async Task Unlock(string user, Guid id)
+		private async Task Unlock(string user, Guid id)
 		{
 			// Validate
 			if (!HubUtils.IsUserValid(user) || !HubUtils.IsGuidValid(id))
@@ -153,30 +118,109 @@ namespace Crash.Server.Hubs
 
 			// Record
 			var lockChange = ChangeFactory.CreateUnlockRecord(latestChange.Type, latestChange.Id);
-			if (await Database.AddChangeAsync(lockChange))
-			{
-				// Update
-				await Clients.Others.Unlock(user, id);
-			}
+			await Database.AddChangeAsync(lockChange);
+		}
+
+		/// <summary>Update Item in SqLite DB and notify other clients</summary>
+		private async Task Transform(IChange change)
+		{
+			// Record
+			await Database.AddChangeAsync(new ImmutableChange(change));
+		}
+
+		/// <summary>Update Item in SqLite DB and notify other clients</summary>
+		private async Task Update(IChange change)
+		{
+			await Database.AddChangeAsync(new ImmutableChange(change));
 		}
 
 		/// <summary>Add Change to SqLite DB and notify other clients</summary>
-		public async Task CameraChange(Change change)
+		private async Task CameraChange(Change change)
 		{
-			// validate
-			if (!HubUtils.IsChangeValid(change) ||
-			    !HubUtils.IsUserValid(change.Owner) ||
-			    !change.HasFlag(ChangeAction.Add))
+			if (change.Owner is null)
 			{
 				return;
 			}
 
-			// No Recording necessary
-
 			// Update
 			var userName = change.Owner;
-			var followerIds = Database.Users.Where(u => u.Follows == userName).Select(u => u.Id);
-			await Clients.Users(followerIds).CameraChange(change);
+
+			var followerIds = Database.Users.Where(u => u.Follows == userName).Select(u => u.Id).ToArray();
+			await Clients.Users(followerIds).PushChange(change);
+		}
+
+		private static IEnumerable<Change> MultiplyChange(IEnumerable<Guid> ids, Change change)
+		{
+			var changes = new Change[ids.Count()];
+			for (var i = 0; i < ids.Count(); i++)
+			{
+				changes[i] = new Change(change) { Id = change.Id };
+			}
+
+			return changes;
+		}
+
+		public async Task PushIdenticalChanges(IEnumerable<Guid> ids, Change change)
+		{
+			await Task.WhenAll(MultiplyChange(ids, change).Select(PushChangeOnly));
+			await Clients.Others.PushIdenticalChanges(ids, change);
+		}
+
+		public async Task PushChange(Change change)
+		{
+			await PushChangeOnly(change);
+			await Clients.Others.PushChange(change);
+		}
+
+		public async Task PushChanges(IEnumerable<Change> changes)
+		{
+			await Task.WhenAll(changes.Select(PushChangeOnly));
+			await Clients.Others.PushChanges(changes);
+		}
+
+		private async Task PushChangeOnly(Change change)
+		{
+			var type = change?.Type?.ToUpperInvariant();
+			switch (type)
+			{
+				case CrashGeometryChange:
+					{
+						var task = change.Action switch
+						{
+							ChangeAction.Add => Add(change),
+							ChangeAction.Add | ChangeAction.Temporary => Add(change),
+							ChangeAction.Locked => Lock(change.Owner, change.Id),
+							ChangeAction.Unlocked => Unlock(change.Owner, change.Id),
+							ChangeAction.Remove => Remove(change.Id),
+							ChangeAction.Update => Update(change),
+							ChangeAction.Transform => Transform(change),
+							_ => Task.CompletedTask
+						};
+
+						await task;
+						return;
+					}
+				case CrashCameraChange:
+					{
+						var task = change.Action switch
+						{
+							ChangeAction.Add => CameraChange(change),
+							_ => Task.CompletedTask
+						};
+						await task;
+						return;
+					}
+				case CrashDoneChange:
+					{
+						var task = change.Action switch
+						{
+							ChangeAction.Release => Done(change.Owner),
+							_ => Task.CompletedTask
+						};
+						await task;
+						return;
+					}
+			}
 		}
 
 		/// <summary>Adds or Updates a User in the User Db</summary>
@@ -198,7 +242,7 @@ namespace Crash.Server.Hubs
 					return;
 				}
 
-				user.Id = base.Context.ConnectionId;
+				user.Id = Context.ConnectionId;
 
 				// Update
 				await Database.Users.AddAsync(existingUser);
@@ -218,7 +262,7 @@ namespace Crash.Server.Hubs
 			await base.OnConnectedAsync();
 
 			var changes = Database.GetChanges();
-			await Clients.Caller.Initialize(changes.Select(c => new Change(c)));
+			await Clients.Caller.InitializeChanges(changes.Select(c => new Change(c)));
 
 			var users = Database.GetUsers();
 			await Clients.Caller.InitializeUsers(users);

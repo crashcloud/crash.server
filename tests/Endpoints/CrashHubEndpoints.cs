@@ -23,7 +23,7 @@ namespace Crash.Server.Tests.Endpoints
 					{
 						Id = Guid.NewGuid(),
 						Owner = Path.GetRandomFileName().Replace(".", ""),
-						Type = nameof(Change),
+						Type = CrashHub.CrashGeometryChange,
 						Action = ChangeAction.Add | ChangeAction.Temporary,
 						Stamp = DateTime.UtcNow,
 						Payload = JsonSerializer.Serialize(new PayloadPacket())
@@ -59,11 +59,11 @@ namespace Crash.Server.Tests.Endpoints
 						changes.Add(new Change
 						{
 							Id = Guid.NewGuid(),
-							Action = getRandomAction(),
+							Action = ChangeAction.Add | getRandomAction(),
 							Owner = randomOwner,
 							Payload = payload,
 							Stamp = DateTime.UtcNow,
-							Type = nameof(Change)
+							Type = CrashHub.CrashGeometryChange
 						});
 					}
 

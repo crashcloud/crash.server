@@ -3,36 +3,38 @@
 	/// <summary>EndPoints Interface</summary>
 	public interface ICrashClient
 	{
-		/// <summary>Updates the Change</summary>
-		Task Update(Change change);
-
-		/// <summary>Adds a Change</summary>
-		Task Add(Change change);
-
-		/// <summary>Deletes a Change</summary>
-		Task Delete(Guid id);
-
-		/// <summary>Informs when a user has Released</summary>
+		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
 		Task Done(string user);
 
-		/// <summary>Informs when a user has Releaseda selection</summary>
+		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
 		Task DoneRange(IEnumerable<Guid> ids);
 
-		/// <summary>Selects a Change</summary>
-		Task Lock(string user, Guid id);
+		/// <summary>
+		///     Pushes an Update/Transform/Payload which applies to many Changes
+		///     An example of this is arraying the same item or deleting many items at once
+		/// </summary>
+		/// <param name="ids">The records to update</param>
+		/// <param name="change">The newest changes</param>
+		Task PushIdenticalChanges(IEnumerable<Guid> ids, Change change);
 
-		/// <summary>Unselects a Change</summary>
-		Task Unlock(string user, Guid id);
+		/// <summary>Pushes a single Change</summary>
+		Task PushChange(Change change);
 
-		/// <summary>On Init</summary>
-		Task Initialize(IEnumerable<Change> changes);
+		/// <summary>
+		///     Pushes many unique changes at once
+		///     An example of this may be copying 10 unique items
+		/// </summary>
+		Task PushChanges(IEnumerable<Change> changes);
 
-		/// <summary>Initialises Users</summary>
+		/// <summary>Initialises the latest changes to a connecting client</summary>
+		Task InitializeChanges(IEnumerable<Change> changes);
+
+		/// <summary>Initialises the Users to a connecting client</summary>
 		Task InitializeUsers(IEnumerable<string> users);
 
-		Task UpdateUser(Change change);
-
-		/// <summary>Communicates View Changes</summary>
-		Task CameraChange(Change change);
+		/// <summary>Updates a User</summary>
+		/// <param name="user"></param>
+		/// <returns></returns>
+		Task UpdateUser(string user);
 	}
 }

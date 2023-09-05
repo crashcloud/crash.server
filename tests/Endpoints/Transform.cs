@@ -1,10 +1,12 @@
 ﻿// ReSharper disable HeapView.BoxingAllocation
 
+using Crash.Changes.Utils;
+
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
 
 namespace Crash.Server.Tests.Endpoints
 {
-	public sealed class Add : CrashHubEndpoints
+	public sealed class Transform : CrashHubEndpoints
 	{
 		private static bool EqualChanges(IChange left, IChange right)
 		{
@@ -42,14 +44,28 @@ namespace Crash.Server.Tests.Endpoints
 		}
 
 		[TestCaseSource(nameof(ValidAddChanges))]
-		public async Task Add_Successful(Change change)
+		public async Task Transform_Successful(Change change)
 		{
 			var currCount = _crashHub.Database.Changes.Count();
 
 			await _crashHub.PushChange(change);
 			Assert.That(_crashHub.Database.Changes.Count(), Is.EqualTo(currCount + 1));
-			Assert.That(_crashHub.Database.TryGetChange(change.Id, out var changeOut), Is.True);
-			Assert.That(EqualChanges(change, changeOut), Is.True);
+
+			var transform = new CTransform(200);
+			var payload = JsonSerializer.Serialize(transform);
+
+			var transformChange = new Change
+			{
+				Id = change.Id, Type = change.Type, Action = ChangeAction.Transform, Payload = payload
+			};
+			await _crashHub.PushChange(transformChange);
+
+			Assert.That(_crashHub.Database.TryGetChange(change.Id, out var latestChange), Is.True);
+
+			Assert.That(change.Id, Is.EqualTo(latestChange.Id));
+			Assert.True(PayloadUtils.TryGetPayloadFromChange(latestChange, out var payloadPacket));
+
+			Assert.True(payloadPacket.Transform.IsValid());
 		}
 	}
 }

@@ -41,7 +41,7 @@ namespace Crash.Server.Model
 		{
 			return new ImmutableChange
 			{
-				Action = 0,
+				Action = ChangeAction.Release,
 				Id = id, // Should this be random?
 				Owner = user,
 				Stamp = DateTime.UtcNow,
@@ -53,17 +53,22 @@ namespace Crash.Server.Model
 		/// <param name="change">The Record to Update</param>
 		public static ImmutableChange CreateDoneRecord(IChange change)
 		{
-			return new ImmutableChange
+			var action = change.Action | ChangeAction.Release;
+			action &= ~ChangeAction.Temporary;
+			action &= ~ChangeAction.Locked;
+			action &= ~ChangeAction.Unlocked;
+
+			var doneRecord = new ImmutableChange
 			{
-				Action = change.Action & ~ChangeAction.Temporary
-				                       & ~ChangeAction.Locked
-				                       & ~ChangeAction.Unlocked,
+				Action = action,
 				Id = change.Id,
 				Owner = change.Owner,
 				Stamp = DateTime.Now,
 				Type = change.Type,
 				Payload = change.Payload
 			};
+
+			return doneRecord;
 		}
 
 		public static MutableChange CombineRecords(IChange previousRecord, IChange newRecord)
@@ -78,7 +83,7 @@ namespace Crash.Server.Model
 				throw new ArgumentException($"{nameof(newRecord)} is null");
 			}
 
-			var combinedId = Guid.Empty;
+			var combinedId = previousRecord.Id;
 			if (previousRecord.Id == Guid.Empty ||
 			    previousRecord.Id != newRecord.Id)
 			{

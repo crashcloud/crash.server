@@ -4,7 +4,7 @@
 
 namespace Crash.Server.Tests.Endpoints
 {
-	public sealed class Add : CrashHubEndpoints
+	public sealed class ReleaseTests : CrashHubEndpoints
 	{
 		private static bool EqualChanges(IChange left, IChange right)
 		{
@@ -42,7 +42,7 @@ namespace Crash.Server.Tests.Endpoints
 		}
 
 		[TestCaseSource(nameof(ValidAddChanges))]
-		public async Task Add_Successful(Change change)
+		public async Task Release_Successful(Change change)
 		{
 			var currCount = _crashHub.Database.Changes.Count();
 

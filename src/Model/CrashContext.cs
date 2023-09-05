@@ -5,11 +5,9 @@ namespace Crash.Server.Model
 	/// <summary>Implementation of DbContext to be used as SqLite DB Session</summary>
 	public sealed class CrashContext : DbContext
 	{
-
 		/// <summary>Default Constructor</summary>
 		public CrashContext(DbContextOptions<CrashContext> options) : base(options)
 		{
-
 		}
 
 		/// <summary>The Set of Changes</summary>
@@ -36,19 +34,19 @@ namespace Crash.Server.Model
 			await Changes.AddAsync(changeRecord);
 
 			// 
-			if (!TryGetChange(changeRecord.Id, out _))
-			{
-				await LatestChanges.AddAsync(new MutableChange(changeRecord));
-			}
-			else
+			if (TryGetChange(changeRecord.Id, out _))
 			{
 				await SetCurrentComputedChange(changeRecord);
 			}
+			else
+			{
+				await LatestChanges.AddAsync(new MutableChange(changeRecord));
+			}
 
 			if (!Users.Any(c => c.Name == changeRecord.Owner) &&
-				!string.IsNullOrEmpty(changeRecord.Owner))
+			    !string.IsNullOrEmpty(changeRecord.Owner))
 			{
-				await Users.AddAsync(new User() { Name = changeRecord.Owner, Id = "", Follows = "" });
+				await Users.AddAsync(new User { Name = changeRecord.Owner, Id = "", Follows = "" });
 			}
 
 			var added = await SaveChangesAsync();
@@ -67,7 +65,8 @@ namespace Crash.Server.Model
 			}
 
 			var change = ChangeFactory.CombineRecords(latestChange, newChange);
-			LatestChanges.Update(change);
+			LatestChanges.Remove(latestChange);
+			await LatestChanges.AddAsync(change);
 			await SaveChangesAsync();
 		}
 
@@ -92,14 +91,8 @@ namespace Crash.Server.Model
 			var result = true;
 
 			// Wrap in a Task.Run call!
-			foreach (var latestChange in LatestChanges)
+			foreach (var latestChange in LatestChanges.Where(c => c.Owner == user))
 			{
-				// Does this include null owners? That's good!
-				if (latestChange.Owner != user)
-				{
-					continue;
-				}
-
 				var doneChange = ChangeFactory.CreateDoneRecord(latestChange);
 				result &= await AddChangeAsync(doneChange);
 			}
@@ -113,16 +106,14 @@ namespace Crash.Server.Model
 		{
 			var result = true;
 
-			foreach(var id in ids)
+			foreach (var id in ids)
 			{
-				if (!TryGetChange(id, out MutableChange? latestChange))
-					continue;
-
-				var doneRecord = new ImmutableChange()
+				if (!TryGetChange(id, out var latestChange))
 				{
-					Id = id,
-					Type = "Crash.Done",
-				};
+					continue;
+				}
+
+				var doneRecord = new ImmutableChange { Id = id, Type = "Crash.Done" };
 
 				result = await AddChangeAsync(doneRecord);
 			}
@@ -131,6 +122,5 @@ namespace Crash.Server.Model
 
 			return result;
 		}
-
 	}
 }
