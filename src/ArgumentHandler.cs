@@ -40,7 +40,7 @@ namespace Crash.Server
 		public bool Exit { get; private set; }
 
 		/// <summary>Parses the input Arguments</summary>
-		public void ParseArgs(string[] args)
+		public void ParseArgs(params string[] args)
 		{
 			var flatArgs = string.Join(' ', args)?.ToLower();
 			if (flatArgs.Contains("help"))
@@ -53,14 +53,10 @@ namespace Crash.Server
 			foreach (Match argMatch in argMatches)
 			{
 				var group = argMatch?.Groups.Values?.LastOrDefault();
-				if (null == group)
-				{
-					continue;
-				}
 
-				var argSplit = group.Value.Split(' ', 2);
+				var argSplit = group?.Value.Split(' ', 2);
 
-				if (null == argSplit || argSplit.Length == 0)
+				if (argSplit is null || argSplit.Length == 0)
 				{
 					continue;
 				}

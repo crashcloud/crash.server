@@ -8,7 +8,7 @@ namespace Crash.Server
 	public class Program
 	{
 		/// <summary>Creates an instance of the Crash WebApplication</summary>
-		public static WebApplication CreateApplication(string[] args)
+		public static WebApplication CreateApplication(params string[] args)
 		{
 			var argHandler = new ArgumentHandler();
 
@@ -64,9 +64,11 @@ namespace Crash.Server
 				debugMessage += $"| Environment	| {app.Environment.EnvironmentName} \n";
 				debugMessage += $"| urls		| {string.Join(", \n| \t\t > ", app.Urls)} \n";
 				debugMessage += $"| args		| {string.Join(", \n| \t\t > ", Environment.GetCommandLineArgs())} \n";
-				debugMessage += $"| vars		| {string.Join(", \\n| \\t\\t > ", Environment.GetEnvironmentVariables())} \n";
-				
-				debugMessage += "|-----------------------------------------------------------------------------------------------------\n";
+				debugMessage +=
+					$"| vars		| {string.Join(", \\n| \\t\\t > ", Environment.GetEnvironmentVariables())} \n";
+
+				debugMessage +=
+					"|-----------------------------------------------------------------------------------------------------\n";
 
 				debugMessage += $"| Users		| {con.Users.Count()}\n";
 				debugMessage += $"| Changes	| {con.Changes.Count()}\n";
@@ -77,7 +79,8 @@ namespace Crash.Server
 			});
 
 
-			app.MapGet($"/Debug/Changes", () => {
+			app.MapGet("/Debug/Changes", () =>
+			{
 				var changeText = string.Empty;
 
 				var scope = app.Services.CreateScope();
@@ -99,7 +102,8 @@ namespace Crash.Server
 				return changeText;
 			});
 
-			app.MapGet($"/Debug/Users", () => {
+			app.MapGet("/Debug/Users", () =>
+			{
 				var userText = string.Empty;
 
 				var scope = app.Services.CreateScope();
@@ -115,7 +119,8 @@ namespace Crash.Server
 				return userText;
 			});
 
-			app.MapGet($"/Debug/Latest/", () => {
+			app.MapGet("/Debug/Latest/", () =>
+			{
 				var latestText = string.Empty;
 
 				var scope = app.Services.CreateScope();
