@@ -1,9 +1,95 @@
 ﻿// ReSharper disable HeapView.BoxingAllocation
 
+using Crash.Changes.Utils;
+using Crash.Server.Hubs;
+
 namespace Crash.Server.Tests.Model
 {
+	[Parallelizable(ParallelScope.All)]
 	public class ChangeFactoryTests
 	{
+		private ImmutableChange GetAddChange()
+		{
+			return new ImmutableChange
+			{
+				Id = Guid.NewGuid(),
+				Action = ChangeAction.Add | ChangeAction.Temporary,
+				Payload = "Example Payload",
+				Type = CrashHub.CrashGeometryChange
+			};
+		}
+
+		[Test]
+		public void CombineRecords_AddOnly()
+		{
+			var addChange = GetAddChange();
+			var releaseChange = new ImmutableChange
+			{
+				Id = addChange.Id, Action = ChangeAction.Release, Type = CrashHub.CrashGeometryChange
+			};
+
+			// Combining but NOT adding Actions!
+			var combinedChange = ChangeFactory.CombineRecords(addChange, releaseChange);
+
+			AssertCombinedChangeIsValid(addChange, releaseChange, combinedChange);
+		}
+
+		private void AssertCombinedChangeIsValid(ImmutableChange addChange, ImmutableChange releaseChange,
+			MutableChange combinedChange)
+		{
+			Assert.Multiple(() =>
+			{
+				Assert.That(combinedChange.Id, Is.EqualTo(addChange.Id));
+				Assert.That(combinedChange.Type, Is.EqualTo(addChange.Type));
+				Assert.That(combinedChange.Owner, Is.EqualTo(addChange.Owner));
+
+				Assert.That(PayloadUtils.TryGetPayloadFromChange(addChange, out var addPayload), Is.True);
+				Assert.That(PayloadUtils.TryGetPayloadFromChange(combinedChange, out var combinedPayload), Is.True);
+
+				Assert.That(addPayload.Data, Is.EqualTo(combinedPayload.Data));
+			});
+		}
+
+		[Test]
+		public void CombineRecords_TransformOnly()
+		{
+			var transformChange = new ImmutableChange
+			{
+				Id = Guid.NewGuid(),
+				Action = ChangeAction.Transform | ChangeAction.Temporary,
+				Payload = JsonSerializer.Serialize(new CTransform(100, 200, 300)),
+				Type = CrashHub.CrashGeometryChange
+			};
+			var releaseChange = new ImmutableChange
+			{
+				Id = transformChange.Id, Action = ChangeAction.Release, Type = CrashHub.CrashGeometryChange
+			};
+
+			var combinedChange = ChangeFactory.CombineRecords(transformChange, releaseChange);
+
+			AssertCombinedChangeIsValid(transformChange, releaseChange, combinedChange);
+		}
+
+		[Test]
+		public void CombineRecords_UpdateOnly()
+		{
+			var updateChange = new ImmutableChange
+			{
+				Id = Guid.NewGuid(),
+				Action = ChangeAction.Update | ChangeAction.Temporary,
+				Payload = JsonSerializer.Serialize(new Dictionary<string, string> { { "Key", "Value" } }),
+				Type = CrashHub.CrashGeometryChange
+			};
+			var releaseChange = new ImmutableChange
+			{
+				Id = updateChange.Id, Action = ChangeAction.Release, Type = CrashHub.CrashGeometryChange
+			};
+
+			var combinedChange = ChangeFactory.CombineRecords(updateChange, releaseChange);
+
+			AssertCombinedChangeIsValid(updateChange, releaseChange, combinedChange);
+		}
+
 		[Test]
 		public void Create_Delete_Success()
 		{

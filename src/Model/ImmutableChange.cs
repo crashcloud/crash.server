@@ -29,22 +29,17 @@ namespace Crash.Server.Model
 		[Key]
 		public Guid UniqueId { get; init; }
 
-		/// <summary>The Date of Creation</summary>
+		// [Timestamp]
 		public DateTime Stamp { get; init; }
 
-		/// <inheritdoc />
 		public Guid Id { get; init; }
 
-		/// <inheritdoc />
 		public string? Owner { get; init; }
 
-		/// <inheritdoc />
-		public string? Payload { get; init; }
+		[Timestamp] public string? Payload { get; init; }
 
-		/// <inheritdoc />
 		public string? Type { get; init; }
 
-		/// <inheritdoc />
 		public ChangeAction Action { get; set; }
 	}
 }

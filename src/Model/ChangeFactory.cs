@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Text.Encodings.Web;
+using System.Text.Json;
 
 using Crash.Changes.Utils;
 
@@ -94,14 +95,24 @@ namespace Crash.Server.Model
 			PayloadUtils.TryGetPayloadFromChange(newRecord, out var newPacket);
 			var payload = PayloadUtils.Combine(previousPacket, newPacket);
 
+			var options = new JsonSerializerOptions
+			{
+				AllowTrailingCommas = true,
+				IgnoreReadOnlyFields = true,
+				IgnoreReadOnlyProperties = true,
+				Encoder = JavaScriptEncoder.Default
+				// Encoder = JavaScriptEncoder.Create(UnicodeRanges.All)
+			};
+
 			MutableChange result = new()
 			{
 				Id = combinedId,
 				Stamp = DateTime.UtcNow,
 				Owner = newRecord.Owner ?? previousRecord.Owner,
-				Payload = JsonSerializer.Serialize(payload),
+				Payload = JsonSerializer.Serialize(payload, options),
 				Type = previousRecord.Type,
-				Action = ChangeUtils.CombineActions(previousRecord.Action, newRecord.Action)
+				Action = ChangeUtils.CombineActions(previousRecord.Action, newRecord.Action) |
+				         ChangeAction.Transform | ChangeAction.Update
 			};
 
 			return result;

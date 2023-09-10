@@ -220,6 +220,8 @@ namespace Crash.Server.Hubs
 						await task;
 						return;
 					}
+				default:
+					throw new ArgumentException("Change.Type is empty!");
 			}
 		}
 

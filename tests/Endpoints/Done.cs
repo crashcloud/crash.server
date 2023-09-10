@@ -19,7 +19,10 @@ namespace Crash.Server.Tests.Endpoints
 			var tempCount = _crashHub.Database.GetChanges().Select(c => c.HasFlag(ChangeAction.Temporary)).Count();
 			Assert.That(tempCount, Is.GreaterThan(0));
 
-			await _crashHub.PushChange(new Change { Owner = string.Empty, Action = ChangeAction.Release });
+			await _crashHub.PushChange(new Change
+			{
+				Owner = string.Empty, Action = ChangeAction.Release, Type = CrashHub.CrashGeometryChange
+			});
 
 			Assert.That(tempCount, Is.EqualTo(tempCount));
 		}

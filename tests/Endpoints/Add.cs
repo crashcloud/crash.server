@@ -51,5 +51,16 @@ namespace Crash.Server.Tests.Endpoints
 			Assert.That(_crashHub.Database.TryGetChange(change.Id, out var changeOut), Is.True);
 			Assert.That(EqualChanges(change, changeOut), Is.True);
 		}
+
+		[TestCaseSource(nameof(InvalidAddChanges))]
+		public async Task Add_Failure(Change change)
+		{
+			var currCount = _crashHub.Database.Changes.Count();
+
+			await _crashHub.PushChange(change);
+			Assert.That(_crashHub.Database.Changes.Count(), Is.EqualTo(currCount));
+			Assert.That(_crashHub.Database.TryGetChange(change.Id, out var changeOut), Is.False);
+			Assert.That(changeOut, Is.Null);
+		}
 	}
 }

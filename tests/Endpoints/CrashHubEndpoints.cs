@@ -32,6 +32,65 @@ namespace Crash.Server.Tests.Endpoints
 			}
 		}
 
+		public static IEnumerable InvalidAddChanges
+		{
+			get
+			{
+				var validPayload = JsonSerializer.Serialize(new PayloadPacket());
+				var invalidPayload = string.Empty;
+
+				yield return new Change
+				{
+					Id = Guid.Empty,
+					Owner = Path.GetRandomFileName().Replace(".", ""),
+					Type = CrashHub.CrashGeometryChange,
+					Action = ChangeAction.Add | ChangeAction.Temporary,
+					Stamp = DateTime.UtcNow,
+					Payload = invalidPayload
+				};
+
+				yield return new Change
+				{
+					Id = Guid.Empty,
+					Owner = Path.GetRandomFileName().Replace(".", ""),
+					Type = CrashHub.CrashGeometryChange,
+					Action = ChangeAction.Add | ChangeAction.Temporary,
+					Stamp = DateTime.UtcNow,
+					Payload = validPayload
+				};
+
+				yield return new Change
+				{
+					Id = new Guid(),
+					Owner = Path.GetRandomFileName().Replace(".", ""),
+					Type = CrashHub.CrashGeometryChange,
+					Action = ChangeAction.Add | ChangeAction.Temporary,
+					Stamp = DateTime.UtcNow,
+					Payload = validPayload
+				};
+
+				yield return new Change
+				{
+					Id = new Guid(),
+					Owner = Path.GetRandomFileName().Replace(".", ""),
+					Type = CrashHub.CrashGeometryChange,
+					Action = ChangeAction.Remove,
+					Stamp = DateTime.UtcNow,
+					Payload = validPayload
+				};
+
+				yield return new Change
+				{
+					Id = new Guid(),
+					Owner = Path.GetRandomFileName().Replace(".", ""),
+					Type = CrashHub.CrashGeometryChange,
+					Action = ChangeAction.Remove | ChangeAction.Locked,
+					Stamp = DateTime.UtcNow,
+					Payload = validPayload
+				};
+			}
+		}
+
 		public static IEnumerable RandomChanges
 		{
 			get

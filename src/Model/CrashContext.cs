@@ -8,14 +8,22 @@ namespace Crash.Server.Model
 		/// <summary>Default Constructor</summary>
 		public CrashContext(DbContextOptions<CrashContext> options) : base(options)
 		{
+			SaveChangesFailed += OnSaveChangesFailed;
 		}
 
-		/// <summary>The Set of Changes</summary>
+		/// <summary>The History of Changes</summary>
 		public DbSet<ImmutableChange> Changes { get; set; }
 
+		/// <summary>The Latest Changes</summary>
 		public DbSet<MutableChange> LatestChanges { get; set; }
 
+		/// <summary>The Users</summary>
 		public DbSet<User> Users { get; set; }
+
+		private void OnSaveChangesFailed(object? sender, SaveChangesFailedEventArgs e)
+		{
+			// TODO: Handle Failures
+		}
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
@@ -33,7 +41,6 @@ namespace Crash.Server.Model
 			// Add to Storage
 			await Changes.AddAsync(changeRecord);
 
-			// 
 			if (TryGetChange(changeRecord.Id, out _))
 			{
 				await SetCurrentComputedChange(changeRecord);
@@ -50,7 +57,7 @@ namespace Crash.Server.Model
 			}
 
 			var added = await SaveChangesAsync();
-			return added == 1;
+			return added > 0;
 		}
 
 		private async Task SetCurrentComputedChange(ImmutableChange newChange)

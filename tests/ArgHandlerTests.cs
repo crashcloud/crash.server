@@ -6,7 +6,7 @@ namespace Crash.Server.Tests
 	public class ArgHandlerTests
 	{
 		[Test]
-		public void EnsureDefaultURLs()
+		public void EnsureDefaultUrLs()
 		{
 			ArgumentHandler argHandler = new();
 			argHandler.EnsureDefaults();
@@ -33,7 +33,7 @@ namespace Crash.Server.Tests
 		}
 
 		[Test]
-		public void EnsureDefaultNewDb()
+		public void EnsureDefaultNewDb_DefaultsToFalse()
 		{
 			ArgumentHandler argHandler = new();
 			argHandler.EnsureDefaults();
@@ -42,18 +42,28 @@ namespace Crash.Server.Tests
 		}
 
 		[Test]
+		public void EnsureDefaultNewDb()
+		{
+			ArgumentHandler argHandler = new();
+			argHandler.EnsureDefaults();
+			argHandler.ParseArgs("--reset", "true");
+
+			Assert.That(argHandler.ResetDB, Is.True);
+		}
+
+		[Test]
 		public void EnsureHelp()
 		{
 			ArgumentHandler argHandler = new();
 			argHandler.EnsureDefaults();
-			argHandler.ParseArgs(new[] { "--help" });
+			argHandler.ParseArgs("--help");
 
 			Assert.That(argHandler.Exit, Is.True);
 		}
 
 		[TestCaseSource(typeof(ArgHandlerData), nameof(ArgHandlerData.Invalid_URLArguments))]
 		[TestCaseSource(typeof(ArgHandlerData), nameof(ArgHandlerData.Valid_URLArguments))]
-		public bool ParseURLArgs(List<string> args)
+		public bool ParseUrlArgs(List<string> args)
 		{
 			ArgumentHandler argHandler = new();
 			argHandler.EnsureDefaults();
@@ -67,7 +77,7 @@ namespace Crash.Server.Tests
 
 		[TestCaseSource(typeof(ArgHandlerData), nameof(ArgHandlerData.Invalid_DBPathArguments))]
 		[TestCaseSource(typeof(ArgHandlerData), nameof(ArgHandlerData.Valid_DBPathArguments))]
-		public bool ParseDBArgs(List<string> args)
+		public bool ParseDbArgs(List<string> args)
 		{
 			ArgumentHandler argHandler = new();
 			argHandler.EnsureDefaults();
