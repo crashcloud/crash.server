@@ -21,28 +21,35 @@ namespace Crash.Server.Migrations
                 {
                     b.Property<Guid>("UniqueId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .IsRequired(true);
 
                     b.Property<int>("Action")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .IsRequired(true);
 
                     b.Property<Guid>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .IsRequired(true);
 
                     b.Property<string>("Owner")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .IsUnicode();
 
                     b.Property<string>("Payload")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .IsUnicode();
 
                     b.Property<DateTime>("Stamp")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .IsRequired(true);
 
                     b.Property<string>("Type")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .IsRequired(true);
 
                     b.HasKey("UniqueId");
-
+                    
                     b.ToTable("Changes");
                 });
 
@@ -50,22 +57,30 @@ namespace Crash.Server.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .IsRequired(true);
 
                     b.Property<int>("Action")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .IsRequired(true);
 
                     b.Property<string>("Owner")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .IsRequired(true)
+                        .IsUnicode();
 
                     b.Property<string>("Payload")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .IsRequired(true)
+                        .IsUnicode();
 
                     b.Property<DateTime>("Stamp")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .IsRequired(true);
 
                     b.Property<string>("Type")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .IsRequired(true);
 
                     b.HasKey("Id");
 
@@ -75,10 +90,13 @@ namespace Crash.Server.Migrations
             modelBuilder.Entity("Crash.Server.Model.User", b =>
                 {
                     b.Property<string>("Name")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .IsRequired(true)
+                        .IsUnicode();
 
                     b.Property<string>("Follows")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .IsUnicode();
 
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
