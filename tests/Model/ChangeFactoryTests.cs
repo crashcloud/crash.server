@@ -51,6 +51,21 @@ namespace Crash.Server.Tests.Model
 		}
 
 		[Test]
+		public void CombineRecords_BadInputs()
+		{
+			var duplicateChange = new Change { Id = Guid.NewGuid() };
+			var badChange = new Change { Id = Guid.Empty };
+
+			Assert.Throws<ArgumentException>(() => ChangeFactory.CombineRecords(null, badChange));
+			Assert.Throws<ArgumentException>(() => ChangeFactory.CombineRecords(badChange, null));
+			Assert.Throws<ArgumentException>(() => ChangeFactory.CombineRecords(null, null));
+			Assert.Throws<ArgumentException>(() => ChangeFactory.CombineRecords(duplicateChange, duplicateChange));
+			Assert.Throws<ArgumentException>(() => ChangeFactory.CombineRecords(badChange, badChange));
+			Assert.Throws<ArgumentException>(() => ChangeFactory.CombineRecords(duplicateChange, badChange));
+			Assert.Throws<ArgumentException>(() => ChangeFactory.CombineRecords(badChange, duplicateChange));
+		}
+
+		[Test]
 		public void CombineRecords_TransformOnly()
 		{
 			var transformChange = new ImmutableChange
