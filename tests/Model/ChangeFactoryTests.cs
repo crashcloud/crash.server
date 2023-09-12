@@ -59,7 +59,6 @@ namespace Crash.Server.Tests.Model
 			Assert.Throws<ArgumentException>(() => ChangeFactory.CombineRecords(null, badChange));
 			Assert.Throws<ArgumentException>(() => ChangeFactory.CombineRecords(badChange, null));
 			Assert.Throws<ArgumentException>(() => ChangeFactory.CombineRecords(null, null));
-			Assert.Throws<ArgumentException>(() => ChangeFactory.CombineRecords(duplicateChange, duplicateChange));
 			Assert.Throws<ArgumentException>(() => ChangeFactory.CombineRecords(badChange, badChange));
 			Assert.Throws<ArgumentException>(() => ChangeFactory.CombineRecords(duplicateChange, badChange));
 			Assert.Throws<ArgumentException>(() => ChangeFactory.CombineRecords(badChange, duplicateChange));

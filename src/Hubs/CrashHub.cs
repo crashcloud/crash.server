@@ -134,6 +134,14 @@ namespace Crash.Server.Hubs
 			await Database.AddChangeAsync(new ImmutableChange(change));
 		}
 
+		// Is this how you open a connection with the server?
+		// Or do you stream?
+		public async Task RequestUsers()
+		{
+			var users = Database.GetUsers();
+			await Clients.Caller.InitializeUsers(users);
+		}
+
 		/// <summary>Add Change to SqLite DB and notify other clients</summary>
 		private async Task CameraChange(Change change)
 		{

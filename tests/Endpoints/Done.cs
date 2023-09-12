@@ -4,6 +4,32 @@ namespace Crash.Server.Tests.Endpoints
 {
 	public sealed class Done : CrashHubEndpoints
 	{
+		private static IEnumerable BadUserNames
+		{
+			get
+			{
+				yield return null;
+				yield return string.Empty;
+			}
+		}
+
+		[TestCaseSource(nameof(BadUserNames))]
+		public async Task Done_WithUser_InvalidUser(string userName)
+		{
+			var doneChange = new Change
+			{
+				Type = CrashHub.CrashDoneChange, Action = ChangeAction.Release, Owner = userName
+			};
+
+			var currentChangesCount = _crashHub.Database.Changes.Count();
+			var latestChangesCount = _crashHub.Database.Changes.Count();
+
+			await _crashHub.PushChange(doneChange);
+
+			Assert.That(_crashHub.Database.Changes.Count(), Is.EqualTo(currentChangesCount));
+			Assert.That(_crashHub.Database.LatestChanges.Count(), Is.EqualTo(latestChangesCount));
+		}
+
 		[TestCaseSource(nameof(RandomChanges))]
 		public async Task Done_Failures(IEnumerable<Change> changes)
 		{
@@ -58,7 +84,8 @@ namespace Crash.Server.Tests.Endpoints
 				}
 			}
 
-			Assert.That(_crashHub.Database.GetChanges().Any(c => c.HasFlag(ChangeAction.Temporary)), Is.False);
+			var latestChanges = _crashHub.Database.GetChanges();
+			Assert.That(latestChanges.Any(c => c.HasFlag(ChangeAction.Temporary)), Is.False);
 		}
 	}
 }

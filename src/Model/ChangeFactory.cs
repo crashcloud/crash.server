@@ -86,8 +86,7 @@ namespace Crash.Server.Model
 
 			var combinedId = previousRecord.Id;
 			if (previousRecord.Id == Guid.Empty ||
-			    previousRecord.Id != newRecord.Id ||
-			    previousRecord.Id == newRecord.Id)
+			    previousRecord.Id != newRecord.Id)
 			{
 				throw new ArgumentException("Id is Invalid!");
 			}

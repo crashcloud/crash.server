@@ -105,7 +105,7 @@ namespace Crash.Server.Tests.Immutability
 			firstHistory.Push(add);
 			firstHistory.Push(remove);
 
-			return new ValueTuple<Stack<Change>, Change>(firstHistory, remove);
+			return new ValueTuple<Stack<Change>, Change>(firstHistory, add);
 		}
 
 		private static (Stack<Change>, Change) GenerateLifetimeStack()

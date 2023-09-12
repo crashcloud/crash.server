@@ -1,5 +1,7 @@
 ﻿// https://learn.microsoft.com/en-us/ef/core/modeling/
 
+using Crash.Server.Hubs;
+
 namespace Crash.Server.Model
 {
 	/// <summary>Implementation of DbContext to be used as SqLite DB Session</summary>
@@ -120,7 +122,10 @@ namespace Crash.Server.Model
 					continue;
 				}
 
-				var doneRecord = new ImmutableChange { Id = id, Type = "Crash.Done" };
+				var doneRecord = new ImmutableChange
+				{
+					Id = id, Type = CrashHub.CrashDoneChange, Action = ChangeAction.Release
+				};
 
 				result = await AddChangeAsync(doneRecord);
 			}
