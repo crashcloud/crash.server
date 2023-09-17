@@ -188,6 +188,11 @@ namespace Crash.Server.Hubs
 
 		private async Task PushChangeOnly(Change change)
 		{
+			if (change is null)
+			{
+				throw new ArgumentNullException("Change was null!");
+			}
+
 			var type = change?.Type?.ToUpperInvariant();
 			switch (type)
 			{
