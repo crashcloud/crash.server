@@ -193,10 +193,18 @@ namespace Crash.Server.Hubs
 				throw new ArgumentNullException("Change was null!");
 			}
 
+			if (change.Type is null)
+			{
+				throw new ArgumentNullException("Change.Type was null!");
+			}
+
 			var type = change?.Type?.ToUpperInvariant();
 			switch (type)
 			{
+				// TODO : Other types of objects MUST (eventually) also work! What about 3rd party plugins?
+				// TODO : Add tests for this effect!
 				case CrashGeometryChange:
+				default:
 					{
 						var task = change.Action switch
 						{
@@ -233,8 +241,6 @@ namespace Crash.Server.Hubs
 						await task;
 						return;
 					}
-				default:
-					throw new ArgumentException("Change.Type is empty!");
 			}
 		}
 
