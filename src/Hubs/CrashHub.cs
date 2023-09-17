@@ -170,7 +170,17 @@ namespace Crash.Server.Hubs
 
 		public async Task PushIdenticalChanges(IEnumerable<Guid> ids, Change change)
 		{
-			await Task.WhenAll(MultiplyChange(ids, change).Select(PushChangeOnly));
+			switch (change.Type)
+			{
+				case CrashDoneChange:
+					await DoneRange(ids);
+					break;
+
+				default:
+					await Task.WhenAll(MultiplyChange(ids, change).Select(PushChangeOnly));
+					break;
+			}
+
 			await Clients.Others.PushIdenticalChanges(ids, change);
 		}
 
