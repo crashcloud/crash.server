@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFramework>net7.0</TargetFramework>
-		<RuntimeIdentifiers>win-x64;win-x86;osx-x64;osx-arm64</RuntimeIdentifiers>
+		<RuntimeIdentifiers>win-x64;win-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Title>Crash.Server</Title>
@@ -23,7 +23,7 @@
 		<TypeScriptJSXEmit>none</TypeScriptJSXEmit>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<IncludeSymbols>True</IncludeSymbols>
-		<AnalysisLevel>6.0-recommended</AnalysisLevel>
+		<AnalysisLevel>7.0-recommended</AnalysisLevel>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<ErrorReport>send</ErrorReport>
 	</PropertyGroup>
@@ -32,15 +32,8 @@
 		<!--<PublishDir>..\Crash\bin\$(Configuration)\net48\Server\$(RuntimeIdentifier)\</PublishDir>-->
 		<PublishSingleFile>false</PublishSingleFile>
 		<SelfContained>false</SelfContained>
-		<PublishTrimmed>false</PublishTrimmed>
-	</PropertyGroup>
 
-	<PropertyGroup Condition="$(Publish) == ''">
-		<RuntimeIdentifier Condition="$([MSBuild]::IsOSPlatform(Windows))">win-x64</RuntimeIdentifier>
-		<RuntimeIdentifier Condition="$([MSBuild]::IsOSPlatform(osx))">osx-x64</RuntimeIdentifier>
-		<!--<OutputPath>..\Crash\bin\$(Configuration)\net48\Server\$(RuntimeIdentifier)\</OutputPath>-->
-		<AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
-		<AppendRuntimeIdentifierToOutputPath>False</AppendRuntimeIdentifierToOutputPath>
+		<PublishTrimmed>false</PublishTrimmed>
 	</PropertyGroup>
 
 	<ItemGroup>
