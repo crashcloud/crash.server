@@ -1,0 +1,41 @@
+@page
+@model Crash.Server.Pages.Latest
+
+@{
+	Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+	<title>Latest Changes</title>
+</head>
+<body>
+<div>
+	<table>
+		<tr>
+			<td>Id</td>
+			<td>UniqueId</td>
+			<td>Action</td>
+			<td>Stamp</td>
+			<td>Type</td>
+			<td>Owner</td>
+			<td>Payload</td>
+		</tr>
+
+		@foreach (var change in Model.Context.LatestChanges)
+		{
+			<tr>
+				<td>@change.Id</td>
+				<td>@change.Action</td>
+				<td>@change.Stamp</td>
+				<td>@change.Type</td>
+				<td>@change.Owner</td>
+				<td>@change.Payload</td>
+			</tr>
+		}
+	</table>
+</div>
+</body>
+</html>

@@ -1,0 +1,33 @@
+@page
+@model Crash.Server.Pages.Users
+
+@{
+	Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+	<title>Users</title>
+</head>
+<body>
+<div>
+	<table>
+		<tr>
+			<td>Name</td>
+			<td>Follows</td>
+		</tr>
+
+		@foreach (var user in Model.Context.Users)
+		{
+			<tr>
+				<td>@user.Name</td>
+				<td>@user.Id</td>
+				<td>@user.Follows</td>
+			</tr>
+		}
+	</table>
+</div>
+</body>
+</html>
