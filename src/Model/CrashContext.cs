@@ -7,9 +7,12 @@ namespace Crash.Server.Model
 	/// <summary>Implementation of DbContext to be used as SqLite DB Session</summary>
 	public sealed class CrashContext : DbContext
 	{
+		private readonly ILogger<CrashHub> Logger;
+
 		/// <summary>Default Constructor</summary>
-		public CrashContext(DbContextOptions<CrashContext> options) : base(options)
+		public CrashContext(DbContextOptions<CrashContext> options, ILogger<CrashHub> logger = null) : base(options)
 		{
+			Logger = logger;
 			SaveChangesFailed += OnSaveChangesFailed;
 		}
 
@@ -37,6 +40,7 @@ namespace Crash.Server.Model
 		{
 			if (changeRecord.Id == Guid.Empty || changeRecord.UniqueId == Guid.Empty)
 			{
+				Logger.ChangeIsNotValid(changeRecord);
 				return false;
 			}
 

@@ -18,11 +18,12 @@ namespace Crash.Server.Hubs
 		internal const string CrashDoneChange = "CRASH.DONECHANGE";
 
 		internal readonly CrashContext Database;
+		private readonly ILogger<CrashHub> Logger;
 
-		/// <summary>Initialize with SqLite DB</summary>
-		public CrashHub(CrashContext database)
+		public CrashHub(CrashContext database, ILogger<CrashHub> logger = null)
 		{
 			Database = database;
+			Logger = logger;
 		}
 
 		/// <summary>Add Change to SqLite DB and notify other clients</summary>
@@ -33,6 +34,7 @@ namespace Crash.Server.Hubs
 			    !HubUtils.IsPayloadValid(change) ||
 			    !change.HasFlag(ChangeAction.Add))
 			{
+				Logger.CouldNotAddChange();
 				return;
 			}
 
@@ -46,12 +48,14 @@ namespace Crash.Server.Hubs
 			// Validate
 			if (!HubUtils.IsGuidValid(id))
 			{
+				Logger.CouldNotRemoveChange();
 				return;
 			}
 
 			// Cannot delete what does not already exist
 			if (!Database.TryGetChange(id, out _))
 			{
+				Logger.ChangeDoesNotExist(id);
 				return;
 			}
 
@@ -65,15 +69,19 @@ namespace Crash.Server.Hubs
 			// Validate
 			if (!HubUtils.IsUserValid(user))
 			{
+				Logger.UserIsNotValid(user);
 				return;
 			}
 
 			// Record
-			if (await Database.DoneAsync(user))
+			if (!await Database.DoneAsync(user))
 			{
-				// Update
-				await Clients.Others.Done(user);
+				Logger.CouldNotRelease();
+				return;
 			}
+
+			// Update
+			await Clients.Others.Done(user);
 		}
 
 		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
@@ -93,6 +101,7 @@ namespace Crash.Server.Hubs
 			// Lock or Unlock impossible if nothing to Lock or Unlock
 			if (!Database.TryGetChange(id, out var latestChange))
 			{
+				Logger.ChangeDoesNotExist(id);
 				return;
 			}
 
@@ -105,7 +114,13 @@ namespace Crash.Server.Hubs
 		private async Task Unlock(string user, Guid id)
 		{
 			// Validate
-			if (!HubUtils.IsUserValid(user) || !HubUtils.IsGuidValid(id))
+			if (!HubUtils.IsUserValid(user))
+			{
+				Logger.UserIsNotValid(user);
+				return;
+			}
+
+			if (!HubUtils.IsGuidValid(id))
 			{
 				return;
 			}
@@ -113,6 +128,7 @@ namespace Crash.Server.Hubs
 			// Lock or Unlock impossible if nothing to Lock or Unlock
 			if (!Database.TryGetChange(id, out var latestChange))
 			{
+				Logger.ChangeDoesNotExist(id);
 				return;
 			}
 
@@ -147,6 +163,7 @@ namespace Crash.Server.Hubs
 		{
 			if (change.Owner is null)
 			{
+				Logger.UserIsNotValid(change.Owner);
 				return;
 			}
 
@@ -258,9 +275,15 @@ namespace Crash.Server.Hubs
 		internal async Task UpdateUser(Change change)
 		{
 			// validate
-			if (!HubUtils.IsChangeValid(change) ||
-			    !HubUtils.IsUserValid(change.Owner))
+			if (!HubUtils.IsChangeValid(change))
 			{
+				Logger.ChangeIsNotValid(change);
+				return;
+			}
+
+			if (!HubUtils.IsUserValid(change.Owner))
+			{
+				Logger.UserIsNotValid(change.Owner);
 				return;
 			}
 
@@ -270,6 +293,7 @@ namespace Crash.Server.Hubs
 				var user = User.FromChange(change);
 				if (user is null || !HubUtils.IsUserValid(user.Name))
 				{
+					Logger.UserIsNotValid(user?.Name);
 					return;
 				}
 

@@ -20,6 +20,7 @@ namespace Crash.Server
 			}
 
 			var builder = WebApplication.CreateBuilder(args);
+
 			var config = new ConfigHandler();
 
 			builder.Services.AddSignalR()
