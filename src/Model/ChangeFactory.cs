@@ -66,7 +66,7 @@ namespace Crash.Server.Model
 				Owner = change.Owner,
 				Stamp = DateTime.Now,
 				Type = change.Type,
-				Payload = change.Payload
+				// Payload = change.Payload
 			};
 
 			return doneRecord;

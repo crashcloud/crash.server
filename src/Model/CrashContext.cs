@@ -1,5 +1,6 @@
 ﻿// https://learn.microsoft.com/en-us/ef/core/modeling/
 
+using Crash.Changes.Extensions;
 using Crash.Server.Hubs;
 
 namespace Crash.Server.Model
@@ -28,6 +29,7 @@ namespace Crash.Server.Model
 		private void OnSaveChangesFailed(object? sender, SaveChangesFailedEventArgs e)
 		{
 			// TODO: Handle Failures
+			;
 		}
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -63,7 +65,7 @@ namespace Crash.Server.Model
 			}
 
 			var added = await SaveChangesAsync();
-			return added > 0;
+			return true;
 		}
 
 		private async Task SetCurrentComputedChange(ImmutableChange newChange)
@@ -103,11 +105,14 @@ namespace Crash.Server.Model
 		{
 			var result = true;
 
-			// Wrap in a Task.Run call!
-			foreach (var latestChange in LatestChanges.Where(c => c.Owner == user))
+			// TODO : Wrap in a Task.Run call!
+			foreach (var latestChange in LatestChanges.Where(c =>
+				         c.Owner == user &&
+				         c.Action.HasFlag(ChangeAction.Temporary)))
 			{
 				var doneChange = ChangeFactory.CreateDoneRecord(latestChange);
-				result &= await AddChangeAsync(doneChange);
+				var addResult = await AddChangeAsync(doneChange);
+				result &= addResult;
 			}
 
 			await SaveChangesAsync();
@@ -126,11 +131,12 @@ namespace Crash.Server.Model
 					continue;
 				}
 
-				var doneRecord = new ImmutableChange
+				if (latestChange.HasFlag(ChangeAction.Temporary))
 				{
-					Id = id, Type = CrashHub.CrashDoneChange, Action = ChangeAction.Release
-				};
+					continue;
+				}
 
+				var doneRecord = ChangeFactory.CreateDoneRecord(latestChange);
 				result = await AddChangeAsync(doneRecord);
 			}
 
