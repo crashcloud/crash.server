@@ -1,5 +1,6 @@
 ﻿// https://learn.microsoft.com/en-us/ef/core/modeling/
 
+using Crash.Changes.Extensions;
 using Crash.Server.Hubs;
 
 namespace Crash.Server.Model
@@ -58,7 +59,7 @@ namespace Crash.Server.Model
 			}
 
 			if (!Users.Any(c => c.Name == changeRecord.Owner) &&
-			    !string.IsNullOrEmpty(changeRecord.Owner))
+				!string.IsNullOrEmpty(changeRecord.Owner))
 			{
 				await Users.AddAsync(new User { Name = changeRecord.Owner, Id = "", Follows = "" });
 			}
@@ -109,8 +110,8 @@ namespace Crash.Server.Model
 
 			// TODO : Wrap in a Task.Run call!
 			foreach (var latestChange in LatestChanges.Where(c =>
-				         c.Owner == user &&
-				         c.Action.HasFlag(ChangeAction.Temporary)))
+						 c.Owner == user &&
+						 c.Action.HasFlag(ChangeAction.Temporary)))
 			{
 				var doneChange = ChangeFactory.CreateDoneRecord(latestChange);
 				var addResult = await AddChangeAsync(doneChange);

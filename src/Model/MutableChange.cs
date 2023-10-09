@@ -1,4 +1,6 @@
-﻿namespace Crash.Server.Model
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Crash.Server.Model
 {
 	/// <summary>
 	///     A record of a Change.

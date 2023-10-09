@@ -19,6 +19,11 @@ namespace Crash.Server
 				return null;
 			}
 
+			if (argHandler.ResetDB && File.Exists(argHandler.DatabaseFileName))
+			{
+				File.Delete(argHandler.DatabaseFileName);
+			}
+
 			var builder = WebApplication.CreateBuilder(args);
 
 			var config = new ConfigHandler();

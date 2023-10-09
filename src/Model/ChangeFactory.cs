@@ -30,7 +30,10 @@ namespace Crash.Server.Model
 		{
 			return new ImmutableChange
 			{
-				Id = id, Action = ChangeAction.Unlocked, Stamp = DateTime.UtcNow, Type = type
+				Id = id,
+				Action = ChangeAction.Unlocked,
+				Stamp = DateTime.UtcNow,
+				Type = type
 			};
 		}
 
@@ -84,9 +87,9 @@ namespace Crash.Server.Model
 				throw new ArgumentException($"{nameof(newRecord)} is null");
 			}
 
-			var combinedId = previousRecord.Id;ccc
+			var combinedId = previousRecord.Id;
 			if (previousRecord.Id == Guid.Empty ||
-			    previousRecord.Id != newRecord.Id)
+				previousRecord.Id != newRecord.Id)
 			{
 				throw new ArgumentException("Id is Invalid!");
 			}
@@ -112,7 +115,7 @@ namespace Crash.Server.Model
 				Payload = JsonSerializer.Serialize(payload, options),
 				Type = previousRecord.Type,
 				Action = ChangeUtils.CombineActions(previousRecord.Action, newRecord.Action) |
-				         ChangeAction.Transform | ChangeAction.Update
+						 ChangeAction.Transform | ChangeAction.Update
 			};
 
 			return result;
