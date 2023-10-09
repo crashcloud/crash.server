@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Crash.Server.Model
+﻿namespace Crash.Server.Model
 {
 	/// <summary>
 	///     A record of a Change.
@@ -20,6 +18,7 @@ namespace Crash.Server.Model
 			Stamp = change.Stamp;
 			Id = change.Id;
 			Owner = change.Owner;
+			// TODO : Make sure this payload contains all the necessary parts
 			Payload = change.Payload;
 			Type = change.Type;
 			Action = change.Action;

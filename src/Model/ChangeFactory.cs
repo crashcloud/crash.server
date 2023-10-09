@@ -84,7 +84,7 @@ namespace Crash.Server.Model
 				throw new ArgumentException($"{nameof(newRecord)} is null");
 			}
 
-			var combinedId = previousRecord.Id;
+			var combinedId = previousRecord.Id;ccc
 			if (previousRecord.Id == Guid.Empty ||
 			    previousRecord.Id != newRecord.Id)
 			{

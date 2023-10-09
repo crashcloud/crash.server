@@ -1,6 +1,5 @@
 ﻿// https://learn.microsoft.com/en-us/ef/core/modeling/
 
-using Crash.Changes.Extensions;
 using Crash.Server.Hubs;
 
 namespace Crash.Server.Model
@@ -74,11 +73,13 @@ namespace Crash.Server.Model
 
 			if (latestChange is null)
 			{
+				// TODO : This doesn't have the full payload packet!!
 				await LatestChanges.AddAsync(new MutableChange(newChange));
 				await SaveChangesAsync();
 				return;
 			}
 
+			// TODO : Does this have the full payload packet??!!
 			var change = ChangeFactory.CombineRecords(latestChange, newChange);
 			LatestChanges.Remove(latestChange);
 			await LatestChanges.AddAsync(change);
@@ -91,6 +92,7 @@ namespace Crash.Server.Model
 			return change is not null;
 		}
 
+		// TODO : All LatestChnges MUST be a combination
 		internal IEnumerable<MutableChange> GetChanges()
 		{
 			return LatestChanges.ToArray();
