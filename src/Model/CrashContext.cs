@@ -93,7 +93,6 @@ namespace Crash.Server.Model
 			return change is not null;
 		}
 
-		// TODO : All LatestChnges MUST be a combination
 		internal IEnumerable<MutableChange> GetChanges()
 		{
 			return LatestChanges.ToArray();
@@ -108,15 +107,16 @@ namespace Crash.Server.Model
 		{
 			var result = true;
 
-			// TODO : Wrap in a Task.Run call!
-			foreach (var latestChange in LatestChanges.Where(c =>
-				         c.Owner == user &&
-				         c.Action.HasFlag(ChangeAction.Temporary)))
+			var temporaryChanges = LatestChanges.Where(c =>
+						 c.Owner == user &&
+						 c.Action.HasFlag(ChangeAction.Temporary));
+
+			await temporaryChanges.ForEachAsync(async (change) =>
 			{
-				var doneChange = ChangeFactory.CreateDoneRecord(latestChange);
+				var doneChange = ChangeFactory.CreateDoneRecord(change);
 				var addResult = await AddChangeAsync(doneChange);
 				result &= addResult;
-			}
+			});
 
 			await SaveChangesAsync();
 

@@ -1,10 +1,9 @@
 ﻿using Crash.Server.Hubs;
 using Crash.Server.Model;
-using Crash.Server.Settings;
 
 namespace Crash.Server
 {
-	// TODO : Improve logging
+
 	public class Program
 	{
 		/// <summary>Creates an instance of the Crash WebApplication</summary>
@@ -24,24 +23,28 @@ namespace Crash.Server
 				File.Delete(argHandler.DatabaseFileName);
 			}
 
-			var builder = WebApplication.CreateBuilder(args);
+			var webBuilder = WebApplication.CreateBuilder(args);
 
-			var config = new ConfigHandler();
-
-			builder.Services.AddSignalR()
+			/* TODO : Add back in appsettings
+			webBuilder.Services.AddSignalR()
 				.AddHubOptions<CrashHub>(hubOptions =>
-					config.Crash.SignalR.BuildCrashHubConfig(hubOptions))
-				.AddJsonProtocol(jsonOptions =>
-					config.Crash.SignalR.BuildJsonConfig(jsonOptions));
+				{
 
-			builder.Services.AddDbContext<CrashContext>(options =>
+				})
+				.AddJsonProtocol(jsonOptions =>
+				{
+
+				});
+			i*/
+
+			webBuilder.Services.AddDbContext<CrashContext>(options =>
 				options.UseSqlite($"Data Source={argHandler.DatabaseFileName}"));
 
 			// Do we need this?
-			builder.WebHost.UseUrls(argHandler.URL);
-			builder.Services.AddRazorPages();
+			webBuilder.WebHost.UseUrls(argHandler.URL);
+			webBuilder.Services.AddRazorPages();
 
-			var app = builder.Build();
+			var app = webBuilder.Build();
 
 			app.MapHub<CrashHub>("/Crash");
 			app.UseHttpsRedirection();
@@ -55,8 +58,6 @@ namespace Crash.Server
 
 		public static void Main(string[] args)
 		{
-			// Display the number of command line arguments.
-			Console.WriteLine(args.Length);
 			var app = CreateApplication(args);
 			app.Run();
 		}

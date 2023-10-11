@@ -6,12 +6,12 @@ namespace Crash.Server
 	/// <summary>Handles Arguments for the start up program</summary>
 	public sealed class ArgumentHandler
 	{
-		private const string pattern = @"--([\w]+ [\S]*)";
-		internal const string appName = "Crash";
-		internal const string dbDirectory = "App_Data";
-		internal const string defaultURL = "http://0.0.0.0:5000";
-		private static readonly Version? vers = typeof(ArgumentHandler).Assembly.GetName().Version;
-		internal static string dbName = $"Database_{vers?.Major}_{vers?.Minor}_{vers?.Build}.db";
+		private const string Pattern = @"--([\w]+ [\S]*)";
+		internal const string AppName = "Crash";
+		internal const string DbDirectory = "App_Data";
+		internal const string DefaultURL = "http://0.0.0.0:8080";
+		private static readonly Version? Vers = typeof(ArgumentHandler).Assembly.GetName().Version;
+		internal static string DbName = $"Database_{Vers?.Major}_{Vers?.Minor}_{Vers?.Build}.db";
 
 		private readonly List<Command> _commands;
 
@@ -20,7 +20,7 @@ namespace Crash.Server
 		{
 			_commands = new List<Command>
 			{
-				new("urls", HandleUrlArgs, "Supply a custom URL for the serer", "\"http://0.0.0.0:5000\""),
+				new("urls", HandleUrlArgs, "Supply a custom URL for the serer", $"\"{DefaultURL}\""),
 				new("path", _handleDatabasePath, "Supply a custom Path for the Database", "C:\\Crash\\data.db"),
 				new("reset", HandleRegenDb, "Empty the current Database", "true"),
 				new("help", HandleHelpRequest, "Help! You're here now.")
@@ -42,13 +42,13 @@ namespace Crash.Server
 		/// <summary>Parses the input Arguments</summary>
 		public void ParseArgs(params string[] args)
 		{
-			var flatArgs = string.Join(' ', args)?.ToLower();
-			if (flatArgs.Contains("help"))
+			var flatArgs = string.Join(' ', args)?.ToLowerInvariant();
+			if (flatArgs?.Contains("help") == true)
 			{
 				HandleHelpRequest(flatArgs);
 			}
 
-			var argMatches = Regex.Matches(flatArgs, pattern, RegexOptions.IgnoreCase);
+			var argMatches = Regex.Matches(flatArgs, Pattern, RegexOptions.IgnoreCase);
 
 			foreach (Match argMatch in argMatches)
 			{
@@ -78,7 +78,7 @@ namespace Crash.Server
 		{
 			if (string.IsNullOrEmpty(URL))
 			{
-				SetUrl(defaultURL);
+				SetUrl(DefaultURL);
 			}
 
 			if (string.IsNullOrEmpty(DatabaseFileName))
@@ -255,7 +255,7 @@ namespace Crash.Server
 		private static string GetDefaultDatabaseDirectory()
 		{
 			var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-			var databaseDirectory = Path.Combine(appData, appName, dbDirectory);
+			var databaseDirectory = Path.Combine(appData, AppName, DbDirectory);
 
 			return databaseDirectory;
 		}
@@ -264,7 +264,7 @@ namespace Crash.Server
 		{
 			if (!Path.HasExtension(databasePath))
 			{
-				DatabaseFileName = Path.Combine(databasePath, dbName);
+				DatabaseFileName = Path.Combine(databasePath, DbName);
 			}
 			else
 			{
@@ -306,7 +306,7 @@ namespace Crash.Server
 			if (string.IsNullOrEmpty(path))
 			{
 				throw new ArgumentNullException($"Input {nameof(path)} : {path} " +
-				                                $"cannot be null for GetDirectoryOfPath");
+												$"cannot be null for GetDirectoryOfPath");
 			}
 
 			var fullDirectoryName = path;
