@@ -1,9 +1,6 @@
 ﻿using Crash.Server.Hubs;
 
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-
-using Moq;
 
 namespace Crash.Server.Tests.Endpoints
 {
@@ -155,26 +152,8 @@ namespace Crash.Server.Tests.Endpoints
 
 		private void SetUpContext()
 		{
-			// Create a mock DbContextOptions object
-			var mockOptions = GetMockOptions();
-
-			_crashContext = new CrashContext(mockOptions);
-
-			var hubContext = new Mock<ICrashClient>();
-			var clientProxy = new Mock<IClientProxy>();
-			var mockClientContext = new Mock<HubCallerContext>();
-
-			_crashHub = new CrashHub(_crashContext);
-
-			var mockClients = new Mock<IHubCallerClients<ICrashClient>>();
-			var mockClientProxy_All = new Mock<ICrashClient>();
-			var mockClientProxy_Others = new Mock<ICrashClient>();
-
-			mockClients.Setup(clients => clients.All).Returns(mockClientProxy_All.Object);
-			mockClients.Setup(clients => clients.Others).Returns(mockClientProxy_Others.Object);
-			mockClientContext.Setup(c => c.ConnectionId).Returns(Guid.NewGuid().ToString());
-			_crashHub.Clients = mockClients.Object;
-			_crashHub.Context = mockClientContext.Object;
+			_crashHub = MockCrashHub.GenerateHub();
+			_crashContext = _crashHub.Database;
 		}
 
 		private static ChangeAction getRandomAction()

@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
+using Moq;
+
 namespace Crash.Server.Tests
 {
 	public class MockCrashHub
@@ -11,7 +13,17 @@ namespace Crash.Server.Tests
 		public static CrashHub GenerateHub()
 		{
 			CrashHub hub = new(GetContext(), GetLogger());
-			hub.Clients = new CrashHubCallerClients();
+
+			var mockClients = new Mock<IHubCallerClients<ICrashClient>>();
+			var mockClientProxy_All = new Mock<ICrashClient>();
+			var mockClientProxy_Others = new Mock<ICrashClient>();
+			var mockClientContext = new Mock<HubCallerContext>();
+
+			mockClients.Setup(clients => clients.All).Returns(mockClientProxy_All.Object);
+			mockClients.Setup(clients => clients.Others).Returns(mockClientProxy_Others.Object);
+			mockClientContext.Setup(c => c.ConnectionId).Returns(Guid.NewGuid().ToString());
+			hub.Clients = mockClients.Object;
+			hub.Context = mockClientContext.Object;
 
 			return hub;
 		}
@@ -24,7 +36,7 @@ namespace Crash.Server.Tests
 			return context;
 		}
 
-		private static CrashLogger GetLogger()
+		internal static CrashLogger GetLogger()
 		{
 			return new CrashLogger();
 		}
