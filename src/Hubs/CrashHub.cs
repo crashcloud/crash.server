@@ -20,7 +20,7 @@ namespace Crash.Server.Hubs
 		internal readonly CrashContext Database;
 		private readonly ILogger<CrashHub> Logger;
 
-		public CrashHub(CrashContext database, ILogger<CrashHub> logger = null)
+		public CrashHub(CrashContext database, ILogger<CrashHub> logger = default)
 		{
 			Database = database;
 			Logger = logger;
@@ -187,6 +187,11 @@ namespace Crash.Server.Hubs
 
 		public async Task PushIdenticalChanges(IEnumerable<Guid> ids, Change change)
 		{
+			if (ids is null || !ids.Any() || change is null)
+			{
+				return;
+			}
+
 			switch (change.Type)
 			{
 				case CrashDoneChange:
@@ -203,12 +208,22 @@ namespace Crash.Server.Hubs
 
 		public async Task PushChange(Change change)
 		{
+			if (change is null)
+			{
+				return;
+			}
+
 			await PushChangeOnly(change);
 			await Clients.Others.PushChange(change);
 		}
 
 		public async Task PushChanges(IEnumerable<Change> changes)
 		{
+			if (changes is null || !changes.Any())
+			{
+				return;
+			}
+
 			await Task.WhenAll(changes.Select(PushChangeOnly));
 			await Clients.Others.PushChanges(changes);
 		}
@@ -231,21 +246,36 @@ namespace Crash.Server.Hubs
 				// TODO : Other types of objects MUST (eventually) also work! What about 3rd party plugins?
 				// TODO : Add tests for this effect!
 				case CrashGeometryChange:
+				case CrashDoneChange:
 				default:
 					{
-						var task = change.Action switch
+						var currentActions = new List<ChangeAction>();
+						foreach (var action in Enum.GetValues<ChangeAction>())
 						{
-							ChangeAction.Add => Add(change),
-							ChangeAction.Add | ChangeAction.Temporary => Add(change),
-							ChangeAction.Locked => Lock(change.Owner, change.Id),
-							ChangeAction.Unlocked => Unlock(change.Owner, change.Id),
-							ChangeAction.Remove => Remove(change.Id),
-							ChangeAction.Update => Update(change),
-							ChangeAction.Transform => Transform(change),
-							_ => Task.CompletedTask
-						};
+							if (!change.Action.HasFlag(action))
+							{
+								continue;
+							}
 
-						await task;
+							var task = action switch
+							{
+								ChangeAction.Locked => Lock(change.Owner, change.Id),
+								ChangeAction.Unlocked => Unlock(change.Owner, change.Id),
+								ChangeAction.Remove => Remove(change.Id),
+								ChangeAction.Release => Done(change.Owner),
+								ChangeAction.Add => Add(change),
+								ChangeAction.Update => Update(change),
+								ChangeAction.Transform => Transform(change),
+
+								ChangeAction.None => Task.CompletedTask,
+								ChangeAction.Temporary => Task.CompletedTask,
+
+								_ => throw new NotImplementedException($"No action defined for {change.Action}");
+							};
+
+							await task;
+						}
+
 						return;
 					}
 				case CrashCameraChange:
@@ -253,16 +283,6 @@ namespace Crash.Server.Hubs
 						var task = change.Action switch
 						{
 							ChangeAction.Add => CameraChange(change),
-							_ => Task.CompletedTask
-						};
-						await task;
-						return;
-					}
-				case CrashDoneChange:
-					{
-						var task = change.Action switch
-						{
-							ChangeAction.Release => Done(change.Owner),
 							_ => Task.CompletedTask
 						};
 						await task;
