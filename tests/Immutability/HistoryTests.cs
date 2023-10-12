@@ -31,8 +31,7 @@ namespace Crash.Server.Tests.Immutability
 			var changeHistory = changeTuple.Item1;
 			var latestChange = changeTuple.Item2;
 
-			var options = GetMockOptions();
-			CrashContext context = new(options);
+			var context = MockCrashHub.GetContext(MockCrashHub.GetLogger());
 
 			await Task.WhenAll(changeHistory.Select(
 				async c => await context.AddChangeAsync(new ImmutableChange
@@ -48,8 +47,6 @@ namespace Crash.Server.Tests.Immutability
 				)));
 
 			var changes = context.GetChanges();
-
-			;
 
 			Assert.Multiple(() =>
 			{

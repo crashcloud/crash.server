@@ -1,8 +1,6 @@
 ﻿using Crash.Changes.Utils;
 using Crash.Server.Hubs;
 
-using Microsoft.EntityFrameworkCore;
-
 namespace Crash.Server.Tests.Hubs
 {
 	[Parallelizable(ParallelScope.None)]
@@ -17,17 +15,7 @@ namespace Crash.Server.Tests.Hubs
 
 		public CrashContextTests()
 		{
-			context = CreateTestContext();
-		}
-
-		private CrashContext CreateTestContext()
-		{
-			var optionsBuilder = new DbContextOptionsBuilder<CrashContext>();
-			optionsBuilder.UseInMemoryDatabase("CrashDb");
-			// optionsBuilder.UseSqlite();
-
-			CrashContext context = new(optionsBuilder.Options);
-			return context;
+			context = MockCrashHub.GetContext(MockCrashHub.GetLogger());
 		}
 
 		private ImmutableChange GenerateChange()

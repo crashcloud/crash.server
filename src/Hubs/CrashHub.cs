@@ -18,9 +18,9 @@ namespace Crash.Server.Hubs
 		internal const string CrashDoneChange = "CRASH.DONECHANGE";
 
 		internal readonly CrashContext Database;
-		private readonly ILogger<CrashHub> Logger;
+		internal readonly ILogger<CrashHub> Logger;
 
-		public CrashHub(CrashContext database, ILogger<CrashHub> logger = default)
+		public CrashHub(CrashContext database, ILogger<CrashHub> logger)
 		{
 			Database = database;
 			Logger = logger;

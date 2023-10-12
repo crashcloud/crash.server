@@ -11,7 +11,7 @@ namespace Crash.Server.Model
 		private readonly ILogger<CrashHub> Logger;
 
 		/// <summary>Default Constructor</summary>
-		public CrashContext(DbContextOptions<CrashContext> options, ILogger<CrashHub> logger = null) : base(options)
+		public CrashContext(DbContextOptions<CrashContext> options, ILogger<CrashHub> logger) : base(options)
 		{
 			Logger = logger;
 			SaveChangesFailed += OnSaveChangesFailed;
@@ -59,7 +59,7 @@ namespace Crash.Server.Model
 			}
 
 			if (!Users.Any(c => c.Name == changeRecord.Owner) &&
-				!string.IsNullOrEmpty(changeRecord.Owner))
+			    !string.IsNullOrEmpty(changeRecord.Owner))
 			{
 				await Users.AddAsync(new User { Name = changeRecord.Owner, Id = "", Follows = "" });
 			}
@@ -110,8 +110,8 @@ namespace Crash.Server.Model
 
 			// TODO : Wrap in a Task.Run call!
 			foreach (var latestChange in LatestChanges.Where(c =>
-						 c.Owner == user &&
-						 c.Action.HasFlag(ChangeAction.Temporary)))
+				         c.Owner == user &&
+				         c.Action.HasFlag(ChangeAction.Temporary)))
 			{
 				var doneChange = ChangeFactory.CreateDoneRecord(latestChange);
 				var addResult = await AddChangeAsync(doneChange);

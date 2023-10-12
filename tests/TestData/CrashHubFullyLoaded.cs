@@ -12,7 +12,8 @@ namespace Crash.Server.Tests
 	{
 		public static CrashHub GenerateHub()
 		{
-			CrashHub hub = new(GetContext(), GetLogger());
+			var logger = GetLogger();
+			CrashHub hub = new(GetContext(logger), logger);
 
 			var mockClients = new Mock<IHubCallerClients<ICrashClient>>();
 			var mockClientProxy_All = new Mock<ICrashClient>();
@@ -28,11 +29,11 @@ namespace Crash.Server.Tests
 			return hub;
 		}
 
-		private static CrashContext GetContext()
+		internal static CrashContext GetContext(CrashLogger logger)
 		{
 			var optionsBuilder = new DbContextOptionsBuilder<CrashContext>();
 			optionsBuilder.UseInMemoryDatabase(Guid.NewGuid().ToString());
-			CrashContext context = new(optionsBuilder.Options);
+			CrashContext context = new(optionsBuilder.Options, logger);
 			return context;
 		}
 

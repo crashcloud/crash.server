@@ -44,8 +44,8 @@ namespace Crash.Server.Tests.Endpoints
 			var currCount = _crashHub.Database.Changes.Count();
 			var invalidIdDeleteChange = new Change { Id = Guid.NewGuid(), Action = ChangeAction.Remove, Type = null };
 
-			Assert.ThrowsAsync<ArgumentException>(() =>
-				_crashHub.PushChange(invalidIdDeleteChange));
+			Assert.ThrowsAsync<ArgumentNullException>(async () =>
+				await _crashHub.PushChange(invalidIdDeleteChange));
 			Assert.That(_crashHub.Database.Changes.Count(), Is.EqualTo(currCount));
 		}
 
