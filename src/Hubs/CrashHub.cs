@@ -270,7 +270,7 @@ namespace Crash.Server.Hubs
 								ChangeAction.None => Task.CompletedTask,
 								ChangeAction.Temporary => Task.CompletedTask,
 
-								_ => throw new NotImplementedException($"No action defined for {change.Action}");
+								_ => throw new NotImplementedException($"No action defined for {change.Action}")
 							};
 
 							await task;

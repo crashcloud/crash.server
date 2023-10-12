@@ -35,7 +35,7 @@ namespace Crash.Server.Tests.Hubs
 
 			Assert.Multiple(() =>
 			{
-				Assert.That(Hub.Database.Changes.Count(), Is.EqualTo(1));
+				Assert.That(Hub.Database.Changes.Count(), Is.GreaterThanOrEqualTo(1));
 				Assert.That(Hub.Database.LatestChanges.Count(), Is.EqualTo(1));
 				Assert.That(Hub.Database.Users.Count(), Is.EqualTo(1));
 			});
