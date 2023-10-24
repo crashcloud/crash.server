@@ -48,15 +48,7 @@ namespace Crash.Server.Model
 
 			// Add to Storage
 			await Changes.AddAsync(changeRecord);
-
-			if (TryGetChange(changeRecord.Id, out _))
-			{
-				await SetCurrentComputedChange(changeRecord);
-			}
-			else
-			{
-				await LatestChanges.AddAsync(new MutableChange(changeRecord));
-			}
+			await SetCurrentComputedChange(changeRecord);
 
 			if (!Users.Any(c => c.Name == changeRecord.Owner) &&
 			    !string.IsNullOrEmpty(changeRecord.Owner))
@@ -70,17 +62,14 @@ namespace Crash.Server.Model
 
 		private async Task SetCurrentComputedChange(ImmutableChange newChange)
 		{
-			var latestChange = await LatestChanges.FindAsync(newChange.Id);
-
-			if (latestChange is null)
+			if (!TryGetChange(newChange.Id, out var latestChange))
 			{
-				// TODO : This doesn't have the full payload packet!!
-				await LatestChanges.AddAsync(new MutableChange(newChange));
+				var mutable = ChangeFactory.CreateMutableFromChange(newChange);
+				await LatestChanges.AddAsync(mutable);
 				await SaveChangesAsync();
 				return;
 			}
 
-			// TODO : Does this have the full payload packet??!!
 			var change = ChangeFactory.CombineRecords(latestChange, newChange);
 			LatestChanges.Remove(latestChange);
 			await LatestChanges.AddAsync(change);
@@ -108,10 +97,10 @@ namespace Crash.Server.Model
 			var result = true;
 
 			var temporaryChanges = LatestChanges.Where(c =>
-						 c.Owner == user &&
-						 c.Action.HasFlag(ChangeAction.Temporary));
+				c.Owner == user &&
+				c.Action.HasFlag(ChangeAction.Temporary));
 
-			await temporaryChanges.ForEachAsync(async (change) =>
+			await temporaryChanges.ForEachAsync(async change =>
 			{
 				var doneChange = ChangeFactory.CreateDoneRecord(change);
 				var addResult = await AddChangeAsync(doneChange);

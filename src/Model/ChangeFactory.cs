@@ -1,7 +1,4 @@
-﻿using System.Text.Encodings.Web;
-using System.Text.Json;
-
-using Crash.Changes.Utils;
+﻿using Crash.Changes.Utils;
 
 namespace Crash.Server.Model
 {
@@ -30,10 +27,7 @@ namespace Crash.Server.Model
 		{
 			return new ImmutableChange
 			{
-				Id = id,
-				Action = ChangeAction.Unlocked,
-				Stamp = DateTime.UtcNow,
-				Type = type
+				Id = id, Action = ChangeAction.Unlocked, Stamp = DateTime.UtcNow, Type = type
 			};
 		}
 
@@ -68,11 +62,22 @@ namespace Crash.Server.Model
 				Id = change.Id,
 				Owner = change.Owner,
 				Stamp = DateTime.Now,
-				Type = change.Type,
+				Type = change.Type
 				// Payload = change.Payload
 			};
 
 			return doneRecord;
+		}
+
+		public static MutableChange CreateMutableFromChange(IChange recievedChange)
+		{
+			PayloadUtils.TryGetPayloadFromChange(recievedChange, out var packet);
+
+			return MutableChange.CreateWithPacket(recievedChange.Id,
+				recievedChange.Owner,
+				packet,
+				recievedChange.Type,
+				recievedChange.Action);
 		}
 
 		public static MutableChange CombineRecords(IChange previousRecord, IChange newRecord)
@@ -89,7 +94,7 @@ namespace Crash.Server.Model
 
 			var combinedId = previousRecord.Id;
 			if (previousRecord.Id == Guid.Empty ||
-				previousRecord.Id != newRecord.Id)
+			    previousRecord.Id != newRecord.Id)
 			{
 				throw new ArgumentException("Id is Invalid!");
 			}
@@ -98,27 +103,13 @@ namespace Crash.Server.Model
 			PayloadUtils.TryGetPayloadFromChange(newRecord, out var newPacket);
 			var payload = PayloadUtils.Combine(previousPacket, newPacket);
 
-			var options = new JsonSerializerOptions
-			{
-				AllowTrailingCommas = true,
-				IgnoreReadOnlyFields = true,
-				IgnoreReadOnlyProperties = true,
-				Encoder = JavaScriptEncoder.Default
-				// Encoder = JavaScriptEncoder.Create(UnicodeRanges.All)
-			};
-
-			MutableChange result = new()
-			{
-				Id = combinedId,
-				Stamp = DateTime.UtcNow,
-				Owner = newRecord.Owner ?? previousRecord.Owner,
-				Payload = JsonSerializer.Serialize(payload, options),
-				Type = previousRecord.Type,
-				Action = ChangeUtils.CombineActions(previousRecord.Action, newRecord.Action) |
-						 ChangeAction.Transform | ChangeAction.Update
-			};
-
-			return result;
+			return MutableChange.CreateWithPacket(
+				combinedId,
+				newRecord.Owner ?? previousRecord.Owner,
+				payload,
+				previousRecord.Type,
+				ChangeUtils.CombineActions(previousRecord.Action, newRecord.Action)
+			);
 		}
 	}
 }

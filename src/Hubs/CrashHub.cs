@@ -250,6 +250,7 @@ namespace Crash.Server.Hubs
 				default:
 					{
 						var currentActions = new List<ChangeAction>();
+						// This only works because Add is First!
 						foreach (var action in Enum.GetValues<ChangeAction>())
 						{
 							if (!change.Action.HasFlag(action))

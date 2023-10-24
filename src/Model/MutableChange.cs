@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 
 namespace Crash.Server.Model
 {
@@ -8,22 +10,19 @@ namespace Crash.Server.Model
 	/// </summary>
 	public sealed record MutableChange : IChange
 	{
+		private static readonly JsonSerializerOptions options = new()
+		{
+			AllowTrailingCommas = true,
+			IgnoreReadOnlyFields = true,
+			IgnoreReadOnlyProperties = true,
+			Encoder = JavaScriptEncoder.Default
+			// Encoder = JavaScriptEncoder.Create(UnicodeRanges.All)
+		};
+
 		/// <summary>Deserialization Constructor</summary>
 		public MutableChange()
 		{
 			Id = Guid.NewGuid();
-		}
-
-		/// <summary>Creates a new Immutable Change</summary>
-		public MutableChange(IChange change) : this()
-		{
-			Stamp = change.Stamp;
-			Id = change.Id;
-			Owner = change.Owner;
-			// TODO : Make sure this payload contains all the necessary parts
-			Payload = change.Payload;
-			Type = change.Type;
-			Action = change.Action;
 		}
 
 		/// <summary>The Date of Creation</summary>
@@ -44,5 +43,22 @@ namespace Crash.Server.Model
 
 		/// <inheritdoc />
 		public ChangeAction Action { get; set; }
+
+		public static MutableChange CreateWithPacket(Guid id,
+			string owner,
+			PayloadPacket packet,
+			string type,
+			ChangeAction action)
+		{
+			return new MutableChange
+			{
+				Id = id,
+				Stamp = DateTime.UtcNow,
+				Owner = owner,
+				Payload = JsonSerializer.Serialize(packet, options),
+				Type = type,
+				Action = action | ChangeAction.Transform | ChangeAction.Update
+			};
+		}
 	}
 }
