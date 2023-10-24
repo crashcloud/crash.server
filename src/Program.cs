@@ -3,7 +3,6 @@ using Crash.Server.Model;
 
 namespace Crash.Server
 {
-
 	public class Program
 	{
 		/// <summary>Creates an instance of the Crash WebApplication</summary>
@@ -25,17 +24,13 @@ namespace Crash.Server
 
 			var webBuilder = WebApplication.CreateBuilder(args);
 
-			/* TODO : Add back in appsettings
 			webBuilder.Services.AddSignalR()
 				.AddHubOptions<CrashHub>(hubOptions =>
 				{
-
 				})
 				.AddJsonProtocol(jsonOptions =>
 				{
-
 				});
-			i*/
 
 			webBuilder.Services.AddDbContext<CrashContext>(options =>
 				options.UseSqlite($"Data Source={argHandler.DatabaseFileName}"));
