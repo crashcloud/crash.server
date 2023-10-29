@@ -99,8 +99,19 @@ namespace Crash.Server.Model
 				throw new ArgumentException("Id is Invalid!");
 			}
 
-			PayloadUtils.TryGetPayloadFromChange(previousRecord, out var previousPacket);
-			PayloadUtils.TryGetPayloadFromChange(newRecord, out var newPacket);
+			var previousPacket = new PayloadPacket();
+			var newPacket = new PayloadPacket();
+
+			if (previousRecord?.Payload is not null)
+			{
+				PayloadUtils.TryGetPayloadFromChange(previousRecord, out previousPacket);
+			}
+
+			if (newRecord?.Payload is not null)
+			{
+				PayloadUtils.TryGetPayloadFromChange(newRecord, out newPacket);
+			}
+
 			var payload = PayloadUtils.Combine(previousPacket, newPacket);
 
 			return MutableChange.CreateWithPacket(

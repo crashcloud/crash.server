@@ -158,6 +158,7 @@ namespace Crash.Server.Hubs
 			await Clients.Caller.InitializeUsers(users);
 		}
 
+		// TODO : Save the last Camera alongside the User so when you log in it is where you left off
 		/// <summary>Add Change to SqLite DB and notify other clients</summary>
 		private async Task CameraChange(Change change)
 		{
