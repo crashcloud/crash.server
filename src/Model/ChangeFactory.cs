@@ -1,10 +1,22 @@
-﻿using Crash.Changes.Utils;
+﻿using System.Text.Encodings.Web;
+using System.Text.Json;
+
+using Crash.Changes.Utils;
 
 namespace Crash.Server.Model
 {
 	/// <summary>Creates Changes</summary>
 	public static class ChangeFactory
 	{
+		private static readonly JsonSerializerOptions options = new()
+		{
+			AllowTrailingCommas = true,
+			IgnoreReadOnlyFields = true,
+			IgnoreReadOnlyProperties = true,
+			Encoder = JavaScriptEncoder.Default
+			// Encoder = JavaScriptEncoder.Create(UnicodeRanges.All)
+		};
+
 		/// <summary>Creates a Delete Record</summary>
 		/// <param name="id">The id of the Change to lock</param>
 		public static ImmutableChange CreateDeleteRecord(Guid id)
@@ -75,51 +87,20 @@ namespace Crash.Server.Model
 
 			return MutableChange.CreateWithPacket(recievedChange.Id,
 				recievedChange.Owner,
-				packet,
+				JsonSerializer.Serialize(packet, options),
 				recievedChange.Type,
 				recievedChange.Action);
 		}
 
 		public static MutableChange CombineRecords(IChange previousRecord, IChange newRecord)
 		{
-			if (previousRecord is null)
-			{
-				throw new ArgumentException($"{nameof(previousRecord)} is null");
-			}
-
-			if (newRecord is null)
-			{
-				throw new ArgumentException($"{nameof(newRecord)} is null");
-			}
-
-			var combinedId = previousRecord.Id;
-			if (previousRecord.Id == Guid.Empty ||
-			    previousRecord.Id != newRecord.Id)
-			{
-				throw new ArgumentException("Id is Invalid!");
-			}
-
-			var previousPacket = new PayloadPacket();
-			var newPacket = new PayloadPacket();
-
-			if (previousRecord?.Payload is not null)
-			{
-				PayloadUtils.TryGetPayloadFromChange(previousRecord, out previousPacket);
-			}
-
-			if (newRecord?.Payload is not null)
-			{
-				PayloadUtils.TryGetPayloadFromChange(newRecord, out newPacket);
-			}
-
-			var payload = PayloadUtils.Combine(previousPacket, newPacket);
-
+			var combinedChange = ChangeUtils.CombineChanges(previousRecord, newRecord);
 			return MutableChange.CreateWithPacket(
-				combinedId,
-				newRecord.Owner ?? previousRecord.Owner,
-				payload,
-				previousRecord.Type,
-				ChangeUtils.CombineActions(previousRecord.Action, newRecord.Action)
+				combinedChange.Id,
+				combinedChange.Owner,
+				combinedChange.Payload,
+				combinedChange.Type,
+				combinedChange.Action
 			);
 		}
 	}

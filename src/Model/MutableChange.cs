@@ -1,6 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Text.Encodings.Web;
-using System.Text.Json;
 
 namespace Crash.Server.Model
 {
@@ -10,15 +8,6 @@ namespace Crash.Server.Model
 	/// </summary>
 	public sealed record MutableChange : IChange
 	{
-		private static readonly JsonSerializerOptions options = new()
-		{
-			AllowTrailingCommas = true,
-			IgnoreReadOnlyFields = true,
-			IgnoreReadOnlyProperties = true,
-			Encoder = JavaScriptEncoder.Default
-			// Encoder = JavaScriptEncoder.Create(UnicodeRanges.All)
-		};
-
 		/// <summary>Deserialization Constructor</summary>
 		public MutableChange()
 		{
@@ -46,7 +35,7 @@ namespace Crash.Server.Model
 
 		public static MutableChange CreateWithPacket(Guid id,
 			string owner,
-			PayloadPacket packet,
+			string packet,
 			string type,
 			ChangeAction action)
 		{
@@ -55,7 +44,7 @@ namespace Crash.Server.Model
 				Id = id,
 				Stamp = DateTime.UtcNow,
 				Owner = owner,
-				Payload = JsonSerializer.Serialize(packet, options),
+				Payload = packet,
 				Type = type,
 				Action = action | ChangeAction.Transform | ChangeAction.Update
 			};
