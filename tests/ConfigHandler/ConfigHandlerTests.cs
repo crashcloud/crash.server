@@ -1,20 +1,9 @@
-﻿using System.Collections;
-
-using Crash.Server.Settings;
+﻿using Crash.Server.Settings;
 
 namespace Crash.Server.Tests
 {
-
 	public sealed class ConfigHandlerTests
 	{
-
-		[TestCaseSource(nameof(InvalidFilePaths))]
-		public void InvalidConfig(string filePath)
-		{
-			var testConfig = new ConfigHandler(filePath);
-			Assert.NotNull(testConfig);
-		}
-
 		public static IEnumerable InvalidFilePaths
 		{
 			get
@@ -23,6 +12,13 @@ namespace Crash.Server.Tests
 				yield return "missingfile.nosj";
 				yield return "TestFiles//invalid_file_1.json";
 			}
+		}
+
+		[TestCaseSource(nameof(InvalidFilePaths))]
+		public void InvalidConfig(string filePath)
+		{
+			var testConfig = new ConfigHandler(filePath);
+			Assert.NotNull(testConfig);
 		}
 	}
 }

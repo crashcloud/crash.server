@@ -1,32 +1,66 @@
-﻿namespace Crash.Server.Tests.Endpoints
-{
+﻿// ReSharper disable HeapView.BoxingAllocation
 
-	// TODO : Should Add verify that given Change has Add Action?
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+
+namespace Crash.Server.Tests.Endpoints
+{
 	public sealed class Add : CrashHubEndpoints
 	{
-		[TestCaseSource(nameof(ValidChanges))]
-		public async Task Add_Succesful(Change change)
+		private static bool EqualChanges(IChange left, IChange right)
 		{
-			var currCount = _crashHub.Count;
+			if (left.Id != right.Id)
+			{
+				return false;
+			}
 
-			await _crashHub.Add(change.Owner, change);
-			Assert.That(_crashHub.Count, Is.EqualTo(currCount + 1));
+			if (left.Owner != right.Owner)
+			{
+				return false;
+			}
 
-			Assert.That(_crashHub.TryGet(change.Id, out var changeOut), Is.True);
-			Assert.That(change, Is.EqualTo(changeOut));
+			if (left.Action != right.Action)
+			{
+				return false;
+			}
+
+			if (left.Payload != right.Payload)
+			{
+				return false;
+			}
+
+			if (left.Stamp != right.Stamp)
+			{
+				return false;
+			}
+
+			if (left.Type != right.Type)
+			{
+				return false;
+			}
+
+			return true;
 		}
 
-		[TestCaseSource(nameof(ValidChanges))]
+		[TestCaseSource(nameof(ValidAddChanges))]
+		public async Task Add_Successful(Change change)
+		{
+			var currCount = _crashHub.Database.Changes.Count();
+
+			await _crashHub.PushChange(change);
+			Assert.That(_crashHub.Database.Changes.Count(), Is.EqualTo(currCount + 1));
+			Assert.That(_crashHub.Database.TryGetChange(change.Id, out var changeOut), Is.True);
+			Assert.That(EqualChanges(change, changeOut), Is.True);
+		}
+
+		[TestCaseSource(nameof(InvalidAddChanges))]
 		public async Task Add_Failure(Change change)
 		{
-			Assert.That(_crashHub.Count, Is.EqualTo(0));
+			var currCount = _crashHub.Database.Changes.Count();
 
-			await _crashHub.Add(null, change);
-			await _crashHub.Add(null, change);
-			await _crashHub.Add(null, null);
-			await _crashHub.Add(change.Owner, null);
-
-			Assert.That(_crashHub.Count, Is.EqualTo(0));
+			await _crashHub.PushChange(change);
+			Assert.That(_crashHub.Database.Changes.Count(), Is.EqualTo(currCount));
+			Assert.That(_crashHub.Database.TryGetChange(change.Id, out var changeOut), Is.False);
+			Assert.That(changeOut, Is.Null);
 		}
 	}
 }

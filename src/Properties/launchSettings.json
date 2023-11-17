@@ -2,13 +2,13 @@
 	"profiles": {
 		"Crash.Server": {
 			"commandName": "Project",
-			"commandLineArgs": "--urls http://0.0.0.0:5000",
+			"commandLineArgs": "--urls http://0.0.0.0:8080 --reset true",
 			"launchBrowser": true,
 			"environmentVariables": {
 				"ASPNETCORE_ENVIRONMENT": "Development"
 			},
 			"dotnetRunMessages": true,
-			"applicationUrl": "https://localhost:7141;http://localhost:5141"
+			"applicationUrl": "http://0.0.0.0:8080"
 		},
 		"Crash.Server.InRhino": {
 			"commandName": "Executable",
@@ -30,12 +30,12 @@
 			"useSSL": true
 		}
 	},
-  "iisSettings": {
-    "windowsAuthentication": false,
-    "anonymousAuthentication": true,
-    "iisExpress": {
-      "applicationUrl": "http://localhost:31474",
-      "sslPort": 44346
-    }
-  }
+	"iisSettings": {
+		"windowsAuthentication": false,
+		"anonymousAuthentication": true,
+		"iisExpress": {
+			"applicationUrl": "http://localhost:31474",
+			"sslPort": 44346
+		}
+	}
 }

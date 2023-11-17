@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
-		<TargetFrameworks>net7.0</TargetFrameworks>
-		<RuntimeIdentifiers>win-x64;win-x86;osx-x64;osx-arm64</RuntimeIdentifiers>
+		<TargetFramework>net7.0</TargetFramework>
+		<RuntimeIdentifiers>win-x64;win-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Title>Crash.Server</Title>
@@ -14,7 +14,7 @@
 		<ApplicationIcon>logo.ico</ApplicationIcon>
 		<UserSecretsId>4fb370be-a5a8-47da-b302-e271468d44a7</UserSecretsId>
 		<Version>$(AssemblyVersion)</Version>
-		<AssemblyVersion>1.3</AssemblyVersion>
+		<AssemblyVersion>1.4.0</AssemblyVersion>
 		<FileVersion>$(AssemblyVersion)</FileVersion>
 		<Authors>Callum Sykes, Curtis Wensley, Erika Santos, Lukas Fuhrimann, Morteza Karimi, Moustafa El-Sawy, Russell Feathers</Authors>
 		<Company>Crash</Company>
@@ -23,7 +23,7 @@
 		<TypeScriptJSXEmit>none</TypeScriptJSXEmit>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<IncludeSymbols>True</IncludeSymbols>
-		<AnalysisLevel>6.0-recommended</AnalysisLevel>
+		<AnalysisLevel>7.0-recommended</AnalysisLevel>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<ErrorReport>send</ErrorReport>
 	</PropertyGroup>
@@ -32,44 +32,42 @@
 		<!--<PublishDir>..\Crash\bin\$(Configuration)\net48\Server\$(RuntimeIdentifier)\</PublishDir>-->
 		<PublishSingleFile>false</PublishSingleFile>
 		<SelfContained>false</SelfContained>
+
 		<PublishTrimmed>false</PublishTrimmed>
 	</PropertyGroup>
-		
-	<PropertyGroup Condition="$(Publish) == ''">
-		<RuntimeIdentifier Condition="$([MSBuild]::IsOSPlatform(Windows))">win-x64</RuntimeIdentifier>
-		<RuntimeIdentifier Condition="$([MSBuild]::IsOSPlatform(osx))">osx-x64</RuntimeIdentifier>
-		<!--<OutputPath>..\Crash\bin\$(Configuration)\net48\Server\$(RuntimeIdentifier)\</OutputPath>-->
-		<AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
-		<AppendRuntimeIdentifierToOutputPath>False</AppendRuntimeIdentifierToOutputPath>
-	</PropertyGroup>
 
 	<ItemGroup>
-		<Content Include="logo.ico" />
+		<Content Include="logo.ico"/>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Include="..\README.md">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Crash.Changes" Version="1.0.2" />
+		<PackageReference Include="Crash.Changes" Version="1.1.3-wip"/>
 		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.10" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="6.0.10" />
-		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
-		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.2" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.10" />
-		<PackageReference Include="System.Text.Json" Version="7.0.2" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.9"/>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="7.0.9"/>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="7.0.9"/>
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0"/>
+		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.5"/>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.9">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="System.Text.Json" Version="7.0.2"/>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Using Include="Crash.Changes" />
+		<Using Include="Crash.Changes"/>
 	</ItemGroup>
+
 
 </Project>

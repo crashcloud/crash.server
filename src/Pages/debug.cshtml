@@ -1,0 +1,142 @@
+@page
+@model Crash.Server.Pages.Debug
+
+@{
+	Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+	<title>Debug Page</title>
+</head>
+<body>
+<div>
+	<table>
+		<tr>
+			<td>
+				<a>Name</a>
+			</td>
+			<td>
+				<a>Value</a>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<a>OS </a>
+			</td>
+			<td>
+				<a>@Environment.OSVersion</a>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<a>DOTNET </a>
+			</td>
+			<td>
+				<a>@Environment.Version</a>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<a>CPU # </a>
+			</td>
+			<td>
+				<a>@Environment.ProcessorCount</a>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<a>Process </a>
+			</td>
+			<td>
+				<a>@Environment.ProcessPath</a>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<a>Dir </a>
+			</td>
+			<td>
+				<a>@Environment.CurrentDirectory</a>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<a>User</a>
+			</td>
+			<td>
+				<a>@Environment.UserName</a>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<a>64BitOS </a>
+			</td>
+			<td>
+				<a>@Environment.Is64BitOperatingSystem</a>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<a>64BitExe</a>
+			</td>
+			<td>
+				<a>@Environment.Is64BitProcess</a>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<a>args</a>
+			</td>
+			<td>
+				<a>@string.Join(", \t\t > ", Environment.GetCommandLineArgs())</a>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<a>vars</a>
+			</td>
+			<td>
+				<a>@string.Join(", \t\t > ", Environment.GetEnvironmentVariables())</a>
+			</td>
+		</tr>
+
+		<tr>
+			<td>
+				<a href="/users/">Users</a>
+			</td>
+			<td>
+				<a>@Model.Context.Users.Count()</a>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<a href="/changes/">Changes</a>
+			</td>
+			<td>
+				<a>@Model.Context.Changes.Count()</a>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<a href="/latest/">Latest </a>
+			</td>
+			<td>
+				<a>@Model.Context.LatestChanges.Count()</a>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<a>Tracker </a>
+			</td>
+			<td>
+				<a>@Model.Context.ChangeTracker</a>
+			</td>
+		</tr>
+	</table>
+
+</div>
+</body>
+</html>

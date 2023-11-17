@@ -1,47 +1,60 @@
-﻿using System.Diagnostics;
-
-using Crash.Server;
+﻿using Crash.Server.Hubs;
 using Crash.Server.Model;
-using Crash.Server.Settings;
 
-using Microsoft.EntityFrameworkCore;
-
-// TODO : Improve logging
-
-var builder = WebApplication.CreateBuilder(args);
-var argHandler = new ArgumentHandler();
-
-argHandler.EnsureDefaults();
-argHandler.ParseArgs(args);
-if (argHandler.Exit)
+namespace Crash.Server
 {
-	return;
+	public class Program
+	{
+		/// <summary>Creates an instance of the Crash WebApplication</summary>
+		public static WebApplication CreateApplication(params string[] args)
+		{
+			var argHandler = new ArgumentHandler();
+
+			argHandler.EnsureDefaults();
+			argHandler.ParseArgs(args);
+			if (argHandler.Exit)
+			{
+				return null;
+			}
+
+			if (argHandler.ResetDB && File.Exists(argHandler.DatabaseFileName))
+			{
+				File.Delete(argHandler.DatabaseFileName);
+			}
+
+			var webBuilder = WebApplication.CreateBuilder(args);
+
+			webBuilder.Services.AddSignalR()
+				.AddHubOptions<CrashHub>(hubOptions =>
+				{
+				})
+				.AddJsonProtocol(jsonOptions =>
+				{
+				});
+
+			webBuilder.Services.AddDbContext<CrashContext>(options =>
+				options.UseSqlite($"Data Source={argHandler.DatabaseFileName}"));
+
+			// Do we need this?
+			webBuilder.WebHost.UseUrls(argHandler.URL);
+			webBuilder.Services.AddRazorPages();
+
+			var app = webBuilder.Build();
+
+			app.MapHub<CrashHub>("/Crash");
+			app.UseHttpsRedirection();
+			app.UseStaticFiles();
+			app.UseRouting();
+			app.MapRazorPages();
+
+			app.MigrateDatabase<CrashContext>();
+			return app;
+		}
+
+		public static void Main(string[] args)
+		{
+			var app = CreateApplication(args);
+			app.Run();
+		}
+	}
 }
-
-var config = new ConfigHandler();
-
-builder.Services.AddSignalR()
-	.AddHubOptions<CrashHub>((hubOptions) =>
-		config.Crash.SignalR.BuildCrashHubConfig(hubOptions))
-	.AddJsonProtocol((jsonOptions) =>
-		config.Crash.SignalR.BuildJsonConfig(jsonOptions));
-
-builder.Services.AddDbContext<CrashContext>(options =>
-			   options.UseSqlite($"Data Source={argHandler.DatabaseFileName}"));
-
-// Do we need this?
-// builder.WebHost.UseUrls(argHandler.URL);
-
-var app = builder.Build();
-
-// TODO : Make a nice little webpage
-app.MapGet("/", () => "Welcome to Crash!");
-app.MapHub<CrashHub>("/Crash");
-
-if (Debugger.IsAttached)
-{
-	app.MapGet("/debug", () => "Debugging is enabled!");
-}
-
-app.MigrateDatabase<CrashContext>();
-app.Run();

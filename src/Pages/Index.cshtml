@@ -1,0 +1,35 @@
+@page
+@model Crash.Server.Pages.Index
+
+@{
+	Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+	<title>Welcome to Crash!</title>
+</head>
+<body>
+<div>
+	<div id="wifi"></div>
+</div>
+</body>
+<style>
+body {
+	background-size: 500px, 500px;
+	background-image: url(media/crash-working.png);
+}
+#wifi {
+	width: 400px;
+	height: 300px;
+	background-repeat: no-repeat;
+	margin: auto;
+	background-size: 400px;
+	position: absolute;
+	left: 0; right: 0; top: 0; bottom: 0;
+	background-image: url(media/crash-wifi.png);
+}
+</style>
+</html>

@@ -1,13 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using SQLitePCL;
 
 namespace Crash.Server
 {
-
 	public static class Extensions
 	{
-
 		/// <summary>
-		/// Creates new Database based on DbContext
+		///     Creates new Database based on DbContext
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="webHost"></param>
@@ -15,12 +13,14 @@ namespace Crash.Server
 		/// <exception cref="InvalidOperationException"></exception>
 		public static IHost MigrateDatabase<T>(this IHost webHost) where T : DbContext
 		{
-			SQLitePCL.Batteries.Init();
+			Batteries.Init();
 			var serviceScopeFactory = (IServiceScopeFactory?)webHost
 				.Services.GetService(typeof(IServiceScopeFactory));
 
 			if (serviceScopeFactory == null)
+			{
 				throw new InvalidOperationException("Cannot Get IServiceScopeFactory");
+			}
 
 			using (var scope = serviceScopeFactory.CreateScope())
 			{
