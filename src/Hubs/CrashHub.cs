@@ -193,7 +193,7 @@ namespace Crash.Server.Hubs
 				return;
 			}
 
-			switch (change.Type)
+			switch (change.Type.ToUpperInvariant())
 			{
 				case CrashDoneChange:
 					await DoneRange(ids);
