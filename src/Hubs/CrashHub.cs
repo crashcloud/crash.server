@@ -31,7 +31,6 @@ namespace Crash.Server.Hubs
 		{
 			// Validate
 			if (!HubUtils.IsChangeValid(change) ||
-			    !HubUtils.IsPayloadValid(change) ||
 			    !change.HasFlag(ChangeAction.Add))
 			{
 				Logger.CouldNotAddChange();
