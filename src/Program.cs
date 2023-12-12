@@ -28,44 +28,27 @@ namespace Crash.Server
 			}
 
 			var webBuilder = WebApplication.CreateBuilder(args);
-			var configuration = webBuilder.Configuration;
+			var crashLogger = new CrashLoggerProvider();
+			webBuilder.Logging.AddProvider(crashLogger);
 
-			
 			webBuilder.Services.AddSignalR()
 				.AddHubOptions<CrashHub>(hubOptions =>
 				{
-					hubOptions.MaximumReceiveMessageSize = 65535L;
-					return;
-					
-					var crashHubConfig = configuration.GetSection("CrashHub");
-					
-					hubOptions.MaximumParallelInvocationsPerClient = crashHubConfig.GetValue<int>(nameof(HubOptions.MaximumParallelInvocationsPerClient));
-					hubOptions.MaximumReceiveMessageSize = crashHubConfig.GetValue<long?>(nameof(HubOptions.MaximumReceiveMessageSize));
-					hubOptions.StreamBufferCapacity = crashHubConfig.GetValue<int?>(nameof(HubOptions.StreamBufferCapacity));
-					hubOptions.KeepAliveInterval = crashHubConfig.GetValue<TimeSpan?>(nameof(HubOptions.KeepAliveInterval));
-					hubOptions.HandshakeTimeout = crashHubConfig.GetValue<TimeSpan?>(nameof(HubOptions.HandshakeTimeout));
-					hubOptions.EnableDetailedErrors = crashHubConfig.GetValue<bool?>(nameof(HubOptions.EnableDetailedErrors));
+					var crashConfig = webBuilder.Configuration.GetRequiredSection("Crash");
+					var signalRConfig = crashConfig.GetRequiredSection("SignalR");
+					hubOptions = signalRConfig.GetRequiredSection("CrashHub").Get<HubOptions<CrashHub>>();
 				})
 				.AddJsonProtocol(jsonOptions =>
 				{
-					var jsonConfig = configuration.GetSection("Json");
-					
-					var jOptions = jsonOptions.PayloadSerializerOptions;
-					jOptions.AllowTrailingCommas = jsonConfig.GetValue<bool>(nameof(JsonSerializerOptions.AllowTrailingCommas));
-					jOptions.DefaultIgnoreCondition = jsonConfig.GetValue<JsonIgnoreCondition>(nameof(JsonSerializerOptions.DefaultIgnoreCondition));
-					jOptions.IgnoreReadOnlyFields = jsonConfig.GetValue<bool>(nameof(JsonSerializerOptions.IgnoreReadOnlyFields));
-					jOptions.IgnoreReadOnlyProperties = jsonConfig.GetValue<bool>(nameof(JsonSerializerOptions.IgnoreReadOnlyProperties));
-					jOptions.IncludeFields = jsonConfig.GetValue<bool>(nameof(JsonSerializerOptions.IncludeFields));
-					jOptions.MaxDepth = jsonConfig.GetValue<int>(nameof(JsonSerializerOptions.MaxDepth));
-					jOptions.PropertyNameCaseInsensitive = jsonConfig.GetValue<bool>(nameof(JsonSerializerOptions.PropertyNameCaseInsensitive));
-					jOptions.WriteIndented = jsonConfig.GetValue<bool>(nameof(JsonSerializerOptions.WriteIndented));
-					jOptions.ReadCommentHandling = jsonConfig.GetValue<JsonCommentHandling>(nameof(JsonSerializerOptions.ReadCommentHandling));
-					jOptions.NumberHandling = jsonConfig.GetValue<JsonNumberHandling>(nameof(JsonSerializerOptions.NumberHandling));
+					var crashConfig = webBuilder.Configuration.GetRequiredSection("Crash");
+					var signalRConfig = crashConfig.GetRequiredSection("SignalR");
+					jsonOptions.PayloadSerializerOptions =
+						signalRConfig.GetRequiredSection("Json").Get<JsonSerializerOptions>();
 				});
 
 			webBuilder.Services.AddDbContext<CrashContext>(options =>
 				options.UseSqlite($"Data Source={argHandler.DatabaseFileName}"));
-
+			
 			// Do we need this?
 			webBuilder.WebHost.UseUrls(argHandler.URL);
 			webBuilder.Services.AddRazorPages();
@@ -73,6 +56,13 @@ namespace Crash.Server
 			var app = webBuilder.Build();
 
 			app.MapHub<CrashHub>("/Crash");
+
+			if (app.Environment.IsDevelopment())
+			{
+				app.MapGet("/logging", () => string.Join("\n", crashLogger.Logger.Messages));
+				app.MapGet("/settings", () => app.Configuration.ToString());
+			}
+
 			app.UseHttpsRedirection();
 			app.UseStaticFiles();
 			app.UseRouting();

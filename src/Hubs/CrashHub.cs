@@ -232,11 +232,13 @@ namespace Crash.Server.Hubs
 		{
 			if (change is null)
 			{
+				Logger.ChangeIsNotValid(change);
 				throw new ArgumentNullException("Change was null!");
 			}
 
 			if (change.Type is null)
 			{
+				Logger.ChangeIsNotValid(change);
 				throw new ArgumentNullException("Change.Type was null!");
 			}
 
@@ -342,6 +344,19 @@ namespace Crash.Server.Hubs
 
 			var users = Database.GetUsers();
 			await Clients.Caller.InitializeUsers(users);
+		}
+		
+		public override Task OnDisconnectedAsync(Exception? exception)
+		{
+			var disconnectedMessage = $"Exception : {exception.Message}\n" +
+			                             $"Inner : {exception?.InnerException?.Message}\n" +
+			                             $"Source : {exception.Source}\n" +
+			                             $"Trace : {exception.StackTrace}\n" +
+			                             $"Data : {string.Join(", ", exception.Data)}";
+			
+			Logger.LogCritical(disconnectedMessage);
+			
+			return base.OnDisconnectedAsync(exception);
 		}
 	}
 }
