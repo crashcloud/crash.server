@@ -348,6 +348,9 @@ namespace Crash.Server.Hubs
 		
 		public override Task OnDisconnectedAsync(Exception? exception)
 		{
+			if (exception is null)
+				return Task.CompletedTask;
+			
 			var disconnectedMessage = $"Exception : {exception.Message}\n" +
 			                             $"Inner : {exception?.InnerException?.Message}\n" +
 			                             $"Source : {exception.Source}\n" +
