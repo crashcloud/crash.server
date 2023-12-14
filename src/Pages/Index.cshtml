@@ -1,5 +1,6 @@
 @page
 @model Crash.Server.Pages.Index
+@inject IWebHostEnvironment Env
 
 @{
 	Layout = null;
@@ -15,6 +16,25 @@
 <div>
 	<div id="wifi"></div>
 </div>
+
+<div>
+	@{
+		if (Env.IsDevelopment())
+		{
+			<div id="debugbar">
+				<ul>
+					<a id="config" href="/config"></a>
+					<a id="debug" href="/debug"></a>
+					<a id="latest" href="/latest"></a>
+					<a id="users" href="/users"></a>
+					<a id="changes" href="/changes"></a>
+					<a id="logging" href="/logging"></a>
+				</ul>
+			</div>
+		}
+	}
+</div>
+
 </body>
 <style>
 body {
@@ -31,5 +51,75 @@ body {
 	left: 0; right: 0; top: 0; bottom: 0;
 	background-image: url(media/crash-wifi.png);
 }
+#debugbar
+{
+	width:  auto;
+	height: 32px;
+	background-color: rgba(255, 255, 255, 0.9);
+	left:  20px;
+	bottom: 20px;
+	margin: auto;
+	position: absolute;
+	border: rgba(125, 125, 125, 0.4) 1px solid;
+	border-radius: 2px;
+	padding: 4px;
+}
+
+#debugbar ul
+{
+	display: ruby-base-container;
+	padding: 0;
+	margin: 0;
+}
+
+#debugbar ul a
+{
+	width: 24px;
+	height: 24px;
+	background-repeat: no-repeat;
+	background-size: 24px;
+	background-position: center;
+	margin: 0;
+	opacity: 0.4;
+	display: inline-block;
+	padding: 4px;
+}
+
+#debugbar ul a:hover
+{
+	opacity: 0.8;
+}
+
+#config
+{
+	background-image: url(media/settings.svg);
+}
+
+#debug
+{
+	background-image: url(media/cpu.svg);
+}
+
+#latest
+{
+	background-image: url(media/layers.svg);
+}
+
+#users
+{
+	background-image: url(media/users.svg);
+}
+
+#changes
+{
+	background-image: url(media/archive.svg);
+}
+
+#logging
+{
+	background-image: url(media/alert-triangle.svg);
+}
+
+
 </style>
 </html>
