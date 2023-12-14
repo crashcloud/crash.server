@@ -12,7 +12,7 @@ You can install Crash.Server as a Docker container by running the following comm
 
 ```
 docker pull crashserver/crash.server
-docker run -p 5000:5000 crashserver/crash.server
+docker run -p 8080:8080 crashserver/crash.server
 ```
 
 ### Release
@@ -20,15 +20,6 @@ docker run -p 5000:5000 crashserver/crash.server
 You can download the latest release of Crash.Server from
 the [GitHub Releases](https://github.com/crashcloud/Crash.Server/releases) page. Once you have downloaded the release,
 extract it to a folder of your choice and then run the `crash.server.exe` file.
-
-### Rhino Yak Package
-
-You can also install Crash.Server through Rhino by using the Rhino Yak package manager. To do so, follow these steps:
-
-1. Open Rhino.
-
-2. Run the `PackageManager` Command in the Rhino command prompt
-3. Search for `Crash` and install
 
 ## Contributing
 
