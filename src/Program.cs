@@ -60,7 +60,7 @@ namespace Crash.Server
 			if (app.Environment.IsDevelopment())
 			{
 				app.MapGet("/logging", () => string.Join("\n", crashLogger.Logger.Messages));
-				app.MapGet("/settings", () => app.Configuration.ToString());
+				app.MapGet("/config", () => app.Configuration.AsEnumerable());
 			}
 
 			app.UseHttpsRedirection();
