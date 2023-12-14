@@ -2,6 +2,7 @@
 
 using Crash.Changes.Extensions;
 using Crash.Server.Hubs;
+using Crash.Server.Pages;
 
 namespace Crash.Server.Model
 {
@@ -123,7 +124,7 @@ namespace Crash.Server.Model
 					continue;
 				}
 
-				if (latestChange.HasFlag(ChangeAction.Temporary))
+				if (!latestChange.HasFlag(ChangeAction.Temporary))
 				{
 					continue;
 				}
