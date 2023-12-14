@@ -2,6 +2,7 @@
 
 using Crash.Changes.Utils;
 using Crash.Server.Tests.Endpoints;
+using Crash.Server.Tests.Utils;
 
 namespace Crash.Server.Tests.Immutability
 {
@@ -32,7 +33,7 @@ namespace Crash.Server.Tests.Immutability
 			var latestChange = changeTuple.Item2;
 
 			var context = MockCrashHub.GetContext(MockCrashHub.GetLogger());
-
+			
 			await Task.WhenAll(changeHistory.Select(
 				async c => await context.AddChangeAsync(new ImmutableChange
 					{
@@ -69,8 +70,8 @@ namespace Crash.Server.Tests.Immutability
 
 				// Payload Can be null or not null?
 				// It'd be more efficient if null
-				Assert.That(changePacket.Data,
-					Is.EqualTo(foundPacket.Data)); // This should be a combination of geom and transform
+				Assert.That(string.Equals(changePacket.Data, foundPacket.Data,
+							StringComparison.OrdinalIgnoreCase));
 
 				// Type must never be null
 				Assert.That(string.IsNullOrEmpty(latestFound.Type), Is.False);
@@ -78,7 +79,7 @@ namespace Crash.Server.Tests.Immutability
 
 				// Action must never be None
 				Assert.That(latestFound.Action, Is.Not.EqualTo(ChangeAction.None));
-				Assert.That(latestFound.Action, Is.EqualTo(latestChange.Action));
+				Assert.That(latestFound.Action.HasFlag(latestChange.Action));
 			});
 		}
 

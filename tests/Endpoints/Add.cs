@@ -1,46 +1,14 @@
 ﻿// ReSharper disable HeapView.BoxingAllocation
 
+using Crash.Server.Tests.Utils;
+
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
 
 namespace Crash.Server.Tests.Endpoints
 {
 	public sealed class Add : CrashHubEndpoints
 	{
-		private static bool EqualChanges(IChange left, IChange right)
-		{
-			if (left.Id != right.Id)
-			{
-				return false;
-			}
-
-			if (left.Owner != right.Owner)
-			{
-				return false;
-			}
-
-			if (left.Action != right.Action)
-			{
-				return false;
-			}
-
-			if (left.Payload != right.Payload)
-			{
-				return false;
-			}
-
-			if (left.Stamp != right.Stamp)
-			{
-				return false;
-			}
-
-			if (left.Type != right.Type)
-			{
-				return false;
-			}
-
-			return true;
-		}
-
+		
 		[TestCaseSource(nameof(ValidAddChanges))]
 		public async Task Add_Successful(Change change)
 		{
@@ -49,7 +17,7 @@ namespace Crash.Server.Tests.Endpoints
 			await _crashHub.PushChange(change);
 			Assert.That(_crashHub.Database.Changes.Count(), Is.EqualTo(currCount + 1));
 			Assert.That(_crashHub.Database.TryGetChange(change.Id, out var changeOut), Is.True);
-			Assert.That(EqualChanges(change, changeOut), Is.True);
+			Assert.That(EqualityUtils.CompareChanges(change, changeOut), Is.True);
 		}
 
 		[TestCaseSource(nameof(InvalidAddChanges))]

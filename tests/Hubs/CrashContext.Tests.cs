@@ -1,5 +1,6 @@
 ﻿using Crash.Changes.Utils;
 using Crash.Server.Hubs;
+using Crash.Server.Tests.Utils;
 
 namespace Crash.Server.Tests.Hubs
 {
@@ -53,7 +54,7 @@ namespace Crash.Server.Tests.Hubs
 			Assert.That(context.Changes.Count(), Is.EqualTo(changeCount + 1));
 
 			Assert.That(context.TryGetChange(change.Id, out var mutableChange), Is.True);
-			Assert.That(ChangeUtils.CompareChanges(change, mutableChange), Is.True);
+			Assert.That(EqualityUtils.CompareChanges(change, mutableChange), Is.True);
 		}
 
 		[Test]
@@ -104,7 +105,7 @@ namespace Crash.Server.Tests.Hubs
 			var changes = context.GetChanges();
 			Assert.That(changes.Count(), Is.LessThanOrEqualTo(changeCount + 1));
 
-			Assert.That(ChangeUtils.CompareChanges(change, changes.Last()), Is.True);
+			Assert.That(EqualityUtils.CompareChanges(change, changes.Last()), Is.True);
 		}
 
 		[Test]
