@@ -85,7 +85,8 @@ namespace Crash.Server.Model
 
 		internal IEnumerable<MutableChange> GetChanges()
 		{
-			return LatestChanges.ToArray();
+			// We don't need to send Removed Changes
+			return LatestChanges.Where(c => !c.Action.HasFlag(ChangeAction.Remove)).ToArray();
 		}
 
 		internal IEnumerable<string> GetUsers()
