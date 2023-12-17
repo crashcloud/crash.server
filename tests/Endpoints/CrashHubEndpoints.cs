@@ -10,6 +10,12 @@ namespace Crash.Server.Tests.Endpoints
 		protected CrashContext? _crashContext;
 		internal CrashHub? _crashHub;
 
+		[TearDown]
+		public void TearDown()
+		{
+			_crashHub?.Dispose();
+		}
+		
 		// TODO : Move to Test Data
 		public static IEnumerable ValidAddChanges
 		{

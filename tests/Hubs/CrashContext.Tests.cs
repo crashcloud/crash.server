@@ -19,6 +19,12 @@ namespace Crash.Server.Tests.Hubs
 			context = MockCrashHub.GetContext(MockCrashHub.GetLogger());
 		}
 
+		[OneTimeTearDown]
+		public async Task OneTimeTearDownAsync()
+		{
+			context.DisposeAsync();
+		}
+		
 		private ImmutableChange GenerateChange()
 		{
 			var change = new ImmutableChange
