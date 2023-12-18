@@ -5,7 +5,8 @@
 		[Test]
 		public async Task CreateWebApplication()
 		{
-			var app = Program.CreateApplication("--urls", "http://0.0.0.0:8080");
+			Program.CrashServerCreator server = new("--urls", "http://0.0.0.0:8080");
+			var app = server.CreateApplication();
 		}
 	}
 }

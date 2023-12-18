@@ -12,7 +12,7 @@ namespace Crash.Server
 	public class Program
 	{
 
-		private class CrashServerCreator
+		internal class CrashServerCreator
 		{
 
 			private readonly ArgumentHandler _argHandler;
