@@ -4,6 +4,12 @@ Crash.Server is a multi-user communication server designed to work alongside Cra
 by [crashcloud](https://github.com/crashcloud) and is available for use under
 the [MIT License](https://github.com/crashcloud/Crash.Server/blob/main/LICENSE.md).
 
+## Get Hacking
+
+1. Clone the Repo `git clone https://github.com/crashcloud/crash.server.git`
+2. cd into src `cd src`
+3. run `dotnet watch --urls http://0.0.0.0:8080`
+
 ## Installation
 
 ### Docker
