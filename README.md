@@ -6,9 +6,18 @@ the [MIT License](https://github.com/crashcloud/Crash.Server/blob/main/LICENSE.m
 
 ## Get Hacking
 
-1. Clone the Repo `git clone https://github.com/crashcloud/crash.server.git`
-2. cd into src `cd src`
-3. run `dotnet watch --urls http://0.0.0.0:8080`
+1. Clone the Repo
+``` bash
+git clone https://github.com/crashcloud/crash.server.git
+```
+3. Open the src folder
+``` bash
+cd src
+```
+5. run
+``` bash
+dotnet watch --urls http://0.0.0.0:8080
+```
 
 ## Installation
 
