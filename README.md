@@ -10,11 +10,14 @@ the [MIT License](https://github.com/crashcloud/Crash.Server/blob/main/LICENSE.m
 ``` bash
 git clone https://github.com/crashcloud/crash.server.git
 ```
-3. Open the src folder
+2. Open the project in Visual Studio
+
+// NOTE : dotnet run and dotnet watch do not seem to work
+2. Open the src folder
 ``` bash
 cd src
 ```
-5. run
+3. run
 ``` bash
 dotnet watch --urls http://0.0.0.0:8080
 ```
