@@ -185,7 +185,7 @@ namespace Crash.Server
 				uriBuild = new UriBuilder(url);
 				if (uriBuild.Uri.HostNameType is UriHostNameType.IPv4 or UriHostNameType.IPv6)
 				{
-					return ValidateIPAddress(url);
+					return ValidateIpAddress(url);
 				}
 
 				if (uriBuild.Uri.HostNameType is UriHostNameType.Dns)
@@ -207,7 +207,7 @@ namespace Crash.Server
 			return true;
 		}
 
-		private static bool ValidateIPAddress(string url)
+		private static bool ValidateIpAddress(string url)
 		{
 			var uriBuild = new UriBuilder(url);
 

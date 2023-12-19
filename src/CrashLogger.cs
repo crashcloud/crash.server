@@ -43,18 +43,18 @@ namespace Crash.Server
 	
 	internal sealed class CrashLoggerProvider : ILoggerProvider
 	{
-		internal CrashLogger Logger;
+		internal CrashLogger _logger;
 		
 		public ILogger CreateLogger(string categoryName)
 		{
-			Logger ??= new CrashLogger();
+			_logger ??= new CrashLogger();
 			
-			return Logger;
+			return _logger;
 		}
 
 		public void Dispose()
 		{
-			Logger.Dispose();
+			_logger.Dispose();
 		}
 	}
 	

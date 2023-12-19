@@ -60,7 +60,7 @@ namespace Crash.Server
 
 				if (_app.Environment.IsDevelopment())
 				{
-					_app.MapGet("/logging", () => string.Join("\n", crashLogger.Logger.Messages));
+					_app.MapGet("/logging", () => string.Join("\n", crashLogger._logger.Messages));
 					_app.MapGet("/config", () => _app.Configuration.AsEnumerable());
 					_app.MapGet("/services", () =>
 					{
