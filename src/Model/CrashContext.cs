@@ -98,7 +98,7 @@ namespace Crash.Server.Model
 		{
 			var result = true;
 
-			var temporaryChanges = LatestChanges.Where(c =>
+			var temporaryChanges = LatestChanges.AsNoTracking().Where(c =>
 				c.Owner == user &&
 				c.Action.HasFlag(ChangeAction.Temporary));
 

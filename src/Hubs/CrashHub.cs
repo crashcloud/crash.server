@@ -179,9 +179,7 @@ namespace Crash.Server.Hubs
 			// Update
 			var userName = change.Owner;
 
-			var followerIds = Database.Users.Where(u => string.Equals(u.Follows,
-															userName,
-															StringComparison.OrdinalIgnoreCase))
+			var followerIds = Database.Users.AsNoTracking().Where(u => u.Name.Equals(u.Follows))
 													.Select(u => u.Id).ToArray();
 			await Clients.Users(followerIds.Where(id => !string.IsNullOrEmpty(id))).PushChange(change);
 		}
@@ -321,7 +319,7 @@ namespace Crash.Server.Hubs
 				return;
 			}
 
-			var existingUser = Database.Users.FirstOrDefault(r => r.Name == change.Owner);
+			var existingUser = await Database.Users.FindAsync(change.Owner);
 			if (existingUser is null)
 			{
 				var user = User.FromChange(change);
