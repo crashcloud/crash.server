@@ -6,6 +6,7 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Title>Crash.Server</Title>
+		<LangVersion>11</LangVersion>
 		<Description>The Crash Server</Description>
 		<PackageProjectUrl>https://github.com/crashcloud/crash.server</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/crashcloud/crash.server</RepositoryUrl>
@@ -26,6 +27,7 @@
 		<AnalysisLevel>7.0-recommended</AnalysisLevel>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<ErrorReport>send</ErrorReport>
+		<NoWarn>CS8602</NoWarn>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="$(Publish) == 'True'">

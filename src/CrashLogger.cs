@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Reflection.PortableExecutable;
 
 namespace Crash.Server
 {
@@ -35,6 +36,7 @@ namespace Crash.Server
 		
 		public void Dispose()
 		{
+			GC.SuppressFinalize(this);
 		}
 		
 	}
@@ -45,8 +47,7 @@ namespace Crash.Server
 		
 		public ILogger CreateLogger(string categoryName)
 		{
-			if (Logger is null)
-				Logger = new CrashLogger();
+			Logger ??= new CrashLogger();
 			
 			return Logger;
 		}

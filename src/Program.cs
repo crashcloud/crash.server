@@ -29,7 +29,7 @@ namespace Crash.Server
 			}
 			
 			/// <summary>Creates an instance of the Crash WebApplication</summary>
-			internal WebApplication CreateApplication()
+			internal WebApplication? CreateApplication()
 			{
 				if (_argHandler.Exit)
 				{
@@ -41,22 +41,22 @@ namespace Crash.Server
 					File.Delete(_argHandler.DatabaseFileName);
 				}
 
-				var webBuilder_ = WebApplication.CreateBuilder(_args);
+				var webBuilder = WebApplication.CreateBuilder(_args);
 				var crashLogger = new CrashLoggerProvider();
-				webBuilder_.Logging.AddProvider(crashLogger);
+				webBuilder.Logging.AddProvider(crashLogger);
 
 				// Do we need this?
-				webBuilder_.WebHost.UseUrls(_argHandler.URL);
-				webBuilder_.Services.AddRazorPages();
+				webBuilder.WebHost.UseUrls(_argHandler.URL);
+				webBuilder.Services.AddRazorPages();
 
-				webBuilder_.Services.AddDbContext<CrashContext>(options =>
+				webBuilder.Services.AddDbContext<CrashContext>(options =>
 					options.UseSqlite($"Data Source={_argHandler.DatabaseFileName}"));
 
-				webBuilder_.Services.AddSignalR()
-					.AddHubOptions<CrashHub>(ConfigureCrashHuhhubOptions)
+				webBuilder.Services.AddSignalR()
+					.AddHubOptions<CrashHub>(ConfigureCrashHubOptions)
 					.AddJsonProtocol(ConfigureJsonOptions);
 
-				_app = webBuilder_.Build();
+				_app = webBuilder.Build();
 
 				if (_app.Environment.IsDevelopment())
 				{
@@ -76,7 +76,8 @@ namespace Crash.Server
 				_app.MapRazorPages();
 				_app.MigrateDatabase<CrashContext>();
 				_app.MapHub<CrashHub>("/Crash");
-
+				
+				
 				return _app;
 			}
 
@@ -84,11 +85,14 @@ namespace Crash.Server
 			{
 				var crashConfig = _app.Configuration.GetRequiredSection("Crash");
 				var signalRConfig = crashConfig.GetRequiredSection("SignalR");
-				jsonOptions.PayloadSerializerOptions =
-					signalRConfig.GetRequiredSection("Json").Get<JsonSerializerOptions>();
+				var jsonConfig = signalRConfig.GetRequiredSection("Json").Get<JsonSerializerOptions>();
+				if (jsonConfig is null)
+					return;
+				
+				jsonOptions.PayloadSerializerOptions = jsonConfig;
 			}
 
-			private void ConfigureCrashHuhhubOptions(HubOptions<CrashHub> hubOptions)
+			private void ConfigureCrashHubOptions(HubOptions<CrashHub> hubOptions)
 			{
 				var crashConfig = _app.Configuration.GetRequiredSection("Crash");
 				var signalRConfig = crashConfig.GetRequiredSection("SignalR");
@@ -108,7 +112,7 @@ namespace Crash.Server
 		{
 			var serverCreator = new CrashServerCreator(args);
 			var app = serverCreator.CreateApplication();
-			app.Run();
+			app?.Run();
 		}
 	}
 }

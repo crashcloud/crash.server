@@ -36,9 +36,10 @@ namespace Crash.Server.Model
 
 		public string? Owner { get; init; }
 
-		[Timestamp] public string? Payload { get; init; }
+		[Timestamp]
+		public string? Payload { get; init; }
 
-		public string? Type { get; init; }
+		public string Type { get; init; }
 
 		public ChangeAction Action { get; set; }
 	}

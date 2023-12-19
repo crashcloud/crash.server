@@ -94,9 +94,17 @@ namespace Crash.Server.Hubs
 			}
 		}
 
+		// TODO : Does this not require a user?
 		/// <summary>Lock Item in SqLite DB and notify other clients</summary>
 		private async Task Lock(string user, Guid id)
 		{
+			// Validate
+			if (!HubUtils.IsUserValid(user))
+			{
+				Logger.UserIsNotValid(user);
+				return;
+			}
+			
 			// Lock or Unlock impossible if nothing to Lock or Unlock
 			if (!Database.TryGetChange(id, out var latestChange))
 			{
@@ -109,6 +117,7 @@ namespace Crash.Server.Hubs
 			await Database.AddChangeAsync(lockChange);
 		}
 
+		// TODO : Does this not require a user?
 		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
 		private async Task Unlock(string user, Guid id)
 		{
@@ -170,8 +179,11 @@ namespace Crash.Server.Hubs
 			// Update
 			var userName = change.Owner;
 
-			var followerIds = Database.Users.Where(u => u.Follows == userName).Select(u => u.Id).ToArray();
-			await Clients.Users(followerIds).PushChange(change);
+			var followerIds = Database.Users.Where(u => string.Equals(u.Follows,
+															userName,
+															StringComparison.OrdinalIgnoreCase))
+													.Select(u => u.Id).ToArray();
+			await Clients.Users(followerIds.Where(id => !string.IsNullOrEmpty(id))).PushChange(change);
 		}
 
 		private static IEnumerable<Change> MultiplyChange(IEnumerable<Guid> ids, Change change)
@@ -233,20 +245,19 @@ namespace Crash.Server.Hubs
 			if (change is null)
 			{
 				Logger.ChangeIsNotValid(change);
-				throw new ArgumentNullException("Change was null!");
+				throw new ArgumentNullException($"Parameter {nameof(change)} was null!");
 			}
 
 			if (change.Type is null)
 			{
 				Logger.ChangeIsNotValid(change);
-				throw new ArgumentNullException("Change.Type was null!");
+				throw new ArgumentNullException($"{nameof(change)}.Type was null!");
 			}
 
 			var type = change?.Type?.ToUpperInvariant();
 			switch (type)
 			{
-				// TODO : Other types of objects MUST (eventually) also work! What about 3rd party plugins?
-				// TODO : Add tests for this effect!
+				// TODO : Add tests to check 3rd Party Plugins work
 				case CrashGeometryChange:
 				case CrashDoneChange:
 				default:
@@ -357,7 +368,7 @@ namespace Crash.Server.Hubs
 			                             $"Trace : {exception.StackTrace}\n" +
 			                             $"Data : {string.Join(", ", exception.Data)}";
 			
-			Logger.LogCritical(disconnectedMessage);
+			Logger.Critical(disconnectedMessage);
 			
 			return base.OnDisconnectedAsync(exception);
 		}

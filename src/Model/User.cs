@@ -37,9 +37,11 @@ namespace Crash.Server.Model
 				_ => false
 			};
 
-		public bool Equals(string? otherName)
-			=> string.Equals(Name, otherName, StringComparison.InvariantCultureIgnoreCase); 
+		public override int GetHashCode() => Name.ToUpperInvariant().GetHashCode();
 
-		public bool Equals(User other) => Equals(other?.Name);
+		public bool Equals(string? other)
+			=> string.Equals(Name, other, StringComparison.OrdinalIgnoreCase); 
+
+		public bool Equals(User? other) => Equals(other?.Name);
 	}
 }
