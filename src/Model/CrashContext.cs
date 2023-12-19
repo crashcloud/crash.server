@@ -51,7 +51,7 @@ namespace Crash.Server.Model
 			await Changes.AddAsync(changeRecord);
 			await SetCurrentComputedChange(changeRecord);
 
-			if (!Users.Any(c => c.Name == changeRecord.Owner) &&
+			if (!Users.AsNoTracking().Any(c => c.Equals(changeRecord.Owner)) &&
 			    !string.IsNullOrEmpty(changeRecord.Owner))
 			{
 				await Users.AddAsync(new User { Name = changeRecord.Owner, Id = "", Follows = "" });
@@ -86,12 +86,12 @@ namespace Crash.Server.Model
 		internal IEnumerable<MutableChange> GetChanges()
 		{
 			// We don't need to send Removed Changes
-			return LatestChanges.Where(c => !c.Action.HasFlag(ChangeAction.Remove)).ToArray();
+			return LatestChanges.AsNoTracking().Where(c => !c.Action.HasFlag(ChangeAction.Remove)).ToArray();
 		}
 
 		internal IEnumerable<string> GetUsers()
 		{
-			return Users.Select(u => u.Name).ToArray();
+			return Users.AsNoTracking().Select(u => u.Name).ToArray();
 		}
 
 		internal async Task<bool> DoneAsync(string user)
