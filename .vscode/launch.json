@@ -22,47 +22,25 @@
             }
         },
         {
-            "name": "Run Rhino 8 WIP",
+            "name": ".NET 7.0 (Mac)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build-plugin",
-            "program": "/Applications/RhinoWIP.app/Contents/MacOS/Rhinoceros",
-            "args": [],
-            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/bin/Debug/net7.0/Crash.Server",
+            "cwd": "${workspaceFolder}/src/bin/Debug/net7.0/",
+            "args": ["--urls", "http://0.0.0.0:8080", "--reset", "true"],
             "stopAtEntry": false,
-            "console": "internalConsole",
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
             "env": {
-                "RHINO_PLUGIN_PATH": "${workspaceFolder}/Crash/bin/Debug/net48/Crash.rhp"
-            } 
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
         },
-        {
-            "name": "Run Rhino 7 (Mac)",
-            "type": "rhino",
-            "request": "launch",
-            "preLaunchTask": "build-plugin",
-            "program": "/Applications/Rhino 7.app/Contents/MacOS/Rhinoceros",
-            "args": [],
-            "cwd": "${workspaceFolder}",
-            "console": "internalConsole",
-            "env": {
-                "RHINO_PLUGIN_PATH": "${workspaceFolder}/Crash/bin/Debug/net48/Crash.rhp"
-            } 
-        },
-        {
-            "name": "Run Rhino 7 (Windows)",
-            "type": "clr",
-            "request": "launch",
-            "preLaunchTask": "build-plugin",
-            "program": "C:\\Program Files\\Rhino 7\\System\\Rhino.exe",
-            /*"args": [
-                "${workspaceFolder}\\Crash\\bin\\Debug\\net48\\Crash.rhp"
-            ],*/
-            "cwd": "${workspaceFolder}",
-            "console": "internalConsole",
-            "env": {
-            } 
-        }
-
     ],
     "compounds": []
 }
