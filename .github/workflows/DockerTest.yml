@@ -24,7 +24,7 @@
         uses: addnab/docker-run-action@v3
         with:
           image: crashserver:latest
-          run: crashserver
+          run: crash.server
 
       - name: Ping Server
         run: |
