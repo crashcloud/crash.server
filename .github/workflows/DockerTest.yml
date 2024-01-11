@@ -1,0 +1,31 @@
+---
+  name: DockerTest
+  on:
+      pull_request
+  
+  jobs:
+    build:
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v3
+  
+      - uses: docker/setup-buildx-action@v2
+      - uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: "Dockerfile"
+          tags: crashserver:latest
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          push: false
+          
+      - name: Run Crash.Server
+        uses: addnab/docker-run-action@v3
+        with:
+          image: crashserver:latest
+          run: crashserver
+
+      - name: Ping Server
+        run: |
+          ping http://localhost:8080
