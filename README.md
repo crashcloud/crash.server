@@ -37,9 +37,9 @@ docker run -p 8080:8080 crashserver/crash.server
 Or you can build and run it with
 ``` bash
 docker build . --label crash.server --tag crash.server
+docker container create crash.server 
+docker run -p 8080:8080 crash.server
 ```
-
-Just ensure when you 
 
 ### Release
 
