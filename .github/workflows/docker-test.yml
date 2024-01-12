@@ -29,5 +29,6 @@ jobs:
 
       - name: Test
         timeout-minutes: 3
+        if: always()
         run: |
           docker run --rm ${{ env.TEST_TAG }}
