@@ -28,10 +28,17 @@ dotnet watch --urls http://0.0.0.0:8080
 
 You can install Crash.Server as a Docker container by running the following command:
 
-```
+``` bash
 docker pull crashserver/crash.server
 docker run -p 8080:8080 crashserver/crash.server
 ```
+
+Or you can build and run it with
+``` bash
+docker build . --label crash.server --tag crash.server
+```
+
+Just ensure when you 
 
 ### Release
 
