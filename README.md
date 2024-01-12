@@ -13,11 +13,12 @@ git clone https://github.com/crashcloud/crash.server.git
 2. Open the project in Visual Studio
 
 // NOTE : dotnet run and dotnet watch do not seem to work
-2. Open the src folder
+
+3. Open the src folder
 ``` bash
 cd src
 ```
-3. run
+4. run
 ``` bash
 dotnet watch --urls http://0.0.0.0:8080
 ```
@@ -28,10 +29,17 @@ dotnet watch --urls http://0.0.0.0:8080
 
 You can install Crash.Server as a Docker container by running the following command:
 
-```
+``` bash
 docker pull crashserver/crash.server
 docker run -p 8080:8080 crashserver/crash.server
 ```
+
+Or you can build and run it with
+``` bash
+docker build . --label crash.server --tag crash.server
+```
+
+Just ensure when you 
 
 ### Release
 
