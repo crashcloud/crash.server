@@ -3,10 +3,10 @@ name: DockerDeploy
 on:
   workflow_dispatch:
     inputs:
-      branch:
-        description: 'Branch to deploy'
+      version:
+        description: 'Version to deploy'
         required: true
-        default: 'main'
+        default: 'WIP'
 
 jobs:
   dockerhub:
@@ -29,7 +29,7 @@ jobs:
         context: .
         push: true
         tags: |
-          crashserver/crash.server:${{ github.event.inputs.branch }}
+          crashserver/crash.server:${{ github.event.inputs.version }}
           crashserver/crash.server:latest
           
   github:
@@ -53,5 +53,5 @@ jobs:
         context: .
         push: true
         tags: |
-          ghcr.io/${{ github.repository }}:${{ github.event.inputs.branch }}
+          ghcr.io/${{ github.repository }}:${{ github.event.inputs.version }}
           ghcr.io/${{ github.repository }}:latest
