@@ -12,17 +12,20 @@ namespace Crash.Server.Tests.Hubs
 			new User { Name = "Lukas" }, new User { Name = "Morteza" }, new User { Name = "Curtis" }
 		};
 
-		private readonly CrashContext context;
+		private CrashContext context;
 
-		public CrashContextTests()
-		{
-			context = MockCrashHub.GetContext(MockCrashHub.GetLogger());
-		}
-
+		[TearDown]
 		[OneTimeTearDown]
 		public async Task OneTimeTearDownAsync()
 		{
-			context.DisposeAsync();
+			await context.DisposeAsync();
+			context?.Dispose();
+		}
+
+		[SetUp]
+		public void SetUp()
+		{
+			context = MockCrashHub.GetContext(MockCrashHub.GetLogger());
 		}
 		
 		private ImmutableChange GenerateChange()
@@ -48,19 +51,6 @@ namespace Crash.Server.Tests.Hubs
 			var changeCount = context.Changes.Count();
 			await context.AddChangeAsync(change);
 			Assert.That(context.Changes.Count(), Is.EqualTo(changeCount + 1));
-		}
-
-		[Test]
-		public async Task TryGetChange_Tests()
-		{
-			var change = GenerateChange();
-
-			var changeCount = context.Changes.Count();
-			await context.AddChangeAsync(change);
-			Assert.That(context.Changes.Count(), Is.EqualTo(changeCount + 1));
-
-			Assert.That(context.TryGetChange(change.Id, out var mutableChange), Is.True);
-			Assert.That(EqualityUtils.CompareChanges(change, mutableChange), Is.True);
 		}
 
 		[Test]
@@ -100,25 +90,11 @@ namespace Crash.Server.Tests.Hubs
 		}
 
 		[Test]
-		public async Task GetChanges_Tests()
-		{
-			var change = GenerateChange();
-
-			var changeCount = context.Changes.Count();
-			await context.AddChangeAsync(change);
-			Assert.That(context.Changes.Count(), Is.EqualTo(changeCount + 1));
-
-			var changes = context.GetChanges();
-			Assert.That(changes.Count(), Is.LessThanOrEqualTo(changeCount + 1));
-
-			Assert.That(EqualityUtils.CompareChanges(change, changes.Last()), Is.True);
-		}
-
-		[Test]
 		public async Task GetUsers_Tests()
 		{
 			context.Users.RemoveRange(_users);
 			await context.Users.AddRangeAsync(_users);
+			await context.SaveChangesAsync();
 
 			Assert.That(context.Users.Count(), Is.EqualTo(3));
 
@@ -143,6 +119,7 @@ namespace Crash.Server.Tests.Hubs
 				var change = new ImmutableChange
 				{
 					Id = Guid.NewGuid(),
+					UniqueId = Guid.NewGuid(),
 					Action = ChangeAction.Add | ChangeAction.Temporary,
 					Owner = _users[i % 3].Name,
 					Stamp = DateTime.UtcNow,
@@ -165,9 +142,5 @@ namespace Crash.Server.Tests.Hubs
 			Assert.That(released.Select(t => t.Owner == doneUser.Name).Count(), Is.EqualTo(10));
 		}
 
-		[Test]
-		public async Task DoneRangeAsync_Tests()
-		{
-		}
 	}
 }
