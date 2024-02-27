@@ -45,9 +45,23 @@ namespace Crash.Server
 				var crashLogger = new CrashLoggerProvider();
 				webBuilder.Logging.AddProvider(crashLogger);
 
+				var CorsPolicy = "CorsPolicy";
+				
 				// Do we need this?
 				webBuilder.WebHost.UseUrls(_argHandler.URL);
 				webBuilder.Services.AddRazorPages();
+				webBuilder.Services.AddCors(options =>
+				{
+					options.AddPolicy(CorsPolicy, builder =>
+					{
+						builder
+							.AllowCredentials()
+							.WithOrigins("http://localhost:7070")
+							.WithMethods("GET", "POST")
+							.SetIsOriginAllowed(a => true)
+							.AllowAnyHeader();
+					});
+				});
 
 				webBuilder.Services.AddDbContext<CrashContext>(options =>
 					options.UseSqlite($"Data Source={_argHandler.DatabaseFileName}"));
@@ -57,7 +71,8 @@ namespace Crash.Server
 					.AddJsonProtocol(ConfigureJsonOptions);
 
 				_app = webBuilder.Build();
-
+				_app.UseCors(CorsPolicy);
+				
 				if (_app.Environment.IsDevelopment())
 				{
 					_app.MapGet("/logging", () => string.Join("\n", crashLogger._logger.Messages));
@@ -66,7 +81,6 @@ namespace Crash.Server
 					{
 						var crashHubOptionsService = _app.Services.GetService<IConfigureOptions<HubOptions<CrashHub>>>();
 						var connectionHandler = _app.Services.GetService<HubConnectionHandler<CrashHub>>();
-						;
 					});
 				}
 
