@@ -18,7 +18,7 @@ jobs:
           uses: NuGet/setup-nuget@v1
         
         - name: Restore Packages
-          run: nuget restore Crash.Server.sln
+          run: dotnet restore Crash.Server.sln
     
         - uses: actions/setup-dotnet@v3
           with:
