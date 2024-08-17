@@ -7,19 +7,26 @@ the [MIT License](https://github.com/crashcloud/Crash.Server/blob/main/LICENSE.m
 ## Get Hacking
 
 1. Clone the Repo
-``` bash
+
+```bash
 git clone https://github.com/crashcloud/crash.server.git
 ```
-2. Open the project in Visual Studio
+
+2. Open the project in Visual Studio or Rider
+
+3. Hit Run or Debug
 
 // NOTE : dotnet run and dotnet watch do not seem to work
 
 3. Open the src folder
-``` bash
+
+```bash
 cd src
 ```
+
 4. run
-``` bash
+
+```bash
 dotnet watch --urls http://0.0.0.0:8080
 ```
 
@@ -29,17 +36,15 @@ dotnet watch --urls http://0.0.0.0:8080
 
 You can install Crash.Server as a Docker container by running the following command:
 
-``` bash
+```bash
 docker pull crashserver/crash.server
 docker run -p 8080:8080 crashserver/crash.server
 ```
 
 Or you can build and run it with
-``` bash
-docker build . --label crash.server --tag crash.server
-```
 
-Just ensure when you 
+```bash
+docker build . --label crash.server --tag crash.server
 
 ### Release
 
@@ -65,3 +70,4 @@ the [Crash.Server GitHub page](https://github.com/crashcloud/Crash.Server/issues
 ## License
 
 Crash.Server is available for use under the [MIT License](https://github.com/crashcloud/Crash.Server/blob/main/LICENSE).
+```

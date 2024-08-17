@@ -105,6 +105,7 @@ namespace Crash.Server
 				hubOptions.KeepAliveInterval = crashHubOptions.KeepAliveInterval;
 				hubOptions.HandshakeTimeout = crashHubOptions.HandshakeTimeout;
 				hubOptions.EnableDetailedErrors = crashHubOptions.EnableDetailedErrors;
+				hubOptions.ClientTimeoutInterval = crashHubOptions.ClientTimeoutInterval;
 			}
 		}
 

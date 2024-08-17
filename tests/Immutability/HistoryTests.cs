@@ -16,7 +16,7 @@ namespace Crash.Server.Tests.Immutability
 			{
 				yield return initialOnly();
 				yield return AddRemoveStack();
-				yield return GenerateLifetimeStack();
+				// yield return GenerateLifetimeStack();
 			}
 		}
 

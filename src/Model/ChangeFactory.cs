@@ -21,7 +21,7 @@ namespace Crash.Server.Model
 		/// <param name="id">The id of the Change to lock</param>
 		public static ImmutableChange CreateDeleteRecord(Guid id)
 		{
-			return new ImmutableChange { Id = id, Action = ChangeAction.Remove, Stamp = DateTime.UtcNow };
+			return new ImmutableChange { Id = id, Action = ChangeAction.Remove, Stamp = DateTime.UtcNow, Type = "Crash.DeleteChange" };
 		}
 
 		/// <summary>Creates a Lock Record</summary>
