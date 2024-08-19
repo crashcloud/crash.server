@@ -1,5 +1,6 @@
 @page
 @model Crash.Server.Pages.Latest
+@using Crash.Changes.Utils;
 
 @{
 	Layout = null;
@@ -12,7 +13,6 @@
 	<title>Latest Changes</title>
 </head>
 <body>
-<div>
 	<table>
 		<tr>
 			<td>Id</td>
@@ -25,13 +25,14 @@
 
 		@foreach (var change in Model.Context.LatestChanges)
 		{
+			PayloadUtils.TryGetPayloadFromChange(change, out var packet);
 			<tr>
 				<td>@change.Id</td>
 				<td>@change.Action</td>
 				<td>@change.Stamp</td>
 				<td>@change.Type</td>
 				<td>@change.Owner</td>
-				<td>@change.Payload</td>
+				<td>@packet.ToString()</td>
 			</tr>
 		}
 	</table>
