@@ -18,7 +18,9 @@ namespace Crash.Server.Tests.Endpoints
 		{
 			var doneChange = new Change
 			{
-				Type = CrashHub.CrashDoneChange, Action = ChangeAction.Release, Owner = userName
+				Type = CrashHub.CrashDoneChange,
+				Action = ChangeAction.Release,
+				Owner = userName
 			};
 
 			var currentChangesCount = _crashHub.Database.Changes.Count();
@@ -47,7 +49,9 @@ namespace Crash.Server.Tests.Endpoints
 
 			await _crashHub.PushChange(new Change
 			{
-				Owner = string.Empty, Action = ChangeAction.Release, Type = CrashHub.CrashGeometryChange
+				Owner = string.Empty,
+				Action = ChangeAction.Release,
+				Type = CrashHub.CrashGeometryChange
 			});
 
 			Assert.That(tempCount, Is.EqualTo(tempCount));
@@ -59,7 +63,7 @@ namespace Crash.Server.Tests.Endpoints
 			var currCount = _crashHub.Database.Changes.Count();
 			HashSet<string> owners = changes.Select(c => c.Owner).ToHashSet();
 
-			await _crashHub.PushChanges(changes);
+			await _crashHub.PushChangesThroughStream(changes.ToAsyncEnumerable());
 
 			var changesCount = _crashHub.Database.Changes.Count();
 			var inputChangesCount = changes.Count();
@@ -71,7 +75,9 @@ namespace Crash.Server.Tests.Endpoints
 			{
 				var doneChange = new Change
 				{
-					Owner = owner, Type = CrashHub.CrashDoneChange, Action = ChangeAction.Release
+					Owner = owner,
+					Type = CrashHub.CrashDoneChange,
+					Action = ChangeAction.Release
 				};
 				await _crashHub.PushChange(doneChange);
 

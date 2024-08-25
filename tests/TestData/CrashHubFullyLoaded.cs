@@ -119,11 +119,9 @@ namespace Crash.Server.Tests
 
 		public Task DoneRange(IEnumerable<Guid> ids) { return Task.CompletedTask; }
 
-		public Task PushIdenticalChanges(IEnumerable<Guid> ids, Change change) { return Task.CompletedTask; }
-
 		public Task PushChange(Change change) { return Task.CompletedTask; }
 
-		public Task PushChanges(IEnumerable<Change> changes) { return Task.CompletedTask; }
+		public Task PushChangesThroughStream(IAsyncEnumerable<Change> changeStream) { return Task.CompletedTask; }
 
 		public Task InitializeChanges(IEnumerable<Change> changes) { return Task.CompletedTask; }
 

@@ -31,7 +31,7 @@ namespace Crash.Server.Hubs
 		{
 			// Validate
 			if (!HubUtils.IsChangeValid(change) ||
-			    !change.HasFlag(ChangeAction.Add))
+				!change.HasFlag(ChangeAction.Add))
 			{
 				Logger.CouldNotAddChange();
 				return;
@@ -104,7 +104,7 @@ namespace Crash.Server.Hubs
 				Logger.UserIsNotValid(user);
 				return;
 			}
-			
+
 			// Lock or Unlock impossible if nothing to Lock or Unlock
 			if (!Database.TryGetChange(id, out var latestChange))
 			{
@@ -181,61 +181,27 @@ namespace Crash.Server.Hubs
 
 			var followerIds = Database.Users.AsNoTracking().Where(u => u.Name.Equals(u.Follows))
 													.Select(u => u.Id).ToArray();
-			await Clients.Users(followerIds.Where(id => !string.IsNullOrEmpty(id))).PushChange(change);
-		}
 
-		private static IEnumerable<Change> MultiplyChange(IEnumerable<Guid> ids, Change change)
-		{
-			var changes = new Change[ids.Count()];
-			for (var i = 0; i < ids.Count(); i++)
-			{
-				changes[i] = new Change(change) { Id = change.Id };
-			}
-
-			return changes;
-		}
-
-		public async Task PushIdenticalChanges(IEnumerable<Guid> ids, Change change)
-		{
-			if (ids is null || !ids.Any() || change is null)
-			{
-				return;
-			}
-
-			switch (change.Type.ToUpperInvariant())
-			{
-				case CrashDoneChange:
-					await DoneRange(ids);
-					break;
-
-				default:
-					await Task.WhenAll(MultiplyChange(ids, change).Select(PushChangeOnly));
-					break;
-			}
-
-			await Clients.Others.PushIdenticalChanges(ids, change);
+			// TODO : This might stop Cameras sending
+			// await Clients.Users(followerIds.Where(id => !string.IsNullOrEmpty(id))).PushChangesThroughStream(change);
 		}
 
 		public async Task PushChange(Change change)
 		{
-			if (change is null)
-			{
-				return;
-			}
-
 			await PushChangeOnly(change);
 			await Clients.Others.PushChange(change);
 		}
 
-		public async Task PushChanges(IEnumerable<Change> changes)
+		// https://learn.microsoft.com/en-us/aspnet/core/signalr/streaming?view=aspnetcore-8.0#client-to-server-streaming
+		// A hub method automatically becomes a client-to-server streaming hub method when it accepts IAsyncEnumerable<T>.
+		public async Task PushChangesThroughStream(IAsyncEnumerable<Change> changeStream)
 		{
-			if (changes is null || !changes.Any())
+			await foreach (var item in changeStream)
 			{
-				return;
+				await PushChangeOnly(item);
 			}
 
-			await Task.WhenAll(changes.Select(PushChangeOnly));
-			await Clients.Others.PushChanges(changes);
+			await Clients.Others.PushChangesThroughStream(changeStream);
 		}
 
 		private async Task PushChangeOnly(Change change)
@@ -349,25 +315,26 @@ namespace Crash.Server.Hubs
 			await base.OnConnectedAsync();
 
 			var changes = Database.GetChanges();
-			await Clients.Caller.InitializeChanges(changes.Select(c => new Change(c)));
+			var changeStream = changes.Select(c => new Change(c));
+			await Clients.Caller.InitializeChanges(changeStream);
 
 			var users = Database.GetUsers();
 			await Clients.Caller.InitializeUsers(users);
 		}
-		
+
 		public override Task OnDisconnectedAsync(Exception? exception)
 		{
 			if (exception is null)
 				return Task.CompletedTask;
-			
+
 			var disconnectedMessage = $"Exception : {exception.Message}\n" +
-			                             $"Inner : {exception?.InnerException?.Message}\n" +
-			                             $"Source : {exception.Source}\n" +
-			                             $"Trace : {exception.StackTrace}\n" +
-			                             $"Data : {string.Join(", ", exception.Data)}";
-			
+										 $"Inner : {exception?.InnerException?.Message}\n" +
+										 $"Source : {exception.Source}\n" +
+										 $"Trace : {exception.StackTrace}\n" +
+										 $"Data : {string.Join(", ", exception.Data)}";
+
 			Logger.Critical(disconnectedMessage);
-			
+
 			return base.OnDisconnectedAsync(exception);
 		}
 	}
