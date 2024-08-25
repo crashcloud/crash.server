@@ -26,13 +26,17 @@
 		@foreach (var change in Model.Context.LatestChanges)
 		{
 			PayloadUtils.TryGetPayloadFromChange(change, out var packet);
+			var changePayload = $"Data : {@packet.Data}\n" + 
+			$"{@packet.Transform}\n" +
+			$"{string.Join(",", @packet?.Updates?.Select(u => $"{u.Key} : {u.Value}"))}";
+
 			<tr>
 				<td>@change.Id</td>
 				<td>@change.Action</td>
 				<td>@change.Stamp</td>
 				<td>@change.Type</td>
 				<td>@change.Owner</td>
-				<td>@packet.ToString()</td>
+				<td>@changePayload</td>
 			</tr>
 		}
 	</table>

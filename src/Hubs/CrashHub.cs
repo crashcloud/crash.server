@@ -181,61 +181,21 @@ namespace Crash.Server.Hubs
 
 			var followerIds = Database.Users.AsNoTracking().Where(u => u.Name.Equals(u.Follows))
 													.Select(u => u.Id).ToArray();
-			await Clients.Users(followerIds.Where(id => !string.IsNullOrEmpty(id))).PushChange(change);
+
+			// TODO : This might stop Cameras sending
+			// await Clients.Users(followerIds.Where(id => !string.IsNullOrEmpty(id))).PushChangesThroughStream(change);
 		}
 
-		private static IEnumerable<Change> MultiplyChange(IEnumerable<Guid> ids, Change change)
+		// https://learn.microsoft.com/en-us/aspnet/core/signalr/streaming?view=aspnetcore-8.0#client-to-server-streaming
+		// A hub method automatically becomes a client-to-server streaming hub method when it accepts IAsyncEnumerable<T>.
+		public async Task PushChangesThroughStream(IAsyncEnumerable<Change> changeStream)
 		{
-			var changes = new Change[ids.Count()];
-			for (var i = 0; i < ids.Count(); i++)
+			await foreach (var item in changeStream)
 			{
-				changes[i] = new Change(change) { Id = change.Id };
+				await PushChangeOnly(item);
 			}
 
-			return changes;
-		}
-
-		public async Task PushIdenticalChanges(IEnumerable<Guid> ids, Change change)
-		{
-			if (ids is null || !ids.Any() || change is null)
-			{
-				return;
-			}
-
-			switch (change.Type.ToUpperInvariant())
-			{
-				case CrashDoneChange:
-					await DoneRange(ids);
-					break;
-
-				default:
-					await Task.WhenAll(MultiplyChange(ids, change).Select(PushChangeOnly));
-					break;
-			}
-
-			await Clients.Others.PushIdenticalChanges(ids, change);
-		}
-
-		public async Task PushChange(Change change)
-		{
-			if (change is null)
-			{
-				return;
-			}
-
-			await PushChangeOnly(change);
-			await Clients.Others.PushChange(change);
-		}
-
-		public async Task PushChanges(IEnumerable<Change> changes)
-		{
-			if (changes is null || !changes.Any())
-			{
-				return;
-			}
-
-			await Task.WhenAll(changes.Select(PushChangeOnly));
-			await Clients.Others.PushChanges(changes);
+			await Clients.Others.PushChangesThroughStream(changeStream);
 		}
 
 		private async Task PushChangeOnly(Change change)
@@ -349,7 +309,8 @@ namespace Crash.Server.Hubs
 			await base.OnConnectedAsync();
 
 			var changes = Database.GetChanges();
-			await Clients.Caller.InitializeChanges(changes.Select(c => new Change(c)));
+			var changeStream = changes.Select(c => new Change(c));
+			await Clients.Caller.InitializeChanges(changeStream);
 
 			var users = Database.GetUsers();
 			await Clients.Caller.InitializeUsers(users);
