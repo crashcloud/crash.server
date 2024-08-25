@@ -186,6 +186,12 @@ namespace Crash.Server.Hubs
 			// await Clients.Users(followerIds.Where(id => !string.IsNullOrEmpty(id))).PushChangesThroughStream(change);
 		}
 
+		public async Task PushChange(Change change)
+		{
+			await PushChangeOnly(change);
+			await Clients.Others.PushChange(change);
+		}
+
 		// https://learn.microsoft.com/en-us/aspnet/core/signalr/streaming?view=aspnetcore-8.0#client-to-server-streaming
 		// A hub method automatically becomes a client-to-server streaming hub method when it accepts IAsyncEnumerable<T>.
 		public async Task PushChangesThroughStream(IAsyncEnumerable<Change> changeStream)

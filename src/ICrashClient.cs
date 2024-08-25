@@ -10,6 +10,11 @@
 		Task DoneRange(IEnumerable<Guid> ids);
 
 		/// <summary>
+		///     Pushes a single changes at once
+		/// </summary>
+		Task PushChange(Change change);
+
+		/// <summary>
 		///     Pushes many unique changes at once
 		///     An example of this may be copying 10 unique items
 		/// </summary>
