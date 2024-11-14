@@ -10,7 +10,7 @@
           "request": "launch",
           "preLaunchTask": "build",
           // If you have changed target frameworks, make sure to update the program path.
-          "program": "${workspaceFolder}/src/bin/Debug/net8.0/Crash.Server.dll",
+          "program": "${workspaceFolder}/src/bin/Debug/net9.0/Crash.Server.dll",
           "args": [ "--urls", "http://0.1.2.3", "--reset", "true"],
           "cwd": "${workspaceFolder}/src",
           "stopAtEntry": false,
@@ -31,8 +31,8 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/src/bin/Debug/net8.0/Crash.Server",
-            "cwd": "${workspaceFolder}/src/bin/Debug/net8.0/",
+            "program": "${workspaceFolder}/src/bin/Debug/net9.0/Crash.Server",
+            "cwd": "${workspaceFolder}/src/bin/Debug/net9.0/",
             "args": ["--urls", "http://0.0.0.0:8080", "--reset", "true"],
             "stopAtEntry": false,
             "serverReadyAction": {
