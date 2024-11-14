@@ -33,9 +33,9 @@ namespace Crash.Server
 					return null;
 				}
 
-				if (Handler.ResetDB && File.Exists(Handler.DatabaseFileName))
+				if (Handler.ResetDB && File.Exists(Handler.DatabasePath))
 				{
-					File.Delete(Handler.DatabaseFileName);
+					File.Delete(Handler.DatabasePath);
 				}
 
 				var webBuilder = WebApplication.CreateBuilder(args);
@@ -47,7 +47,7 @@ namespace Crash.Server
 				webBuilder.Services.AddRazorPages();
 
 				webBuilder.Services.AddDbContext<CrashContext>(options =>
-					options.UseSqlite($"Data Source={Handler.DatabaseFileName}"));
+					options.UseSqlite($"Data Source={Handler.DatabasePath}"));
 
 				webBuilder.Services.AddSignalR()
 					.AddHubOptions<CrashHub>(ConfigureCrashHubOptions)

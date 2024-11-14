@@ -13,10 +13,10 @@ namespace Crash.Server
 
 		private const string Pattern = @"--([\w]+ [\S]*)";
 		internal const string AppName = "Crash";
-		internal const string DbDirectory = "App_Data";
+		internal const string DbDirectory = "Databases";
 		internal const string DefaultURL = "http://0.0.0.0:8080";
 		private static readonly Version? Vers = typeof(Arguments).Assembly.GetName().Version;
-		internal static string DbName => $"Database_{Vers?.Major}_{Vers?.Minor}_{Vers?.Build}.db";
+		internal static string DbName => $"{Vers?.Major}_{Vers?.Minor}_{Vers?.Build}.db";
 
 		#endregion
 
@@ -26,7 +26,7 @@ namespace Crash.Server
 		public string URL { get; set; } = DefaultURL;
 
 		/// <summary>The file name for the Database</summary>
-		public string DatabaseFileName { get; set; } = DbName;
+		public string DatabasePath { get; set; } = DbName;
 
 		/// <summary>Resets the Database</summary>
 		public bool ResetDB { get; set; } = false;
@@ -42,7 +42,13 @@ namespace Crash.Server
 		public Arguments() { }
 
 		#endregion
+		private static string GetDefaultDatabasePath(string name)
+		{
+			var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+			var databaseDirectory = Path.Combine(appData, AppName, DbDirectory, name);
 
+			return databaseDirectory;
+		}
 
 		public static async Task<Arguments> ParseArgs(string[] args)
 		{
@@ -86,9 +92,14 @@ namespace Crash.Server
 
 			var pathOption = new Option<FileInfo?>(
 				name: "--path",
-				description: "Supply a custom Path for the Database");
+				description: "Supply a custom Path for the Database file");
 			pathOption.AddAlias("-p");
-			pathOption.SetDefaultValue(Arguments.DbName);
+			pathOption.SetDefaultValue(GetDefaultDatabasePath(Arguments.DbName));
+			pathOption.AddValidator(result =>
+			{
+				var fileInfo = result.GetValueForOption(pathOption);
+				if (fileInfo is null) return;
+			});
 
 			var resetOption = new Option<bool>(
 				name: "--reset",
@@ -138,7 +149,13 @@ namespace Crash.Server
 					validatedArgs.URL = uri?.ToString() ?? DefaultURL;
 
 					// TODO : Validate : Must be a file - Does FileInfo Validate?
-					validatedArgs.DatabaseFileName = path?.FullName ?? validatedArgs.DatabaseFileName;
+					var finalPath = path?.FullName ?? GetDefaultDatabasePath(DbName);
+					if (string.IsNullOrEmpty(path.DirectoryName))
+					{
+						finalPath = GetDefaultDatabasePath(path.FullName);
+					}
+
+					validatedArgs.DatabasePath = finalPath;
 					validatedArgs.ResetDB = reset;
 					validatedArgs.LoggingLevel = logLevel;
 
@@ -150,6 +167,7 @@ namespace Crash.Server
 						var build = "4debf41"; // TODO : Embedd
 
 						Console.WriteLine($"\n{name.Name} version {version}, build {build}\n");
+
 						validatedArgs.Exit = true;
 					}
 				}, uriOption, pathOption, resetOption, environmentOptions, appSettingsOptions, loggingLevelOptions, versionOption);
@@ -188,9 +206,9 @@ namespace Crash.Server
 				return;
 			}
 
-			if (File.Exists(DatabaseFileName))
+			if (File.Exists(DatabasePath))
 			{
-				File.Delete(DatabaseFileName);
+				File.Delete(DatabasePath);
 			}
 		}
 

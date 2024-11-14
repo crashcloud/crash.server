@@ -51,8 +51,8 @@ namespace Crash.Server.Model
 			await Changes.AddAsync(changeRecord);
 			await SetCurrentComputedChange(changeRecord);
 
-			if (!Users.AsNoTracking().Any(c => c.Name.Equals(changeRecord.Owner)) &&
-			    !string.IsNullOrEmpty(changeRecord.Owner))
+			if (!Users.AsNoTracking().Any(c => c.Name.Equals(changeRecord.Owner, StringComparison.OrdinalIgnoreCase)) &&
+				!string.IsNullOrEmpty(changeRecord.Owner))
 			{
 				await Users.AddAsync(new User { Name = changeRecord.Owner, Id = "", Follows = "" });
 			}

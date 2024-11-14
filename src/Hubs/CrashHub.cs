@@ -179,9 +179,9 @@ namespace Crash.Server.Hubs
 			// Update
 			var userName = change.Owner;
 
-			var followerIds = Database.Users.AsNoTracking().Where(u => u.Name.Equals(u.Follows))
+			var followerIds = Database.Users.AsNoTracking().Where(u => u.Name.Equals(u.Follows, StringComparison.OrdinalIgnoreCase))
 													.Select(u => u.Id).ToArray();
-			await Clients.Users(followerIds.Where(id => !string.IsNullOrEmpty(id))).PushChange(change);
+			await Clients.Users(followerIds.Where(id => !string.IsNullOrEmpty(id))!).PushChange(change);
 		}
 
 		private static IEnumerable<Change> MultiplyChange(IEnumerable<Guid> ids, Change change)
