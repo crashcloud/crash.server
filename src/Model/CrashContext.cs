@@ -58,7 +58,7 @@ namespace Crash.Server.Model
 			await SetCurrentComputedChange(changeRecord);
 
 			var noTracking = Users.AsNoTracking();
-			if (noTracking.Any(c => c.Name == changeRecord.Owner))
+			if (!noTracking.Any(c => c.Name == changeRecord.Owner))
 			{
 				await Users.AddAsync(new User { Name = changeRecord.Owner, Id = "", Follows = "" });
 				await SaveChangesAsync();
