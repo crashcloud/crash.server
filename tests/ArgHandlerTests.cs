@@ -176,10 +176,11 @@ namespace Crash.Server.Tests
 			private static string GetRandomValidDbFileName()
 			{
 				var fileName = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
+				var tempDirectory = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
 				var fileNameWithDbExt = $"{fileName}.db";
 				var path = Directory.GetCurrentDirectory();
 
-				return Path.Combine(path, fileNameWithDbExt);
+				return Path.Combine(path, tempDirectory, fileNameWithDbExt);
 			}
 
 			private static string GetRandomValidFullURL()

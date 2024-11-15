@@ -4,8 +4,6 @@ using System.CommandLine.Parsing;
 using System.Diagnostics;
 using System.Reflection;
 
-using Microsoft.AspNetCore.Razor.TagHelpers;
-
 namespace Crash.Server
 {
 	/// <summary>Handles Arguments for the start up program</summary>
