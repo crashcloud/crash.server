@@ -4,122 +4,135 @@
 
 @{
 	Layout = null;
+	var Version = typeof(Crash.Server.Program).Assembly.GetName().Version;
+
 }
 
 <!DOCTYPE html>
 
+<style>
+	body {
+		font-family: monospace;
+	}
+</style>
 <html>
+
 <head>
 	<title>Welcome to Crash!</title>
 </head>
-<body>
-<div>
-	<div id="wifi"></div>
-</div>
 
-<div>
-	@{
-		if (Env.IsDevelopment())
-		{
-			<div id="debugbar">
-				<ul>
-					<a id="config" href="/config"></a>
-					<a id="debug" href="/debug"></a>
-					<a id="latest" href="/latest"></a>
-					<a id="users" href="/users"></a>
-					<a id="changes" href="/changes"></a>
-					<a id="logging" href="/logging"></a>
-				</ul>
-			</div>
+<body>
+	<div>
+		<div id="wifi"></div>
+	</div>
+
+	<div>
+		@{
+			if (Env.IsDevelopment())
+			{
+				<div id="debugbar">
+					<ul>
+						<a id="config" href="/config"></a>
+						<a id="debug" href="/debug"></a>
+						<a id="latest" href="/latest"></a>
+						<a id="users" href="/users"></a>
+						<a id="changes" href="/changes"></a>
+						<a id="logging" href="/logging"></a>
+					</ul>
+				</div>
+
+			}
+			<div id="version"><a>@Version</a></div>
 		}
-	}
-</div>
+	</div>
 
 </body>
 <style>
-body {
-	background-size: 500px, 500px;
-	background-image: url(media/crash-working.png);
-}
-#wifi {
-	width: 400px;
-	height: 300px;
-	background-repeat: no-repeat;
-	margin: auto;
-	background-size: 400px;
-	position: absolute;
-	left: 0; right: 0; top: 0; bottom: 0;
-	background-image: url(media/crash-wifi.png);
-}
-#debugbar
-{
-	width:  auto;
-	height: 32px;
-	background-color: rgba(255, 255, 255, 0.9);
-	left:  20px;
-	bottom: 20px;
-	margin: auto;
-	position: absolute;
-	border: rgba(125, 125, 125, 0.4) 1px solid;
-	border-radius: 2px;
-	padding: 4px;
-}
+	body {
+		background-size: 500px, 500px;
+		background-image: url(media/crash-working.png);
+	}
 
-#debugbar ul
-{
-	display: ruby-base-container;
-	padding: 0;
-	margin: 0;
-}
+	#wifi {
+		width: 400px;
+		height: 300px;
+		background-repeat: no-repeat;
+		margin: auto;
+		background-size: 400px;
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		background-image: url(media/crash-wifi.png);
+	}
 
-#debugbar ul a
-{
-	width: 24px;
-	height: 24px;
-	background-repeat: no-repeat;
-	background-size: 24px;
-	background-position: center;
-	margin: 0;
-	opacity: 0.4;
-	display: inline-block;
-	padding: 4px;
-}
+	#debugbar {
+		width: auto;
+		height: 32px;
+		background-color: rgba(255, 255, 255, 0.9);
+		left: 20px;
+		bottom: 20px;
+		margin: auto;
+		position: absolute;
+		border: rgba(125, 125, 125, 0.4) 1px solid;
+		border-radius: 2px;
+		padding: 4px;
+	}
 
-#debugbar ul a:hover
-{
-	opacity: 0.8;
-}
+	#debugbar ul {
+		display: ruby-base-container;
+		padding: 0;
+		margin: 0;
+	}
 
-#config
-{
-	background-image: url(media/settings.svg);
-}
+	#debugbar ul a {
+		width: 24px;
+		height: 24px;
+		background-repeat: no-repeat;
+		background-size: 24px;
+		background-position: center;
+		margin: 0;
+		opacity: 0.4;
+		display: inline-block;
+		padding: 4px;
+	}
 
-#debug
-{
-	background-image: url(media/cpu.svg);
-}
+	#debugbar ul a:hover {
+		opacity: 0.8;
+	}
 
-#latest
-{
-	background-image: url(media/layers.svg);
-}
+	#config {
+		background-image: url(media/settings.svg);
+	}
 
-#users
-{
-	background-image: url(media/users.svg);
-}
+	#debug {
+		background-image: url(media/cpu.svg);
+	}
 
-#changes
-{
-	background-image: url(media/archive.svg);
-}
+	#latest {
+		background-image: url(media/layers.svg);
+	}
 
-#logging
-{
-	background-image: url(media/alert-triangle.svg);
-}
+	#users {
+		background-image: url(media/users.svg);
+	}
 
+	#changes {
+		background-image: url(media/archive.svg);
+	}
 
+	#logging {
+		background-image: url(media/alert-triangle.svg);
+	}
+
+	#version {
+		position: absolute;
+		margin: auto;
+		right: 0;
+		bottom: 0;
+		padding: 10px
+	}
 </style>
+
 </html>

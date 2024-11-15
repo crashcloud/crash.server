@@ -56,11 +56,12 @@ namespace Crash.Server.Tests.Hubs
 		[Test]
 		public async Task GetChanges_TwoInputsCombinedIntoOne()
 		{
+			var addPacket = new PayloadPacket() { Data = "Example Payload" };
 			var addChange = new ImmutableChange
 			{
 				Id = Guid.NewGuid(),
 				Action = ChangeAction.Add | ChangeAction.Temporary,
-				Payload = "Example Payload",
+				Payload = JsonSerializer.Serialize(addPacket),
 				Type = CrashHub.CrashGeometryChange
 			};
 			var releaseChange = new ImmutableChange

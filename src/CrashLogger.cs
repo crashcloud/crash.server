@@ -1,9 +1,8 @@
 using System.Diagnostics;
-using System.Reflection.PortableExecutable;
 
 namespace Crash.Server
 {
-	public class CrashLogger : ILogger, IDisposable
+	internal sealed class CrashLogger : ILogger, IDisposable
 	{
 		private readonly LogLevel _currentLevel;
 		private readonly List<string> _logMessages;
@@ -14,9 +13,9 @@ namespace Crash.Server
 			return this;
 		}
 
-		public CrashLogger()
+		public CrashLogger(LogLevel loggingLevel = LogLevel.Information)
 		{
-			_currentLevel = Debugger.IsAttached ? LogLevel.Trace : LogLevel.Information;
+			_currentLevel = Debugger.IsAttached ? LogLevel.Trace : loggingLevel;
 			_logMessages = new List<string>();
 		}
 
@@ -44,7 +43,12 @@ namespace Crash.Server
 	internal sealed class CrashLoggerProvider : ILoggerProvider
 	{
 		internal CrashLogger _logger;
-		
+
+		internal CrashLoggerProvider(LogLevel loggingLevel)
+		{
+			_logger = new CrashLogger(loggingLevel);
+		}
+
 		public ILogger CreateLogger(string categoryName)
 		{
 			_logger ??= new CrashLogger();

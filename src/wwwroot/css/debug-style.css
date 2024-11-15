@@ -1,0 +1,17 @@
+body {
+	font-family: monospace;
+	background-size: 500px, 500px;
+	background-image: url(../media/crash-working.png);
+}
+
+table {
+	border: 1px black solid;
+	padding: 20px;
+	margin: auto;
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 10%;
+	border-radius: 2px;
+	background-color: white;
+}

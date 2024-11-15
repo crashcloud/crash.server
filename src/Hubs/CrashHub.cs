@@ -31,7 +31,7 @@ namespace Crash.Server.Hubs
 		{
 			// Validate
 			if (!HubUtils.IsChangeValid(change) ||
-			    !change.HasFlag(ChangeAction.Add))
+				!change.HasFlag(ChangeAction.Add))
 			{
 				Logger.CouldNotAddChange();
 				return;
@@ -104,7 +104,7 @@ namespace Crash.Server.Hubs
 				Logger.UserIsNotValid(user);
 				return;
 			}
-			
+
 			// Lock or Unlock impossible if nothing to Lock or Unlock
 			if (!Database.TryGetChange(id, out var latestChange))
 			{
@@ -179,9 +179,9 @@ namespace Crash.Server.Hubs
 			// Update
 			var userName = change.Owner;
 
-			var followerIds = Database.Users.AsNoTracking().Where(u => u.Name.Equals(u.Follows))
+			var followerIds = Database.Users.AsNoTracking().Where(u => u.Name.Equals(u.Follows, StringComparison.OrdinalIgnoreCase))
 													.Select(u => u.Id).ToArray();
-			await Clients.Users(followerIds.Where(id => !string.IsNullOrEmpty(id))).PushChange(change);
+			await Clients.Users(followerIds.Where(id => !string.IsNullOrEmpty(id))!).PushChange(change);
 		}
 
 		private static IEnumerable<Change> MultiplyChange(IEnumerable<Guid> ids, Change change)
@@ -354,20 +354,20 @@ namespace Crash.Server.Hubs
 			var users = Database.GetUsers();
 			await Clients.Caller.InitializeUsers(users);
 		}
-		
+
 		public override Task OnDisconnectedAsync(Exception? exception)
 		{
 			if (exception is null)
 				return Task.CompletedTask;
-			
+
 			var disconnectedMessage = $"Exception : {exception.Message}\n" +
-			                             $"Inner : {exception?.InnerException?.Message}\n" +
-			                             $"Source : {exception.Source}\n" +
-			                             $"Trace : {exception.StackTrace}\n" +
-			                             $"Data : {string.Join(", ", exception.Data)}";
-			
+										 $"Inner : {exception?.InnerException?.Message}\n" +
+										 $"Source : {exception.Source}\n" +
+										 $"Trace : {exception.StackTrace}\n" +
+										 $"Data : {string.Join(", ", exception.Data)}";
+
 			Logger.Critical(disconnectedMessage);
-			
+
 			return base.OnDisconnectedAsync(exception);
 		}
 	}

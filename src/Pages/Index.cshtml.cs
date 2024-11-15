@@ -6,7 +6,6 @@ namespace Crash.Server.Pages
 	{
 		public void OnGet()
 		{
-			
 		}
 	}
 }
