@@ -30,7 +30,7 @@ jobs:
       run: dotnet build Crash.Server.sln --configuration Release
 
     - name: Test with dotnet
-      run: dotnet test tests/Crash.Tests.csproj --logger trx --results-directory "TestResults-${{ matrix.dotnet-version }}"
+      run: dotnet test tests/Crash.Server.Tests.csproj --logger trx --results-directory "TestResults-${{ matrix.dotnet-version }}"
 
     - name: Upload dotnet test results
       if: ${{ always() }}
