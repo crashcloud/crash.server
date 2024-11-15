@@ -41,6 +41,7 @@ namespace Crash.Server
 		public LogLevel LoggingLevel { get; private set; }
 
 		public string[] Args { get; private set; } = Array.Empty<string>();
+		public bool OpenBrowser { get; private set; } = false;
 
 		public Arguments() { }
 
@@ -109,6 +110,12 @@ namespace Crash.Server
 				}
 			});
 
+			var openBrowserOption = new Option<bool>(
+				name: "--open",
+				description: "Open the landing page for crash in the browser");
+			openBrowserOption.AddAlias("-o");
+			openBrowserOption.SetDefaultValue(false);
+
 			var resetOption = new Option<bool>(
 				name: "--reset",
 				description: "Empty the current Database. This is a DESTRUCTIVE operation that CANNOT be undone."
@@ -152,9 +159,10 @@ namespace Crash.Server
 			rootCommand.AddOption(environmentOptions);
 			rootCommand.AddOption(appSettingsOptions);
 			rootCommand.AddOption(loggingLevelOptions);
+			rootCommand.AddOption(openBrowserOption);
 			rootCommand.AddOption(versionOption);
 
-			rootCommand.SetHandler((uri, path, reset, environment, appSettings, logLevel, showVersion) =>
+			rootCommand.SetHandler((uri, path, reset, environment, appSettings, logLevel, showVersion, openBrowser) =>
 				{
 					validatedArgs.URL = uri?.ToString() ?? DefaultURL;
 
@@ -177,7 +185,13 @@ namespace Crash.Server
 
 						validatedArgs.Exit = true;
 					}
-				}, uriOption, pathOption, resetOption, environmentOptions, appSettingsOptions, loggingLevelOptions, versionOption);
+
+					if (openBrowser)
+					{
+						validatedArgs.OpenBrowser = true;
+					}
+
+				}, uriOption, pathOption, resetOption, environmentOptions, appSettingsOptions, loggingLevelOptions, versionOption, openBrowserOption);
 
 
 			var commandLineBuilder = new CommandLineBuilder(rootCommand)

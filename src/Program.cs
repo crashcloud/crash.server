@@ -129,6 +129,18 @@ namespace Crash.Server
 
 				var serverCreator = new CrashServerCreator(validatedArgs);
 				if (!serverCreator.TryCreateApplication(validatedArgs.Args, out var app)) return 1;
+
+				if (validatedArgs.OpenBrowser)
+				{
+					var startInfo = new ProcessStartInfo
+					{
+						FileName = validatedArgs.URL,
+						UseShellExecute = true,
+						CreateNoWindow = true
+					};
+					Process.Start(startInfo);
+				}
+
 				await app?.RunAsync();
 
 				return 0;
