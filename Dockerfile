@@ -5,7 +5,7 @@ COPY src/Crash.Server.csproj /src
 RUN dotnet restore /src/Crash.Server.csproj
 COPY src /src/
 
-RUN dotnet publish /src/Crash.Server.csproj -c Release -f net7.0 --no-restore -o out
+RUN dotnet publish /src/Crash.Server.csproj -c Release -f net9.0 --no-restore -o out
 
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 as runtime
 

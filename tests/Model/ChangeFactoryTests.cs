@@ -10,11 +10,12 @@ namespace Crash.Server.Tests.Model
 	{
 		private ImmutableChange GetAddChange()
 		{
+			var packet = new PayloadPacket() { Data = "Example Payload" };
 			return new ImmutableChange
 			{
 				Id = Guid.NewGuid(),
 				Action = ChangeAction.Add | ChangeAction.Temporary,
-				Payload = "Example Payload",
+				Payload = JsonSerializer.Serialize(packet),
 				Type = CrashHub.CrashGeometryChange
 			};
 		}
@@ -71,7 +72,7 @@ namespace Crash.Server.Tests.Model
 			{
 				Id = Guid.NewGuid(),
 				Action = ChangeAction.Transform | ChangeAction.Temporary,
-				Payload = JsonSerializer.Serialize(new CTransform(100, 200, 300)),
+				Payload = JsonSerializer.Serialize(new PayloadPacket() { Transform = new CTransform(100, 200, 300) }),
 				Type = CrashHub.CrashGeometryChange
 			};
 			var releaseChange = new ImmutableChange

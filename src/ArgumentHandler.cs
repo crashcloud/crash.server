@@ -1,358 +1,252 @@
-﻿using System.Globalization;
-using System.Text.RegularExpressions;
+﻿using System.CommandLine;
+using System.CommandLine.Builder;
+using System.CommandLine.Parsing;
+using System.Diagnostics;
+using System.Reflection;
+
+using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Crash.Server
 {
 	/// <summary>Handles Arguments for the start up program</summary>
-	public sealed class ArgumentHandler
+	public struct Arguments
 	{
+
+		#region Consts & Defaults
+
 		private const string Pattern = @"--([\w]+ [\S]*)";
 		internal const string AppName = "Crash";
-		internal const string DbDirectory = "App_Data";
+		internal const string DbDirectory = "Databases";
 		internal const string DefaultURL = "http://0.0.0.0:8080";
-		private static readonly Version? Vers = typeof(ArgumentHandler).Assembly.GetName().Version;
-		internal static string DbName = $"Database_{Vers?.Major}_{Vers?.Minor}_{Vers?.Build}.db";
+		private static Version? Vers { get; } = typeof(Arguments).Assembly.GetName().Version;
+		internal static string DbName => $"{Vers?.Major}_{Vers?.Minor}_{Vers?.Build}.db";
 
-		private readonly List<Command> _commands;
+		#endregion
 
-		// TODO : Add logging level
-		public ArgumentHandler()
-		{
-			_commands = new List<Command>
-			{
-				new("urls", HandleUrlArgs, "Supply a custom URL for the serer", $"\"{DefaultURL}\""),
-				new("path", _handleDatabasePath, "Supply a custom Path for the Database", "C:\\Crash\\data.db"),
-				new("reset", HandleRegenDb, "Empty the current Database", "true"),
-				new("help", HandleHelpRequest, "Help! You're here now.")
-			};
-		}
+		#region Properties
 
 		/// <summary>The Server URL</summary>
-		public string URL { get; private set; }
+		public string URL { get; set; } = DefaultURL;
 
 		/// <summary>The file name for the Database</summary>
-		public string DatabaseFileName { get; private set; }
+		public string DatabasePath { get; set; } = GetDefaultDatabasePath(DbName);
 
 		/// <summary>Resets the Database</summary>
-		public bool ResetDB { get; private set; }
+		public bool ResetDB { get; set; } = false;
 
 		/// <summary>Instructs the program to exit</summary>
-		public bool Exit { get; private set; }
+		public bool Exit { get; set; } = false;
 
-		/// <summary>Parses the input Arguments</summary>
-		public void ParseArgs(params string[] args)
-		{
-			var flatArgs = string.Join(' ', args)?.ToLowerInvariant();
-			if (flatArgs?.Contains("help") == true)
-			{
-				HandleHelpRequest(flatArgs);
-			}
+		/// <summary>Current Logging Level for the server</summary>
+		public LogLevel LoggingLevel { get; private set; }
 
-			var argMatches = Regex.Matches(flatArgs, Pattern, RegexOptions.IgnoreCase);
+		public string[] Args { get; private set; } = Array.Empty<string>();
+		public bool OpenBrowser { get; private set; } = false;
 
-			foreach (Match argMatch in argMatches)
-			{
-				var group = argMatch?.Groups.Values?.LastOrDefault();
-
-				var argSplit = group?.Value.Split(' ', 2);
-
-				if (argSplit is null || argSplit.Length == 0)
-				{
-					continue;
-				}
-
-				var argPreposition = argSplit[0];
-				var argValue = string.Empty;
-
-				if (argSplit?.Length > 0)
-				{
-					argValue = argSplit[1];
-				}
-
-				HandleArgs(argPreposition, argValue);
-			}
-		}
-
-		/// <summary>Ensures defaults are set incase of no Arguments</summary>
-		public void EnsureDefaults()
-		{
-			if (string.IsNullOrEmpty(URL))
-			{
-				SetUrl(DefaultURL);
-			}
-
-			if (string.IsNullOrEmpty(DatabaseFileName))
-			{
-				var databasePath = GetDefaultDatabaseDirectory();
-				_handleDatabasePath(databasePath);
-			}
-		}
-
-		private void HandleArgs(string argPreposition, string argValue)
-		{
-			foreach (var command in _commands)
-			{
-				if (command.Name != argPreposition.ToLower(CultureInfo.InvariantCulture))
-				{
-					continue;
-				}
-
-				try
-				{
-					command.Action.Invoke(argValue);
-				}
-				catch
-				{
-					Console.WriteLine(
-						$"Command {command.Name} threw an error, your args might be invalid. Check --help");
-				}
-
-				return;
-			}
-
-			Console.WriteLine($"Invalid argument {argPreposition} and value {argValue}");
-		}
-
-		#region Help
-
-		private void HandleHelpRequest(string helpArg)
-		{
-			Console.WriteLine("\nusage: crash.server <command> [<args>...]\n");
-			Console.WriteLine("Examples:");
-			foreach (var command in _commands.GetRange(0, 3))
-			{
-				Console.WriteLine($"    crash.server --{command.Name} {command.Example}");
-			}
-
-			Console.WriteLine("\nThe available crash.server commands are:");
-
-			var extraSpace = 8;
-			var maxLength = _commands.Max(c => c.Name.Length);
-			var overallLength = extraSpace + maxLength;
-			foreach (var command in _commands)
-			{
-				var spacing = overallLength - command.Name.Length;
-				var spaces = string.Join("", Enumerable.Range(0, spacing).Select(r => " "));
-				Console.WriteLine($"    {command.Name}{spaces}{command.Description}");
-			}
-
-			Console.WriteLine("\nSee 'crash.server --help <command>' to read about a specific subcommand.\n");
-
-			Exit = true;
-		}
+		public Arguments() { }
 
 		#endregion
-
-		internal sealed class Command
-		{
-			internal readonly Action<string> Action;
-			internal readonly string Description;
-			internal readonly string Example;
-			internal readonly string Name;
-
-			internal Command(string name, Action<string> action, string description, string example = "")
-			{
-				Name = name;
-				Action = action;
-				Description = description;
-				Example = example;
-			}
-		}
-
-		#region URL Args
-
-		private void HandleUrlArgs(string urlValue)
-		{
-			ValidateUrlInput(ref urlValue);
-			if (!ValidateUrlInput(ref urlValue))
-			{
-				throw new ArgumentException("Given URL was Invalid.");
-			}
-
-			SetUrl(urlValue);
-		}
-
-		private void SetUrl(string urlValue)
-		{
-			URL = urlValue;
-		}
-
-		private static bool ValidateUrlInput(ref string url)
-		{
-			UriBuilder uriBuild;
-			try
-			{
-				uriBuild = new UriBuilder(url);
-				if (uriBuild.Uri.HostNameType is UriHostNameType.IPv4 or UriHostNameType.IPv6)
-				{
-					return ValidateIpAddress(url);
-				}
-
-				if (uriBuild.Uri.HostNameType is UriHostNameType.Dns)
-				{
-					return ValidateUrl(url);
-				}
-
-				throw new ArgumentException("Invalid URL. Was not detectable as either an IP or URL");
-			}
-			catch (UriFormatException)
-			{
-				throw new ArgumentException("Invalid URL");
-			}
-		}
-
-		private static bool ValidateUrl(string url)
-		{
-			// No logic required for now.
-			return true;
-		}
-
-		private static bool ValidateIpAddress(string url)
-		{
-			var uriBuild = new UriBuilder(url);
-
-			if (!uriBuild.Uri.IsDefaultPort)
-			{
-				return true;
-			}
-
-			var portString = uriBuild.Port.ToString(CultureInfo.InvariantCulture);
-			if (url.Replace("/", "").EndsWith(portString, StringComparison.InvariantCulture))
-			{
-				return true;
-			}
-
-			var uriii = uriBuild.ToString();
-
-			// IP is IPv4/IPv6 - Website is DNS
-			if (uriBuild.Uri.HostNameType is UriHostNameType.IPv4 or UriHostNameType.IPv6)
-			{
-				throw new ArgumentException("Port is required for IP Address");
-			}
-
-			return true;
-		}
-
-		#endregion
-
-		#region Database Args
-
-		private void _handleDatabasePath(string givenPath)
-		{
-			ValidateDatabaseDirectory(givenPath);
-			EnsureDatabaseDirectoryExists(givenPath);
-			SetDatabaseFilePath(givenPath);
-		}
-
-		private static void ValidateDatabaseDirectory(string givenPath)
-		{
-			if (Path.GetInvalidPathChars().Where(c => givenPath.Contains(c)).Any())
-			{
-				throw new InvalidDataException("Invalid Characters in given path!");
-			}
-		}
-
-		private static string GetDefaultDatabaseDirectory()
+		private static string GetDefaultDatabasePath(string name)
 		{
 			var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-			var databaseDirectory = Path.Combine(appData, AppName, DbDirectory);
+			var databaseDirectory = Path.Combine(appData, AppName, DbDirectory, name);
 
 			return databaseDirectory;
 		}
 
-		private void SetDatabaseFilePath(string databasePath)
+		public static async Task<Arguments> ParseArgs(string[] args)
 		{
-			if (!Path.HasExtension(databasePath))
+			args = args.Where(a => !string.IsNullOrEmpty(a)).ToArray();
+			var validatedArgs = new Arguments() { Args = args };
+
+			var uriOption = new Option<Uri?>(
+				name: "--urls",
+				description: "Supply a custom URL for the server"
+			);
+			uriOption.AddAlias("-u");
+			uriOption.SetDefaultValue(Arguments.DefaultURL);
+			uriOption.AddValidator(result =>
 			{
-				DatabaseFileName = Path.Combine(databasePath, DbName);
-			}
-			else
+				try
+				{
+					var value = result.GetValueForOption(uriOption);
+
+					if (value is null) return;
+
+					if (value.IsFile)
+					{
+						result.ErrorMessage = "Given URL was a file path. Please provide a valid URL.";
+						return;
+					}
+
+					if (value.Scheme != "http" && value.Scheme != "https")
+					{
+						result.ErrorMessage = "Given URL was not a valid HTTP or HTTPS URL. Please provide a valid URL.";
+						return;
+					}
+
+					result.ErrorMessage = null;
+				}
+				catch
+				{
+					// TODO : Switch on exceptions
+					result.ErrorMessage = $"Given URL {result} was not a valid URL. Please provide a valid URL.";
+					return;
+				}
+			});
+
+			var pathOption = new Option<FileInfo?>(
+				name: "--path",
+				description: "Supply a custom Path for the Database file");
+			pathOption.AddAlias("-p");
+			pathOption.SetDefaultValue(GetDefaultDatabasePath(Arguments.DbName));
+			pathOption.AddValidator(result =>
 			{
-				DatabaseFileName = databasePath;
+				var fileInfo = result.GetValueForOption(pathOption);
+				if (fileInfo is null) return;
+				if (fileInfo.Extension != ".db")
+				{
+					result.ErrorMessage = "Database filepath must end in \".db\"";
+				}
+			});
+
+			var openBrowserOption = new Option<bool>(
+				name: "--open",
+				description: "Open the landing page for crash in the browser");
+			openBrowserOption.AddAlias("-o");
+			openBrowserOption.SetDefaultValue(false);
+
+			var resetOption = new Option<bool>(
+				name: "--reset",
+				description: "Empty the current Database. This is a DESTRUCTIVE operation that CANNOT be undone."
+			).FromAmong("true", "false", "True", "False");
+			resetOption.AddAlias("-r");
+			resetOption.SetDefaultValue(false);
+
+			var environmentOptions = new Option<string>(
+				name: "--environment",
+				description: "Set the environment for the server to run in."
+			).FromAmong("Development", "Production", "Staging", "Testing");
+			environmentOptions.AddAlias("-e");
+			// TODO : Best default values?
+			environmentOptions.SetDefaultValue(Debugger.IsAttached ? "Development" : "Production");
+
+			var appSettingsOptions = new Option<FileInfo>(
+				name: "--appsettings",
+				description: "Supply a custom appsettings.json file for the server to use."
+			);
+			appSettingsOptions.AddAlias("-a");
+
+			var loggingLevelOptions = new Option<LogLevel>(
+				name: "--loglevel",
+				description: "Set the logging level for the server to use"
+			).FromAmong(Enum.GetNames<LogLevel>());
+			loggingLevelOptions.AddAlias("-l");
+			loggingLevelOptions.SetDefaultValue(LogLevel.Information);
+
+			var versionOption = new Option<bool>(
+				name: "--version",
+				description: "Display the current version of the server."
+			);
+
+			var description = "Crash.Server - A multi-user communication server designed to work alongside Crash.";
+			description += "\n               Consult the docs at http://crsh.cloud";
+			var rootCommand = new RootCommand(description);
+
+			rootCommand.AddOption(uriOption);
+			rootCommand.AddOption(pathOption);
+			rootCommand.AddOption(resetOption);
+			rootCommand.AddOption(environmentOptions);
+			rootCommand.AddOption(appSettingsOptions);
+			rootCommand.AddOption(loggingLevelOptions);
+			rootCommand.AddOption(openBrowserOption);
+			rootCommand.AddOption(versionOption);
+
+			rootCommand.SetHandler((uri, path, reset, environment, appSettings, logLevel, showVersion, openBrowser) =>
+				{
+					validatedArgs.URL = uri?.ToString() ?? DefaultURL;
+
+					if (path is not null)
+					{
+						var finalPath = path?.FullName ?? GetDefaultDatabasePath(DbName);
+						if (string.IsNullOrEmpty(path?.DirectoryName))
+						{
+							finalPath = GetDefaultDatabasePath(path.FullName);
+						}
+						validatedArgs.DatabasePath = finalPath;
+					}
+
+					validatedArgs.ResetDB = reset;
+					validatedArgs.LoggingLevel = logLevel;
+
+					if (showVersion && TryGetVersionInfo(out string name, out string version, out string suffix, out string commit))
+					{
+						Console.WriteLine($"\n{name} version {version}{suffix}, build {commit}\n");
+
+						validatedArgs.Exit = true;
+					}
+
+					if (openBrowser)
+					{
+						validatedArgs.OpenBrowser = true;
+					}
+
+				}, uriOption, pathOption, resetOption, environmentOptions, appSettingsOptions, loggingLevelOptions, versionOption, openBrowserOption);
+
+
+			var commandLineBuilder = new CommandLineBuilder(rootCommand)
+				   // .UseVersionOption() // Use Custom Option
+				   .UseHelp()
+				   .UseEnvironmentVariableDirective()
+				   //    .UseParseDirective()
+				   //    .UseSuggestDirective()
+				   //    .RegisterWithDotnetSuggest()
+				   .UseTypoCorrections()
+				   .UseParseErrorReporting()
+				   .UseExceptionHandler()
+				   .CancelOnProcessTermination();
+
+			var parser = commandLineBuilder.Build();
+
+			var result = await parser.InvokeAsync(args);
+			if (result != 0) return new() { Exit = true }; ;
+
+			var flatArgs = string.Join(", ", args ?? Array.Empty<string>())?.ToLowerInvariant();
+			bool helpRun = flatArgs?.Contains("help") ?? false;
+			if (helpRun)
+			{
+				return new() { Exit = true };
 			}
+			return validatedArgs;
 		}
 
-		private static void EnsureDatabaseDirectoryExists(string databaseFilePath)
+		private static bool TryGetVersionInfo(out string name, out string version, out string suffix, out string commit)
 		{
-			var directoryName = GetDirectoryOfPath(databaseFilePath);
-			try
+			// TODO : Suffix
+			var assem = typeof(Program).Assembly;
+			var cas = assem.GetCustomAttributes();
+
+			var assemblyName = typeof(Program).Assembly.GetName();
+			var assemblyVersion = assemblyName.Version;
+
+			var assembly = Assembly.GetExecutingAssembly();
+			var commitInfo = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+			var customAttributeInfo = commitInfo.InformationalVersion.Split(new char[] { '+', '-' });
+
+			var commitHash = customAttributeInfo.LastOrDefault()[..7];
+			var versionSuffix = string.Empty;
+			if (customAttributeInfo.Length == 3 && !string.IsNullOrEmpty(customAttributeInfo[1]))
 			{
-				Directory.CreateDirectory(directoryName);
+				versionSuffix = $"-{customAttributeInfo[1]}";
 			}
-			catch (Exception ex)
-			{
-				throw new ArgumentNullException($"Could not create directory {directoryName} for database file", ex);
-			}
+
+			name = assemblyName?.Name ?? "unknown";
+			version = assemblyVersion?.ToString() ?? "x.x.x.x";
+			commit = commitHash;
+			suffix = versionSuffix;
+
+			return true;
 		}
 
-		/// <summary>Checks a path for being a Directory or File</summary>
-		/// <returns>True on file, false on Directory</returns>
-		private static bool IsFile(string path)
-		{
-			if (string.IsNullOrEmpty(path))
-			{
-				throw new ArgumentNullException($"Input {path} cannot be null for IsFile check");
-			}
-
-			return Path.HasExtension(path);
-		}
-
-		/// <summary>
-		///     If given a directory, returns the same string
-		///     If given a file, returns the current directory of the file
-		/// </summary>
-		private static string? GetDirectoryOfPath(string path)
-		{
-			if (string.IsNullOrEmpty(path))
-			{
-				throw new ArgumentNullException($"Input {nameof(path)} : {path} " +
-												$"cannot be null for GetDirectoryOfPath");
-			}
-
-			var fullDirectoryName = path;
-			if (IsFile(path))
-			{
-				fullDirectoryName = Path.GetDirectoryName(path);
-			}
-
-			return fullDirectoryName;
-		}
-
-		private void HandleRegenDb(string toggleArgs)
-		{
-			var value = GetRegenerateDatabaseValue(toggleArgs);
-			SetRegenenerateDatabaseValue(value);
-			RegenerateDatabase(value);
-		}
-
-		private static bool GetRegenerateDatabaseValue(string toggleArgs)
-		{
-			if (!bool.TryParse(toggleArgs, out var result))
-			{
-				throw new ArgumentException($"Invalid Argument {toggleArgs}, could not parse into a boolean.");
-			}
-
-			return result;
-		}
-
-		private void SetRegenenerateDatabaseValue(bool value)
-		{
-			ResetDB = value;
-		}
-
-		private void RegenerateDatabase(bool value)
-		{
-			if (!value)
-			{
-				return;
-			}
-
-			if (File.Exists(DatabaseFileName))
-			{
-				File.Delete(DatabaseFileName);
-			}
-		}
-
-		#endregion
 	}
 }

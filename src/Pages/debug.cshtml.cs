@@ -7,8 +7,8 @@ namespace Crash.Server.Pages
 {
 	public abstract class DebugBase : PageModel
 	{
-		internal readonly CrashContext Context;
-		internal readonly IWebHostEnvironment Env; // using Microsoft.AspNetCore.Hosting;
+		internal CrashContext Context { get; }
+		internal IWebHostEnvironment Env { get; }
 
 		protected DebugBase(IWebHostEnvironment env, CrashContext context) // Injected from ASP.NET Core
 		{

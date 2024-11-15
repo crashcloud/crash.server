@@ -10,16 +10,17 @@
 <html>
 <head>
 	<title>Debug Page</title>
+	<link rel="stylesheet" href="~/css/debug-style.css" type="text/css" />
 </head>
 <body>
 <div>
 	<table>
 		<tr>
 			<td>
-				<a>Name</a>
+					<a><b>Name</b></a>
 			</td>
 			<td>
-				<a>Value</a>
+					<a><b>Value</b></a>
 			</td>
 		</tr>
 		<tr>
@@ -32,7 +33,7 @@
 		</tr>
 		<tr>
 			<td>
-				<a>DOTNET </a>
+					<a>dotnet </a>
 			</td>
 			<td>
 				<a>@Environment.Version</a>
@@ -91,7 +92,7 @@
 				<a>args</a>
 			</td>
 			<td>
-				<a>@string.Join(", \t\t > ", Environment.GetCommandLineArgs())</a>
+					<a>@string.Join(", ", Environment.GetCommandLineArgs())</a>
 			</td>
 		</tr>
 		<tr>
@@ -99,7 +100,7 @@
 				<a>vars</a>
 			</td>
 			<td>
-				<a>@string.Join(", \t\t > ", Environment.GetEnvironmentVariables())</a>
+					<a>@string.Join(", ", Environment.GetEnvironmentVariables())</a>
 			</td>
 		</tr>
 
