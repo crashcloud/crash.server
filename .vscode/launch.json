@@ -22,7 +22,7 @@
           }
         },
         {
-            "name": ".NET 7.0 (Mac)",
+            "name": ".NET 9.0 (Mac)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",

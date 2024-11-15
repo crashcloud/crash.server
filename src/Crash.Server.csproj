@@ -28,7 +28,7 @@
 		<TypeScriptJSXEmit>none</TypeScriptJSXEmit>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<IncludeSymbols>True</IncludeSymbols>
-		<AnalysisLevel>7.0-recommended</AnalysisLevel>
+		<AnalysisLevel>9.0-recommended</AnalysisLevel>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<ErrorReport>send</ErrorReport>
 		<NoWarn>CS8602</NoWarn>
