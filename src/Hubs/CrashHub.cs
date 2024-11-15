@@ -155,21 +155,29 @@ namespace Crash.Server.Hubs
 		/// <summary>Add Change to SqLite DB and notify other clients</summary>
 		private async Task<Result<bool>> CameraChange(Change change)
 		{
-			if (change.Owner is null)
+			try
 			{
-				Logger.UserIsNotValid(change.Owner);
-				return Result.Err<bool>($"User {change.Owner} is not valid!");
+				if (change.Owner is null)
+				{
+					Logger.UserIsNotValid(change.Owner);
+					return Result.Err<bool>($"User {change.Owner} is not valid!");
+				}
+
+				// Update
+				var userName = change.Owner;
+
+				var followerIds = Database.Users.AsNoTracking().Where(u => u.Name == u.Follows)
+													.Select(u => u.Id).ToArray();
+				await Clients.Users(followerIds.Where(id => !string.IsNullOrEmpty(id))!).PushChange(change);
+
+				// TODO : This might stop Cameras sending
+				// await Clients.Users(followerIds.Where(id => !string.IsNullOrEmpty(id))).PushChangesThroughStream(change);
+			}
+			catch (Exception ex)
+			{
+				return Result.Err<bool>(ex);
 			}
 
-			// Update
-			var userName = change.Owner;
-
-			var followerIds = Database.Users.AsNoTracking().Where(u => u.Name.Equals(u.Follows, StringComparison.OrdinalIgnoreCase))
-													.Select(u => u.Id).ToArray();
-			await Clients.Users(followerIds.Where(id => !string.IsNullOrEmpty(id))!).PushChange(change);
-
-			// TODO : This might stop Cameras sending
-			// await Clients.Users(followerIds.Where(id => !string.IsNullOrEmpty(id))).PushChangesThroughStream(change);
 			return Result.Ok(true);
 		}
 

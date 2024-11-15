@@ -47,18 +47,25 @@ namespace Crash.Server.Model
 				return false;
 			}
 
+			if (string.IsNullOrEmpty(changeRecord.Owner))
+			{
+				Logger.UserIsNotValid(changeRecord.Owner);
+				return false;
+			}
+
 			// Add to Storage
 			await Changes.AddAsync(changeRecord);
 			await SetCurrentComputedChange(changeRecord);
 
-			if (!Users.AsNoTracking().Any(c => c.Name.Equals(changeRecord.Owner, StringComparison.OrdinalIgnoreCase)) &&
-				!string.IsNullOrEmpty(changeRecord.Owner))
+			var noTracking = Users.AsNoTracking();
+			if (noTracking.Any(c => c.Name == changeRecord.Owner))
 			{
 				await Users.AddAsync(new User { Name = changeRecord.Owner, Id = "", Follows = "" });
+				await SaveChangesAsync();
+				return true;
 			}
 
-			var added = await SaveChangesAsync();
-			return true;
+			return false;
 		}
 
 		private async Task SetCurrentComputedChange(ImmutableChange newChange)
