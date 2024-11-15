@@ -18,7 +18,7 @@ namespace Crash.Server
 		internal const string AppName = "Crash";
 		internal const string DbDirectory = "Databases";
 		internal const string DefaultURL = "http://0.0.0.0:8080";
-		private static readonly Version? Vers = typeof(Arguments).Assembly.GetName().Version;
+		private static Version? Vers { get; } = typeof(Arguments).Assembly.GetName().Version;
 		internal static string DbName => $"{Vers?.Major}_{Vers?.Minor}_{Vers?.Build}.db";
 
 		#endregion
@@ -55,6 +55,7 @@ namespace Crash.Server
 
 		public static async Task<Arguments> ParseArgs(string[] args)
 		{
+			args = args.Where(a => !string.IsNullOrEmpty(a)).ToArray();
 			var validatedArgs = new Arguments() { Args = args };
 
 			var uriOption = new Option<Uri?>(
@@ -141,7 +142,9 @@ namespace Crash.Server
 				description: "Display the current version of the server."
 			);
 
-			var rootCommand = new RootCommand("Crash.Server - A multi-user communication server designed to work alongside Crash.");
+			var description = "Crash.Server - A multi-user communication server designed to work alongside Crash.";
+			description += "\n               Consult the docs at http://crsh.cloud";
+			var rootCommand = new RootCommand(description);
 
 			rootCommand.AddOption(uriOption);
 			rootCommand.AddOption(pathOption);

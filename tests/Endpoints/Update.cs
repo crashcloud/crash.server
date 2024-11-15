@@ -51,8 +51,8 @@ namespace Crash.Server.Tests.Endpoints
 			await _crashHub.PushChange(change);
 			Assert.That(_crashHub.Database.Changes.Count(), Is.EqualTo(currCount + 1));
 
-			var updates = new Dictionary<string, string> { { "Key", "Value" } };
-			var payload = JsonSerializer.Serialize(updates);
+			var updatesPacket = new PayloadPacket() { Updates = new Dictionary<string, string> { { "Key", "Value" } } };
+			var payload = JsonSerializer.Serialize(updatesPacket);
 
 			var transformChange = new Change
 			{
@@ -66,7 +66,7 @@ namespace Crash.Server.Tests.Endpoints
 			Assert.True(PayloadUtils.TryGetPayloadFromChange(latestChange, out var payloadPacket));
 
 			Assert.That(payloadPacket.Updates, Is.Not.Null.Or.Empty);
-			Assert.That(payloadPacket.Updates, Is.EqualTo(updates));
+			Assert.That(payloadPacket.Updates, Is.EqualTo(updatesPacket.Updates));
 		}
 	}
 }

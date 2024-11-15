@@ -8,85 +8,75 @@ namespace Crash.Server.Tests
 		[Test]
 		public void EnsureDefaultUrLs()
 		{
-			ArgumentHandler argHandler = new();
-			argHandler.EnsureDefaults();
+			Arguments arguments = new();
+
 			Assert.Multiple(() =>
 			{
-				Assert.That(Uri.TryCreate(argHandler.URL, UriKind.Absolute, out var result), Is.True,
+				Assert.That(Uri.TryCreate(arguments.URL, UriKind.Absolute, out var result), Is.True,
 					"Failed to create the URI");
-				Assert.That(result.AbsoluteUri, Does.StartWith(argHandler.URL), "URLs are not similiar enough");
+				Assert.That(result.AbsoluteUri, Does.StartWith(arguments.URL), "URLs are not similiar enough");
 			});
 		}
 
 		[Test]
 		public void EnsureDefaultDbPath()
 		{
-			ArgumentHandler argHandler = new();
-			argHandler.EnsureDefaults();
-			var directory = Path.GetDirectoryName(argHandler.DatabaseFileName);
+			Arguments arguments = new();
+
+			var directory = Path.GetDirectoryName(arguments.DatabasePath);
 			Assert.Multiple(() =>
 			{
-				Assert.That(argHandler.DatabaseFileName, Does.EndWith(".db"), "File does not end with .db");
+				Assert.That(arguments.DatabasePath, Does.EndWith(".db"), "File does not end with .db");
 				Assert.That(Directory.Exists(directory), Is.True, "Directory does not exist");
-				Assert.That(argHandler.DatabaseFileName, Has.Length.LessThan(255), "Filename is too long");
+				Assert.That(arguments.DatabasePath, Has.Length.LessThan(255), "Filename is too long");
 			});
 		}
 
 		[Test]
 		public void EnsureDefaultNewDb_DefaultsToFalse()
 		{
-			ArgumentHandler argHandler = new();
-			argHandler.EnsureDefaults();
+			Arguments arguments = new();
 
-			Assert.That(argHandler.ResetDB, Is.False);
+
+			Assert.That(arguments.ResetDB, Is.False);
 		}
 
 		[Test]
-		public void EnsureDefaultNewDb()
+		public async Task EnsureDefaultNewDb()
 		{
-			ArgumentHandler argHandler = new();
-			argHandler.EnsureDefaults();
-			argHandler.ParseArgs("--reset", "true");
+			Arguments arguments = await Arguments.ParseArgs(new[] { "--reset", "true" });
 
-			Assert.That(argHandler.ResetDB, Is.True);
+			Assert.That(arguments.ResetDB, Is.True);
 		}
 
 		[Test]
-		public void EnsureHelp()
+		public async Task EnsureHelp()
 		{
-			ArgumentHandler argHandler = new();
-			argHandler.EnsureDefaults();
-			argHandler.ParseArgs("--help");
+			var arguments = await Arguments.ParseArgs(new[] { "--help" });
 
-			Assert.That(argHandler.Exit, Is.True);
+			Assert.That(arguments.Exit, Is.True);
 		}
 
 		[TestCaseSource(typeof(ArgHandlerData), nameof(ArgHandlerData.Invalid_URLArguments))]
 		[TestCaseSource(typeof(ArgHandlerData), nameof(ArgHandlerData.Valid_URLArguments))]
-		public bool ParseUrlArgs(List<string> args)
+		public async Task<bool> ParseUrlArgs(List<string> args)
 		{
-			ArgumentHandler argHandler = new();
-			argHandler.EnsureDefaults();
-			argHandler.ParseArgs(args.ToArray());
+			Arguments arguments = await Arguments.ParseArgs([.. args]);
 
-			ArgumentHandler defaultArgHandler = new();
-			defaultArgHandler.EnsureDefaults();
+			Arguments defaultArgHandler = new();
 
-			return argHandler.URL != defaultArgHandler.URL;
+			return arguments.URL != defaultArgHandler.URL;
 		}
 
 		[TestCaseSource(typeof(ArgHandlerData), nameof(ArgHandlerData.Invalid_DBPathArguments))]
 		[TestCaseSource(typeof(ArgHandlerData), nameof(ArgHandlerData.Valid_DBPathArguments))]
-		public bool ParseDbArgs(List<string> args)
+		public async Task<bool> ParseDbArgs(List<string> args)
 		{
-			ArgumentHandler argHandler = new();
-			argHandler.EnsureDefaults();
-			argHandler.ParseArgs(args.ToArray());
+			Arguments arguments = await Arguments.ParseArgs([.. args]);
 
-			ArgumentHandler defaultArgHandler = new();
-			defaultArgHandler.EnsureDefaults();
+			Arguments defaultArgHandler = new();
 
-			return argHandler.DatabaseFileName != defaultArgHandler.DatabaseFileName;
+			return arguments.DatabasePath != defaultArgHandler.DatabasePath;
 		}
 
 		public sealed class ArgHandlerData
