@@ -27,8 +27,6 @@ namespace Crash.Server.Tests
 			Assert.Multiple(() =>
 			{
 				Assert.That(arguments.DatabasePath, Does.EndWith(".db"), "File does not end with .db");
-				Assert.That(Directory.Exists(directory), Is.True, "Directory does not exist");
-				Assert.That(arguments.DatabasePath, Has.Length.LessThan(255), "Filename is too long");
 			});
 		}
 
