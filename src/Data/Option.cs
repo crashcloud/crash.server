@@ -1,5 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 
+namespace Crash.Server.Data;
+
 #pragma warning disable CA1050 // Declare types in namespaces
 #pragma warning disable CA1716 // Identifiers should not match keywords
 #pragma warning disable CA1000 // Do not declare static members on generic types

@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 
 using Crash.Changes.Extensions;
+using Crash.Server.Data;
 using Crash.Server.Model;
 
 using Microsoft.AspNetCore.SignalR;
@@ -174,7 +175,7 @@ namespace Crash.Server.Hubs
 
 		public async Task PushChange(Change change)
 		{
-			await PushChangeOnly(change);
+			if (!(await PushChangeOnly(change)).IsSuccess) { return; }
 			await Clients.Others.PushChange(change);
 		}
 

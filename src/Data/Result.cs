@@ -1,5 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 
+namespace Crash.Server.Data;
+
 #pragma warning disable CA1050 // Declare types in namespaces
 #pragma warning disable CA1716 // Identifiers should not match keywords
 #pragma warning disable CA1000 // Do not declare static members on generic types
@@ -38,7 +40,7 @@ public readonly struct Result<T>
 		return IsSuccess;
 	}
 
-	public bool IsErr([MaybeNullWhen(false)] out E error)
+	public bool IsErr([MaybeNullWhen(false)] out Exception error)
 	{
 		error = ResultError;
 		return !IsSuccess;
