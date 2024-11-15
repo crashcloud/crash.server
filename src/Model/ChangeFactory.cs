@@ -8,7 +8,7 @@ namespace Crash.Server.Model
 	/// <summary>Creates Changes</summary>
 	public static class ChangeFactory
 	{
-		private static readonly JsonSerializerOptions options = new()
+		private static JsonSerializerOptions options { get; } = new()
 		{
 			AllowTrailingCommas = true,
 			IgnoreReadOnlyFields = true,

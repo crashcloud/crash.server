@@ -118,7 +118,6 @@ namespace Crash.Server.Tests.Hubs
 			});
 
 			await Hub.PushChange(null);
-			await Hub.PushChange(null);
 
 			Assert.Multiple(() =>
 			{

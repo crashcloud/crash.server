@@ -27,135 +27,119 @@ namespace Crash.Server.Hubs
 		}
 
 		/// <summary>Add Change to SqLite DB and notify other clients</summary>
-		private async Task Add(IChange change)
+		private async Task<Result<bool>> Add(IChange change)
 		{
 			// Validate
 			if (!HubUtils.IsChangeValid(change) ||
 				!change.HasFlag(ChangeAction.Add))
 			{
 				Logger.CouldNotAddChange();
-				return;
+				return Result.Err<bool>($"Change {change} is not valid!");
 			}
 
 			// Record
 			await Database.AddChangeAsync(new ImmutableChange(change));
+			return Result.Ok(true);
 		}
 
 		/// <summary>Delete Item in SqLite DB and notify other clients</summary>
-		private async Task Remove(Guid id)
+		private async Task<Result<bool>> Remove(Guid id)
 		{
-			// Validate
-			if (!HubUtils.IsGuidValid(id))
-			{
-				Logger.CouldNotRemoveChange();
-				return;
-			}
-
 			// Cannot delete what does not already exist
 			if (!Database.TryGetChange(id, out _))
 			{
 				Logger.ChangeDoesNotExist(id);
-				return;
+				return Result.Err<bool>($"Change {id} does not exist!");
 			}
 
 			// Record
 			await Database.AddChangeAsync(ChangeFactory.CreateDeleteRecord(id));
+			return Result.Ok(true);
 		}
 
 		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
-		private async Task Done(string user)
+		private async Task<Result<bool>> Done(string user)
 		{
 			// Validate
 			if (!HubUtils.IsUserValid(user))
 			{
 				Logger.UserIsNotValid(user);
-				return;
+				return Result.Err<bool>($"User {user} is not valid!");
 			}
 
 			// Record
 			if (!await Database.DoneAsync(user))
 			{
 				Logger.CouldNotRelease();
-				return;
+				return Result.Err<bool>($"Could not release changes for {user}!");
 			}
 
 			// Update
 			await Clients.Others.Done(user);
-		}
-
-		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
-		private async Task DoneRange(IEnumerable<Guid> ids)
-		{
-			// Record
-			if (await Database.DoneAsync(ids))
-			{
-				// Update
-				await Clients.Others.DoneRange(ids);
-			}
+			return Result.Ok(true);
 		}
 
 		// TODO : Does this not require a user?
 		/// <summary>Lock Item in SqLite DB and notify other clients</summary>
-		private async Task Lock(string user, Guid id)
+		private async Task<Result<bool>> Lock(string user, Guid id)
 		{
 			// Validate
 			if (!HubUtils.IsUserValid(user))
 			{
 				Logger.UserIsNotValid(user);
-				return;
+				return Result.Err<bool>($"User {user} is not valid!");
 			}
 
 			// Lock or Unlock impossible if nothing to Lock or Unlock
 			if (!Database.TryGetChange(id, out var latestChange))
 			{
 				Logger.ChangeDoesNotExist(id);
-				return;
+				return Result.Err<bool>($"Change {id} does not exist!");
 			}
 
 			// Record
 			var lockChange = ChangeFactory.CreateLockRecord(latestChange.Type, latestChange.Id);
 			await Database.AddChangeAsync(lockChange);
+			return Result.Ok(true);
 		}
 
 		// TODO : Does this not require a user?
 		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
-		private async Task Unlock(string user, Guid id)
+		private async Task<Result<bool>> Unlock(string user, Guid id)
 		{
 			// Validate
 			if (!HubUtils.IsUserValid(user))
 			{
 				Logger.UserIsNotValid(user);
-				return;
-			}
-
-			if (!HubUtils.IsGuidValid(id))
-			{
-				return;
+				return Result.Err<bool>($"User {user} is not valid!");
 			}
 
 			// Lock or Unlock impossible if nothing to Lock or Unlock
 			if (!Database.TryGetChange(id, out var latestChange))
 			{
 				Logger.ChangeDoesNotExist(id);
-				return;
+				return Result.Err<bool>($"Change {id} does not exist!");
 			}
 
 			// Record
 			var lockChange = ChangeFactory.CreateUnlockRecord(latestChange.Type, latestChange.Id);
 			await Database.AddChangeAsync(lockChange);
+			return Result.Ok(true);
 		}
 
 		/// <summary>Update Item in SqLite DB and notify other clients</summary>
-		private async Task Transform(IChange change)
+		private async Task<Result<bool>> Transform(IChange change)
 		{
 			// Record
 			await Database.AddChangeAsync(new ImmutableChange(change));
+			return Result.Ok(true);
 		}
 
 		/// <summary>Update Item in SqLite DB and notify other clients</summary>
-		private async Task Update(IChange change)
+		private async Task<Result<bool>> Update(IChange change)
 		{
 			await Database.AddChangeAsync(new ImmutableChange(change));
+			return Result.Ok(true);
 		}
 
 		// Is this how you open a connection with the server?
@@ -168,12 +152,12 @@ namespace Crash.Server.Hubs
 
 		// TODO : Save the last Camera alongside the User so when you log in it is where you left off
 		/// <summary>Add Change to SqLite DB and notify other clients</summary>
-		private async Task CameraChange(Change change)
+		private async Task<Result<bool>> CameraChange(Change change)
 		{
 			if (change.Owner is null)
 			{
 				Logger.UserIsNotValid(change.Owner);
-				return;
+				return Result.Err<bool>($"User {change.Owner} is not valid!");
 			}
 
 			// Update
@@ -185,6 +169,7 @@ namespace Crash.Server.Hubs
 
 			// TODO : This might stop Cameras sending
 			// await Clients.Users(followerIds.Where(id => !string.IsNullOrEmpty(id))).PushChangesThroughStream(change);
+			return Result.Ok(true);
 		}
 
 		public async Task PushChange(Change change)
@@ -205,69 +190,93 @@ namespace Crash.Server.Hubs
 			await Clients.Others.PushChangesThroughStream(changeStream);
 		}
 
-		private async Task PushChangeOnly(Change change)
+		private async Task<Result<bool>> PushChangeOnly(Change change)
 		{
 			if (change is null)
 			{
 				Logger.ChangeIsNotValid(change);
-				throw new ArgumentNullException($"Parameter {nameof(change)} was null!");
+				return Result.Err<bool>(new ArgumentNullException(nameof(change)));
 			}
 
 			if (change.Type is null)
 			{
 				Logger.ChangeIsNotValid(change);
-				throw new ArgumentNullException($"{nameof(change)}.Type was null!");
+				return Result.Err<bool>(new ArgumentNullException($"{nameof(change)}.Type was null!"));
 			}
 
 			var type = change?.Type?.ToUpperInvariant();
-			switch (type)
+			return type switch
 			{
+				CrashCameraChange => change.Action switch
+				{
+					ChangeAction.Add => await CameraChange(change),
+					_ => Result.Err<bool>($"No action defined for {change.Action}")
+				},
+
 				// TODO : Add tests to check 3rd Party Plugins work
-				case CrashGeometryChange:
-				case CrashDoneChange:
-				default:
-					{
-						var currentActions = new List<ChangeAction>();
-						// This only works because Add is First!
-						foreach (var action in Enum.GetValues<ChangeAction>())
-						{
-							if (!change.Action.HasFlag(action))
-							{
-								continue;
-							}
+				CrashGeometryChange or CrashDoneChange or _ => await HandleDefaultChange(change!),
+			};
+		}
 
-							var task = action switch
-							{
-								ChangeAction.Locked => Lock(change.Owner, change.Id),
-								ChangeAction.Unlocked => Unlock(change.Owner, change.Id),
-								ChangeAction.Remove => Remove(change.Id),
-								ChangeAction.Release => Done(change.Owner),
-								ChangeAction.Add => Add(change),
-								ChangeAction.Update => Update(change),
-								ChangeAction.Transform => Transform(change),
+		private static List<ChangeAction> GetChangesInActionableOrder(ChangeAction action)
+		{
+			List<ChangeAction> changes = new();
 
-								ChangeAction.None => Task.CompletedTask,
-								ChangeAction.Temporary => Task.CompletedTask,
+			// Add Absolutely must be first!
+			if (action.HasFlag(ChangeAction.Add)) { changes.Add(ChangeAction.Add); }
 
-								_ => throw new NotImplementedException($"No action defined for {change.Action}")
-							};
+			// Remove should probably be first-ish too
+			if (action.HasFlag(ChangeAction.Remove)) { changes.Add(ChangeAction.Remove); }
 
-							await task;
-						}
+			// Locked & Unlocked can be in any order
+			if (action.HasFlag(ChangeAction.Locked)) { changes.Add(ChangeAction.Locked); }
+			if (action.HasFlag(ChangeAction.Unlocked)) { changes.Add(ChangeAction.Unlocked); }
 
-						return;
-					}
-				case CrashCameraChange:
-					{
-						var task = change.Action switch
-						{
-							ChangeAction.Add => CameraChange(change),
-							_ => Task.CompletedTask
-						};
-						await task;
-						return;
-					}
+			// Update & Transform can be in any order
+			if (action.HasFlag(ChangeAction.Update)) { changes.Add(ChangeAction.Update); }
+			if (action.HasFlag(ChangeAction.Transform)) { changes.Add(ChangeAction.Transform); }
+
+			// Temporary can be in any order
+			if (action.HasFlag(ChangeAction.Temporary)) { changes.Add(ChangeAction.Temporary); }
+
+			// Last to go
+			if (action.HasFlag(ChangeAction.Release)) { changes.Add(ChangeAction.Release); }
+
+			return changes;
+		}
+
+		private async Task<Result<bool>> HandleDefaultChange(Change change)
+		{
+			var currentActions = new List<ChangeAction>();
+
+			var orderedActions = GetChangesInActionableOrder(change.Action);
+
+			List<Result<bool>> results = new();
+			foreach (var action in orderedActions)
+			{
+				var result = action switch
+				{
+					ChangeAction.Locked => await Lock(change.Owner, change.Id),
+					ChangeAction.Unlocked => await Unlock(change.Owner, change.Id),
+					ChangeAction.Remove => await Remove(change.Id),
+					ChangeAction.Release => await Done(change.Owner),
+					ChangeAction.Add => await Add(change),
+					ChangeAction.Update => await Update(change),
+					ChangeAction.Transform => await Transform(change),
+
+					ChangeAction.None or ChangeAction.Temporary => Result.Err<bool>($"No action defined for {action}"),
+
+					_ => Result.Err<bool>(new NotImplementedException($"No action defined for {change.Action}")),
+				};
+
+				results.Add(result);
 			}
+
+			var errors = results!.Where(r => !r.IsSuccess).Select(r => r.ResultError);
+			if (errors.Any())
+				return Result.Ok(true);
+
+			return Result.Err<bool>($"Multiple errors {string.Join("\n", errors)}");
 		}
 
 		/// <summary>Adds or Updates a User in the User Db</summary>
