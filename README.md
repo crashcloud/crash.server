@@ -16,8 +16,6 @@ git clone https://github.com/crashcloud/crash.server.git
 
 3. Hit Run or Debug
 
-// NOTE : dotnet run and dotnet watch do not seem to work
-
 3. Open the src folder
 
 ```bash
