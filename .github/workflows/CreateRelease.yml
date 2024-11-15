@@ -23,7 +23,7 @@ jobs:
         - uses: actions/setup-dotnet@v3
           with:
             dotnet-version: |
-              7.0
+              9.0
     
         - name: Build Crash
           run: dotnet build Crash.Server.sln --configuration Release

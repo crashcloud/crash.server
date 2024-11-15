@@ -4,8 +4,6 @@ using System.CommandLine.Parsing;
 using System.Diagnostics;
 using System.Reflection;
 
-using Microsoft.AspNetCore.Razor.TagHelpers;
-
 namespace Crash.Server
 {
 	/// <summary>Handles Arguments for the start up program</summary>
@@ -48,7 +46,7 @@ namespace Crash.Server
 		#endregion
 		private static string GetDefaultDatabasePath(string name)
 		{
-			var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+			var appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 			var databaseDirectory = Path.Combine(appData, AppName, DbDirectory, name);
 
 			return databaseDirectory;

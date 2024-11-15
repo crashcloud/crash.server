@@ -77,8 +77,7 @@ namespace Crash.Server.Tests.Hubs
 				Assert.That(Hub.Database.Users, Is.Empty);
 			});
 
-			await Hub.PushChanges(null);
-			await Hub.PushChanges(Array.Empty<Change>());
+			await Hub.PushChange(null);
 
 			Assert.Multiple(() =>
 			{
@@ -118,8 +117,7 @@ namespace Crash.Server.Tests.Hubs
 				Assert.That(Hub.Database.Users, Is.Empty);
 			});
 
-			await Hub.PushIdenticalChanges(null, null);
-			await Hub.PushIdenticalChanges(Array.Empty<Guid>(), null);
+			await Hub.PushChange(null);
 
 			Assert.Multiple(() =>
 			{

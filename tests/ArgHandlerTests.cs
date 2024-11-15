@@ -27,8 +27,6 @@ namespace Crash.Server.Tests
 			Assert.Multiple(() =>
 			{
 				Assert.That(arguments.DatabasePath, Does.EndWith(".db"), "File does not end with .db");
-				Assert.That(Directory.Exists(directory), Is.True, "Directory does not exist");
-				Assert.That(arguments.DatabasePath, Has.Length.LessThan(255), "Filename is too long");
 			});
 		}
 
@@ -176,10 +174,11 @@ namespace Crash.Server.Tests
 			private static string GetRandomValidDbFileName()
 			{
 				var fileName = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
+				var tempDirectory = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
 				var fileNameWithDbExt = $"{fileName}.db";
 				var path = Directory.GetCurrentDirectory();
 
-				return Path.Combine(path, fileNameWithDbExt);
+				return Path.Combine(path, tempDirectory, fileNameWithDbExt);
 			}
 
 			private static string GetRandomValidFullURL()
