@@ -49,7 +49,7 @@ namespace Crash.Server
 				if (Handler.Exit) return false;
 
 				var fileInfo = new FileInfo(Handler.DatabasePath);
-				if (!Try(fileInfo.Delete, $"Failed to delete the database file")) return false;
+				if (fileInfo.Exists && !Try(fileInfo.Delete, $"Failed to delete the database file")) return false;
 				if (!Try(fileInfo.Directory.Create, $"Failed to delete the database directory")) return false;
 
 				var webBuilder = WebApplication.CreateBuilder(args);
