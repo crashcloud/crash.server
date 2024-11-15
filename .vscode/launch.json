@@ -11,7 +11,7 @@
           "preLaunchTask": "build",
           // If you have changed target frameworks, make sure to update the program path.
           "program": "${workspaceFolder}/src/bin/Debug/net9.0/Crash.Server.dll",
-          "args": [ "--urls", "http://0.0.0.0", "--reset", "true"],
+          "args": [ "--urls", "http://0.0.0.0:8080", "--reset", "true"],
           "cwd": "${workspaceFolder}/src",
           "stopAtEntry": false,
           "env": {
