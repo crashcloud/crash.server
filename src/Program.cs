@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using System.Diagnostics;
 using System.Net.Sockets;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -149,32 +150,5 @@ namespace Crash.Server
 			}
 		}
 
-		private static string GetSocketHelp(string argsMessage)
-		{
-			var returnString = string.Empty;
-
-			int addressIndex = argsMessage.IndexOf("://") + 1;
-			int colonIndex = argsMessage.LastIndexOf(':') - 1;
-
-			var dashes = new char[Math.Max(addressIndex, colonIndex) + 1];
-			Array.Fill<char>(dashes, ' ');
-
-			for (int i = addressIndex; i < dashes.Length; i++)
-			{
-				dashes[i] = '-';
-			}
-			dashes[addressIndex] = '^';
-			if (colonIndex > 1)
-				dashes[colonIndex] = '^';
-
-			if (colonIndex > 1 && argsMessage.Count(c => c == ':') == 2)
-			{
-				returnString += $"\t{string.Join("", dashes)}- It is possible your address is not available. Is this address correct?";
-			}
-
-			returnString += "\n";
-
-			return returnString;
-		}
 	}
 }

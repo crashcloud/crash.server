@@ -231,18 +231,5 @@ namespace Crash.Server
 			return true;
 		}
 
-		private void RegenerateDatabase(bool value)
-		{
-			if (!value)
-			{
-				return;
-			}
-
-			if (File.Exists(DatabasePath))
-			{
-				File.Delete(DatabasePath);
-			}
-		}
-
 	}
 }
