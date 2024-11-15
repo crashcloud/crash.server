@@ -1,7 +1,9 @@
 ﻿using System.CommandLine;
+using System.Net.Sockets;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
+using Crash.Server.Cli;
 using Crash.Server.Hubs;
 using Crash.Server.Model;
 
@@ -25,18 +27,29 @@ namespace Crash.Server
 				Handler = args;
 			}
 
-			/// <summary>Creates an instance of the Crash WebApplication</summary>
-			internal WebApplication? CreateApplication(params string[] args)
+			private static bool Try(Action action, string errorMessage)
 			{
-				if (Handler.Exit)
+				try
 				{
-					return null;
+					action();
+					return true;
 				}
+				catch
+				{
+					Console.WriteLine(errorMessage);
+					return false;
+				}
+			}
 
-				if (Handler.ResetDB && File.Exists(Handler.DatabasePath))
-				{
-					File.Delete(Handler.DatabasePath);
-				}
+			/// <summary>Creates an instance of the Crash WebApplication</summary>
+			internal bool TryCreateApplication(string[] args, out WebApplication? webApplication)
+			{
+				webApplication = null;
+				if (Handler.Exit) return false;
+
+				var fileInfo = new FileInfo(Handler.DatabasePath);
+				if (!Try(fileInfo.Delete, $"Failed to delete the database file")) return false;
+				if (!Try(fileInfo.Directory.Create, $"Failed to delete the database directory")) return false;
 
 				var webBuilder = WebApplication.CreateBuilder(args);
 				var crashLogger = new CrashLoggerProvider(Handler.LoggingLevel);
@@ -74,8 +87,8 @@ namespace Crash.Server
 				App.MigrateDatabase<CrashContext>();
 				App.MapHub<CrashHub>("/Crash");
 
-
-				return App;
+				webApplication = App;
+				return true;
 			}
 
 			private void ConfigureJsonOptions(JsonHubProtocolOptions jsonOptions)
@@ -108,15 +121,60 @@ namespace Crash.Server
 
 		static async Task<int> Main(string[] args)
 		{
-			var validatedArgs = await Arguments.ParseArgs(args);
-			if (validatedArgs.Exit) return 0;
+			try
+			{
+				var validatedArgs = await Arguments.ParseArgs(args);
+				if (validatedArgs.Exit) return 1;
 
-			var serverCreator = new CrashServerCreator(validatedArgs);
-			var app = serverCreator.CreateApplication(validatedArgs.Args);
-			await app?.RunAsync();
+				var serverCreator = new CrashServerCreator(validatedArgs);
+				if (!serverCreator.TryCreateApplication(validatedArgs.Args, out var app)) return 1;
+				await app?.RunAsync();
 
-			return 0;
+				return 0;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine("\n");
+				Console.WriteLine($"Hmm. That was unexpected ...");
+				Console.WriteLine($"Please review your args for misspellings or copy/paste errors.");
+
+				var errorHelper = new ErrorHelper(args);
+				if (errorHelper.TryCaptureException(ex, out var assistanceMessage))
+				{
+					Console.WriteLine(assistanceMessage);
+				}
+
+				Console.WriteLine("\n");
+				return 1;
+			}
 		}
 
+		private static string GetSocketHelp(string argsMessage)
+		{
+			var returnString = string.Empty;
+
+			int addressIndex = argsMessage.IndexOf("://") + 1;
+			int colonIndex = argsMessage.LastIndexOf(':') - 1;
+
+			var dashes = new char[Math.Max(addressIndex, colonIndex) + 1];
+			Array.Fill<char>(dashes, ' ');
+
+			for (int i = addressIndex; i < dashes.Length; i++)
+			{
+				dashes[i] = '-';
+			}
+			dashes[addressIndex] = '^';
+			if (colonIndex > 1)
+				dashes[colonIndex] = '^';
+
+			if (colonIndex > 1 && argsMessage.Count(c => c == ':') == 2)
+			{
+				returnString += $"\t{string.Join("", dashes)}- It is possible your address is not available. Is this address correct?";
+			}
+
+			returnString += "\n";
+
+			return returnString;
+		}
 	}
 }

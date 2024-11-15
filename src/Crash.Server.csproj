@@ -19,7 +19,9 @@
 		<suffix Condition="$(Configuration) == 'Debug'">-dev</suffix>
 		<suffix Condition="$(Configuration) == 'Release'">-wip</suffix>
 		<Version>$(AssemblyVersion)$(suffix)</Version>
-		<Authors>Callum Sykes, Curtis Wensley, Erika Santos, Lukas Fuhrimann, Morteza Karimi, Moustafa El-Sawy, Russell Feathers</Authors>
+		<IncludeSourceRevisionInInformationalVersion>true</IncludeSourceRevisionInInformationalVersion>
+		<Authors>Callum Sykes, Curtis Wensley, Erika Santos, Lukas Fuhrimann, Morteza Karimi,
+			Moustafa El-Sawy, Russell Feathers</Authors>
 		<Company>Crash</Company>
 		<Copyright>Crash</Copyright>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
@@ -75,6 +77,5 @@
 	<ItemGroup>
 		<Using Include="Crash.Changes" />
 	</ItemGroup>
-
 
 </Project>

@@ -2,6 +2,9 @@
 using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
 using System.Diagnostics;
+using System.Reflection;
+
+using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Crash.Server
 {
@@ -26,7 +29,7 @@ namespace Crash.Server
 		public string URL { get; set; } = DefaultURL;
 
 		/// <summary>The file name for the Database</summary>
-		public string DatabasePath { get; set; } = DbName;
+		public string DatabasePath { get; set; } = GetDefaultDatabasePath(DbName);
 
 		/// <summary>Resets the Database</summary>
 		public bool ResetDB { get; set; } = false;
@@ -99,6 +102,10 @@ namespace Crash.Server
 			{
 				var fileInfo = result.GetValueForOption(pathOption);
 				if (fileInfo is null) return;
+				if (fileInfo.Extension != ".db")
+				{
+					result.ErrorMessage = "Database filepath must end in \".db\"";
+				}
 			});
 
 			var resetOption = new Option<bool>(
@@ -110,11 +117,11 @@ namespace Crash.Server
 
 			var environmentOptions = new Option<string>(
 				name: "--environment",
-				description: "Set the environment for the server to run in. Default is Development."
+				description: "Set the environment for the server to run in."
 			).FromAmong("Development", "Production", "Staging", "Testing");
 			environmentOptions.AddAlias("-e");
 			// TODO : Best default values?
-			environmentOptions.SetDefaultValue(Debugger.IsAttached ? "Development" : "Testing");
+			environmentOptions.SetDefaultValue(Debugger.IsAttached ? "Development" : "Production");
 
 			var appSettingsOptions = new Option<FileInfo>(
 				name: "--appsettings",
@@ -124,7 +131,7 @@ namespace Crash.Server
 
 			var loggingLevelOptions = new Option<LogLevel>(
 				name: "--loglevel",
-				description: "Set the logging level for the server to use. Default is Information."
+				description: "Set the logging level for the server to use"
 			).FromAmong(Enum.GetNames<LogLevel>());
 			loggingLevelOptions.AddAlias("-l");
 			loggingLevelOptions.SetDefaultValue(LogLevel.Information);
@@ -148,25 +155,22 @@ namespace Crash.Server
 				{
 					validatedArgs.URL = uri?.ToString() ?? DefaultURL;
 
-					// TODO : Validate : Must be a file - Does FileInfo Validate?
-					var finalPath = path?.FullName ?? GetDefaultDatabasePath(DbName);
-					if (string.IsNullOrEmpty(path.DirectoryName))
+					if (path is not null)
 					{
-						finalPath = GetDefaultDatabasePath(path.FullName);
+						var finalPath = path?.FullName ?? GetDefaultDatabasePath(DbName);
+						if (string.IsNullOrEmpty(path?.DirectoryName))
+						{
+							finalPath = GetDefaultDatabasePath(path.FullName);
+						}
+						validatedArgs.DatabasePath = finalPath;
 					}
 
-					validatedArgs.DatabasePath = finalPath;
 					validatedArgs.ResetDB = reset;
 					validatedArgs.LoggingLevel = logLevel;
 
-					if (showVersion)
+					if (showVersion && TryGetVersionInfo(out string name, out string version, out string suffix, out string commit))
 					{
-						// TODO : Suffix
-						var name = typeof(Program).Assembly.GetName();
-						var version = name.Version;
-						var build = "4debf41"; // TODO : Embedd
-
-						Console.WriteLine($"\n{name.Name} version {version}, build {build}\n");
+						Console.WriteLine($"\n{name} version {version}{suffix}, build {commit}\n");
 
 						validatedArgs.Exit = true;
 					}
@@ -177,9 +181,9 @@ namespace Crash.Server
 				   // .UseVersionOption() // Use Custom Option
 				   .UseHelp()
 				   .UseEnvironmentVariableDirective()
-				   .UseParseDirective()
-				   .UseSuggestDirective()
-				   .RegisterWithDotnetSuggest()
+				   //    .UseParseDirective()
+				   //    .UseSuggestDirective()
+				   //    .RegisterWithDotnetSuggest()
 				   .UseTypoCorrections()
 				   .UseParseErrorReporting()
 				   .UseExceptionHandler()
@@ -197,6 +201,34 @@ namespace Crash.Server
 				return new() { Exit = true };
 			}
 			return validatedArgs;
+		}
+
+		private static bool TryGetVersionInfo(out string name, out string version, out string suffix, out string commit)
+		{
+			// TODO : Suffix
+			var assem = typeof(Program).Assembly;
+			var cas = assem.GetCustomAttributes();
+
+			var assemblyName = typeof(Program).Assembly.GetName();
+			var assemblyVersion = assemblyName.Version;
+
+			var assembly = Assembly.GetExecutingAssembly();
+			var commitInfo = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+			var customAttributeInfo = commitInfo.InformationalVersion.Split(new char[] { '+', '-' });
+
+			var commitHash = customAttributeInfo.LastOrDefault()[..7];
+			var versionSuffix = string.Empty;
+			if (customAttributeInfo.Length == 3 && !string.IsNullOrEmpty(customAttributeInfo[1]))
+			{
+				versionSuffix = $"-{customAttributeInfo[1]}";
+			}
+
+			name = assemblyName?.Name ?? "unknown";
+			version = assemblyVersion?.ToString() ?? "x.x.x.x";
+			commit = commitHash;
+			suffix = versionSuffix;
+
+			return true;
 		}
 
 		private void RegenerateDatabase(bool value)
