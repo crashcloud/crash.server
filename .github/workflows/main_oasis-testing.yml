@@ -1,11 +1,12 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy ASP.Net Core app to Azure Web App - oasisserver
+name: Build and deploy Crash.Server for testing.
 
 on:
- schedule:
-    - cron: "0 23 * * *" # deploy every day @ 11 PM PST
+  push:
+    branches:
+      - main
 
 jobs:
   build:
@@ -49,15 +50,15 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_44303034C8C946B78734428EBA9C1233 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_CE82C442772A4B4CA20164B229C5898F }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_AF9DF29025344B3B8388AB8A6D88639C }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_A1404B5A918042FDAF64C62ECEE78BB8 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_1D7B653FED484EFE911C1CCCB5DADF88 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_FED68041EC7B470AAE06D1DF2EDA84D2 }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'oasisserver'
+          app-name: 'oasis-testing'
           slot-name: 'Production'
           package: .
           
