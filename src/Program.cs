@@ -97,7 +97,7 @@ namespace Crash.Server
 				var jsonConfig = signalRConfig.GetRequiredSection("Json").Get<JsonSerializerOptions>();
 				if (jsonConfig is null)
 					return;
-				
+
 				jsonOptions.PayloadSerializerOptions = jsonConfig;
 			}
 
@@ -106,7 +106,7 @@ namespace Crash.Server
 				var crashConfig = App.Configuration.GetRequiredSection("Crash");
 				var signalRConfig = crashConfig.GetRequiredSection("SignalR");
 				var crashHubOptions = signalRConfig.GetRequiredSection("CrashHub").Get<HubOptions<CrashHub>>();
-				
+
 				// TODO : Is there a way to deserialize the Section TO the hubOptions object? Below feels redundant
 				hubOptions.MaximumParallelInvocationsPerClient = crashHubOptions.MaximumParallelInvocationsPerClient;
 				hubOptions.MaximumReceiveMessageSize = crashHubOptions.MaximumReceiveMessageSize;

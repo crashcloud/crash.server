@@ -1,4 +1,4 @@
-
+﻿
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
 
@@ -24,13 +24,14 @@ internal class ErrorHelper
 		assistanceMessage = string.Empty;
 		if (ex is null) return false;
 
-		var assistanceMessages = new List<string>();
-		assistanceMessages.Add(ArgsMessage);
-		assistanceMessages.Add(GetPaddedNewLine(ArgsMessage.Length));
+		var assistanceMessages = new List<string>
+		{
+			ArgsMessage,
+			GetPaddedNewLine(ArgsMessage.Length)
+		};
 
 		bool helpFound = false;
 
-		int messageCount = 0;
 		foreach (var handler in ErrorHandlers)
 		{
 			if (!handler.Predicate(ex)) continue;

@@ -8,7 +8,7 @@ namespace Crash.Server.Model
 	/// <summary>Creates Changes</summary>
 	public static class ChangeFactory
 	{
-		private static JsonSerializerOptions options { get; } = new()
+		private static JsonSerializerOptions Options { get; } = new()
 		{
 			AllowTrailingCommas = true,
 			IgnoreReadOnlyFields = true,
@@ -39,7 +39,10 @@ namespace Crash.Server.Model
 		{
 			return new ImmutableChange
 			{
-				Id = id, Action = ChangeAction.Unlocked, Stamp = DateTime.UtcNow, Type = type
+				Id = id,
+				Action = ChangeAction.Unlocked,
+				Stamp = DateTime.UtcNow,
+				Type = type
 			};
 		}
 
@@ -86,7 +89,7 @@ namespace Crash.Server.Model
 
 			return MutableChange.CreateWithPacket(recievedChange.Id,
 				recievedChange.Owner,
-				JsonSerializer.Serialize(packet, options),
+				JsonSerializer.Serialize(packet, Options),
 				recievedChange.Type,
 				recievedChange.Action);
 		}

@@ -12,7 +12,6 @@ namespace Crash.Server
 
 		#region Consts & Defaults
 
-		private const string Pattern = @"--([\w]+ [\S]*)";
 		internal const string AppName = "Crash";
 		internal const string DbDirectory = "Databases";
 		internal const string DefaultURL = "http://0.0.0.0:8080";
@@ -77,7 +76,7 @@ namespace Crash.Server
 						return;
 					}
 
-					if (value.Scheme != "http" && value.Scheme != "https")
+					if (value.Scheme is not "http" and not "https")
 					{
 						result.ErrorMessage = "Given URL was not a valid HTTP or HTTPS URL. Please provide a valid URL.";
 						return;
@@ -218,6 +217,7 @@ namespace Crash.Server
 			return validatedArgs;
 		}
 
+		private static char[] Splitters { get; } = new char[] { '+', '-' };
 		private static bool TryGetVersionInfo(out string name, out string version, out string suffix, out string commit)
 		{
 			// TODO : Suffix
@@ -229,7 +229,7 @@ namespace Crash.Server
 
 			var assembly = Assembly.GetExecutingAssembly();
 			var commitInfo = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
-			var customAttributeInfo = commitInfo.InformationalVersion.Split(new char[] { '+', '-' });
+			var customAttributeInfo = commitInfo.InformationalVersion.Split(Splitters);
 
 			var commitHash = customAttributeInfo.LastOrDefault()[..7];
 			var versionSuffix = string.Empty;

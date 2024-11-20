@@ -9,7 +9,7 @@ namespace Crash.Server.Model
 	/// <summary>Implementation of DbContext to be used as SqLite DB Session</summary>
 	public sealed class CrashContext : DbContext
 	{
-		private readonly ILogger<CrashHub> Logger;
+		private ILogger<CrashHub> Logger { get; }
 
 		/// <summary>Default Constructor</summary>
 		public CrashContext(DbContextOptions<CrashContext> options, ILogger<CrashHub> logger) : base(options)

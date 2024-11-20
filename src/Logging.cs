@@ -2,50 +2,50 @@
 {
 	public static partial class Logging
 	{
-		
+
 		[LoggerMessage(
 			EventId = (int)LogLevel.Critical,
 			Level = LogLevel.Critical,
 			Message = "{message}")]
 		public static partial void Critical(
 			this ILogger logger, string message);
-		
+
 		[LoggerMessage(
 			EventId = (int)LogLevel.Error,
 			Level = LogLevel.Error,
 			Message = "{message}")]
 		public static partial void Error(
 			this ILogger logger, string message);
-		
+
 		[LoggerMessage(
 			EventId = (int)LogLevel.Information,
 			Level = LogLevel.Information,
 			Message = "{message}")]
 		public static partial void Information(
 			this ILogger logger, string message);
-		
+
 		[LoggerMessage(
 			EventId = (int)LogLevel.Warning,
 			Level = LogLevel.Warning,
 			Message = "{message}")]
 		public static partial void Warning(
 			this ILogger logger, string message);
-		
+
 		[LoggerMessage(
 			EventId = (int)LogLevel.Debug,
 			Level = LogLevel.Debug,
 			Message = "{message}")]
 		public static partial void Debug(
 			this ILogger logger, string message);
-		
+
 		[LoggerMessage(
 			EventId = (int)LogLevel.Trace,
 			Level = LogLevel.Trace,
 			Message = "{message}")]
 		public static partial void Trace(
 			this ILogger logger, string message);
-		
-		
+
+
 		// Example
 		[LoggerMessage(
 			EventId = 100,

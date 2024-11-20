@@ -32,6 +32,7 @@
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<ErrorReport>send</ErrorReport>
 		<NoWarn>CS8602</NoWarn>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="$(Publish) == 'True'">

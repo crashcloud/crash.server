@@ -53,8 +53,8 @@ dotnet_style_predefined_type_for_member_access = true:suggestion
 
 # Suggest more modern language features when available
 dotnet_style_object_initializer = true:warning
-dotnet_style_collection_initializer = true:warning
-dotnet_style_coalesce_expression = true:warning
+dotnet_style_collection_initializer = true:suggestion
+dotnet_style_coalesce_expression = true:suggestion
 dotnet_style_null_propagation = true:warning
 dotnet_style_explicit_tuple_names = true:warning
 
@@ -150,7 +150,7 @@ dotnet_style_prefer_conditional_expression_over_assignment = true:silent
 dotnet_style_operator_placement_when_wrapping = beginning_of_line
 tab_width = 4
 end_of_line = crlf
-dotnet_style_prefer_conditional_expression_over_return = true:silent
+dotnet_style_prefer_conditional_expression_over_return = true:none
 dotnet_style_prefer_inferred_tuple_names = true:suggestion
 dotnet_style_prefer_inferred_anonymous_type_member_names = true:suggestion
 dotnet_style_prefer_compound_assignment = true:suggestion
@@ -168,6 +168,16 @@ dotnet_diagnostic.CA2011.severity = warning
 dotnet_diagnostic.CA1852.severity = warning
 
 # CSharp code style settings:
+
+# IDE0046: Convert to conditional expression
+dotnet_diagnostic.IDE0046.severity = none
+
+# IDE0028: Simplify collection initialization
+dotnet_diagnostic.IDE0028.severity = suggestion
+
+# IDE0270: Use coalesce expression
+dotnet_diagnostic.IDE0270.severity = suggestion
+
 [*.cs]
 # Newline settings
 csharp_new_line_before_open_brace = all
@@ -241,7 +251,7 @@ csharp_space_between_parentheses = false
 csharp_space_between_square_brackets = false
 
 # Blocks are allowed
-csharp_prefer_braces = true:silent
+csharp_prefer_braces = true:none
 csharp_preserve_single_line_blocks = true
 csharp_preserve_single_line_statements = true
 
@@ -285,6 +295,15 @@ dotnet_analyzer_diagnostic.severity = none
 
 # IDE0160: Convert to block scoped namespace
 dotnet_diagnostic.IDE0160.severity = silent
+
+# IDE0011: Add braces
+dotnet_diagnostic.IDE0011.severity = none
+
+# IDE0007: Use implicit type
+dotnet_diagnostic.IDE0007.severity = suggestion
+
+# CA1822: Mark members as static
+dotnet_diagnostic.CA1822.severity = suggestion
 
 [src/{Compilers,ExpressionEvaluator,Scripting}/**Test**/*.{cs,vb}]
 

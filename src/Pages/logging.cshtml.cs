@@ -1,4 +1,4 @@
-using Crash.Server.Model;
+﻿using Crash.Server.Model;
 
 namespace Crash.Server.Pages
 {

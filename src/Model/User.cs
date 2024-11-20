@@ -21,10 +21,7 @@ namespace Crash.Server.Model
 		/// <returns></returns>
 		internal static User? FromChange(Change change)
 		{
-			if (string.IsNullOrEmpty(change?.Payload))
-			{
-				return null;
-			}
+			if (string.IsNullOrEmpty(change?.Payload)) return null;
 
 			return JsonSerializer.Deserialize<User>(change.Payload);
 		}
@@ -40,7 +37,7 @@ namespace Crash.Server.Model
 		public override int GetHashCode() => Name.ToUpperInvariant().GetHashCode();
 
 		public bool Equals(string? other)
-			=> string.Equals(Name, other, StringComparison.OrdinalIgnoreCase); 
+			=> string.Equals(Name, other, StringComparison.OrdinalIgnoreCase);
 
 		public bool Equals(User? other) => Equals(other?.Name);
 	}

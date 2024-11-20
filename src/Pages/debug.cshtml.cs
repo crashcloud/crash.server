@@ -16,7 +16,11 @@ namespace Crash.Server.Pages
 		{
 			Env = env;
 			Context = context;
-			Log = (provider as CrashLoggerProvider)?._logger;
+
+			if (provider is not CrashLoggerProvider crashLoggerProvider)
+				throw new ArgumentNullException(nameof(provider));
+
+			Log = crashLoggerProvider._logger;
 		}
 
 		public override void OnPageHandlerExecuting(PageHandlerExecutingContext context)

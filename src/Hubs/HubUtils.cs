@@ -9,8 +9,6 @@
 
 		private const string InvalidGuidMessage = "Inputted Change Id is Guid.Empty";
 
-		private const string InvalidPayloadMessage = "Payload is Invalid";
-
 		/// <summary>Validates a user as being not empty or null</summary>
 		internal static bool IsUserValid(string user)
 		{
@@ -27,8 +25,8 @@
 		internal static bool IsChangeValid(IChange change)
 		{
 			if (change is not null &&
-			    change.Id != Guid.Empty &&
-			    change.Action != ChangeAction.None)
+				change.Id != Guid.Empty &&
+				change.Action != ChangeAction.None)
 			{
 				return true;
 			}
