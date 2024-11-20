@@ -9,7 +9,7 @@ namespace Crash.Server.Tests
 		{
 			var args = await Arguments.ParseArgs(["--urls", "http://0.0.0.0:8080"]);
 			Program.CrashServerCreator server = new(args);
-			Assert.True(server.TryCreateApplication(args.Args, out var webApplication));
+			Assert.That(server.TryCreateApplication(args.Args, out var webApplication));
 		}
 	}
 }

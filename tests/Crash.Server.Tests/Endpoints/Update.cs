@@ -56,14 +56,17 @@ namespace Crash.Server.Tests.Endpoints
 
 			var transformChange = new Change
 			{
-				Id = change.Id, Type = change.Type, Action = ChangeAction.Update, Payload = payload
+				Id = change.Id,
+				Type = change.Type,
+				Action = ChangeAction.Update,
+				Payload = payload
 			};
 			await _crashHub.PushChange(transformChange);
 
 			Assert.That(_crashHub.Database.TryGetChange(change.Id, out var latestChange), Is.True);
 
 			Assert.That(change.Id, Is.EqualTo(latestChange.Id));
-			Assert.True(PayloadUtils.TryGetPayloadFromChange(latestChange, out var payloadPacket));
+			Assert.That(PayloadUtils.TryGetPayloadFromChange(latestChange, out var payloadPacket));
 
 			Assert.That(payloadPacket.Updates, Is.Not.Null.Or.Empty);
 			Assert.That(payloadPacket.Updates, Is.EqualTo(updatesPacket.Updates));

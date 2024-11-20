@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Crash.Server", "src\Crash.S
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{DFFDAFE0-A738-44DD-A529-76889CBCC7EA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Crash.Server.Tests", "tests\Crash.Server.Tests.csproj", "{F8D97400-10B6-4C11-85BA-0B8F7A1947DA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Crash.Server.Tests", "tests\Crash.Server.Tests\Crash.Server.Tests.csproj", "{F8D97400-10B6-4C11-85BA-0B8F7A1947DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crash.Server.Integration.Tests", "tests\Crash.Server.Integration.Tests\Crash.Server.Integration.Tests.csproj", "{8ABD36E5-A1E2-4E07-BDD0-2E81FB01E3B8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,12 +25,17 @@ Global
 		{F8D97400-10B6-4C11-85BA-0B8F7A1947DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8D97400-10B6-4C11-85BA-0B8F7A1947DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8D97400-10B6-4C11-85BA-0B8F7A1947DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8ABD36E5-A1E2-4E07-BDD0-2E81FB01E3B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8ABD36E5-A1E2-4E07-BDD0-2E81FB01E3B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8ABD36E5-A1E2-4E07-BDD0-2E81FB01E3B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8ABD36E5-A1E2-4E07-BDD0-2E81FB01E3B8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F8D97400-10B6-4C11-85BA-0B8F7A1947DA} = {DFFDAFE0-A738-44DD-A529-76889CBCC7EA}
+		{8ABD36E5-A1E2-4E07-BDD0-2E81FB01E3B8} = {DFFDAFE0-A738-44DD-A529-76889CBCC7EA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FA1835DB-DFA8-4A36-87DE-F3FC8944FF62}

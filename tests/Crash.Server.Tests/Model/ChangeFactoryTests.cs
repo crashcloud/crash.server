@@ -26,7 +26,9 @@ namespace Crash.Server.Tests.Model
 			var addChange = GetAddChange();
 			var releaseChange = new ImmutableChange
 			{
-				Id = addChange.Id, Action = ChangeAction.Release, Type = CrashHub.CrashGeometryChange
+				Id = addChange.Id,
+				Action = ChangeAction.Release,
+				Type = CrashHub.CrashGeometryChange
 			};
 
 			// Combining but NOT adding Actions!
@@ -77,7 +79,9 @@ namespace Crash.Server.Tests.Model
 			};
 			var releaseChange = new ImmutableChange
 			{
-				Id = transformChange.Id, Action = ChangeAction.Release, Type = CrashHub.CrashGeometryChange
+				Id = transformChange.Id,
+				Action = ChangeAction.Release,
+				Type = CrashHub.CrashGeometryChange
 			};
 
 			var combinedChange = ChangeFactory.CombineRecords(transformChange, releaseChange);
@@ -97,7 +101,9 @@ namespace Crash.Server.Tests.Model
 			};
 			var releaseChange = new ImmutableChange
 			{
-				Id = updateChange.Id, Action = ChangeAction.Release, Type = CrashHub.CrashGeometryChange
+				Id = updateChange.Id,
+				Action = ChangeAction.Release,
+				Type = CrashHub.CrashGeometryChange
 			};
 
 			var combinedChange = ChangeFactory.CombineRecords(updateChange, releaseChange);
@@ -168,10 +174,10 @@ namespace Crash.Server.Tests.Model
 			ImmutableChange latestChange = new()
 			{
 				Action = ChangeAction.Add |
-				         ChangeAction.Temporary |
-				         ChangeAction.Update |
-				         ChangeAction.Transform |
-				         ChangeAction.Locked,
+						 ChangeAction.Temporary |
+						 ChangeAction.Update |
+						 ChangeAction.Transform |
+						 ChangeAction.Locked,
 				Payload = "{}",
 				Id = id,
 				Type = "Camera"
@@ -203,8 +209,8 @@ namespace Crash.Server.Tests.Model
 			var hasAddAndDelete = change.Action.HasFlag(ChangeAction.Add | ChangeAction.Remove);
 			var hasLockAndUnlock = change.Action.HasFlag(ChangeAction.Locked | ChangeAction.Unlocked);
 
-			Assert.False(hasAddAndDelete);
-			Assert.False(hasLockAndUnlock);
+			Assert.That(hasAddAndDelete, Is.False);
+			Assert.That(hasLockAndUnlock, Is.False);
 		}
 	}
 }

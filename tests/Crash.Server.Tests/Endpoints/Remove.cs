@@ -1,4 +1,6 @@
-﻿using Crash.Server.Hubs;
+﻿using System.IO;
+
+using Crash.Server.Hubs;
 
 namespace Crash.Server.Tests.Endpoints
 {
@@ -14,7 +16,9 @@ namespace Crash.Server.Tests.Endpoints
 
 			var deleteChange = new Change(change)
 			{
-				Action = ChangeAction.Remove, Id = change.Id, Type = CrashHub.CrashGeometryChange
+				Action = ChangeAction.Remove,
+				Id = change.Id,
+				Type = CrashHub.CrashGeometryChange
 			};
 			await _crashHub.PushChange(deleteChange);
 			Assert.That(_crashHub.Database.Changes.Count(), Is.EqualTo(currCount + 2));
@@ -32,7 +36,9 @@ namespace Crash.Server.Tests.Endpoints
 			var currCount = _crashHub.Database.Changes.Count();
 			var invalidIdDeleteChange = new ImmutableChange
 			{
-				Id = Guid.Empty, Action = ChangeAction.Remove, Type = CrashHub.CrashGeometryChange
+				Id = Guid.Empty,
+				Action = ChangeAction.Remove,
+				Type = CrashHub.CrashGeometryChange
 			};
 			await _crashHub.Database.AddChangeAsync(invalidIdDeleteChange);
 			Assert.That(_crashHub.Database.Changes.Count(), Is.EqualTo(currCount));
@@ -55,7 +61,9 @@ namespace Crash.Server.Tests.Endpoints
 
 			await _crashHub.PushChange(new Change
 			{
-				Id = Guid.Empty, Action = ChangeAction.Remove, Type = CrashHub.CrashGeometryChange
+				Id = Guid.Empty,
+				Action = ChangeAction.Remove,
+				Type = CrashHub.CrashGeometryChange
 			});
 
 			for (var i = 0; i < 5; i++)
@@ -64,7 +72,9 @@ namespace Crash.Server.Tests.Endpoints
 				var guid = Guid.NewGuid();
 				await _crashHub.PushChange(new Change
 				{
-					Id = guid, Action = ChangeAction.Remove, Type = CrashHub.CrashGeometryChange
+					Id = guid,
+					Action = ChangeAction.Remove,
+					Type = CrashHub.CrashGeometryChange
 				});
 				Assert.That(_crashHub.Database.Changes.Count(), Is.EqualTo(currCount));
 			}
@@ -79,7 +89,9 @@ namespace Crash.Server.Tests.Endpoints
 
 			await _crashHub.PushChange(new Change
 			{
-				Action = ChangeAction.Remove, Id = change.Id, Type = CrashHub.CrashGeometryChange
+				Action = ChangeAction.Remove,
+				Id = change.Id,
+				Type = CrashHub.CrashGeometryChange
 			});
 
 			Assert.That(_crashHub.Database.Changes.Count(), Is.EqualTo(currCount));

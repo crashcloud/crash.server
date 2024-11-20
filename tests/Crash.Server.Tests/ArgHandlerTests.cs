@@ -1,4 +1,4 @@
-﻿// ReSharper disable HeapView.BoxingAllocation
+﻿using System.IO;
 
 namespace Crash.Server.Tests
 {

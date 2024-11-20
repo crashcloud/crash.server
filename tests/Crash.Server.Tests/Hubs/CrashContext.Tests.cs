@@ -2,6 +2,8 @@
 using Crash.Server.Hubs;
 using Crash.Server.Tests.Utils;
 
+using NUnit.Framework.Legacy;
+
 namespace Crash.Server.Tests.Hubs
 {
 	[Parallelizable(ParallelScope.None)]
@@ -27,7 +29,7 @@ namespace Crash.Server.Tests.Hubs
 		{
 			context = MockCrashHub.GetContext(MockCrashHub.GetLogger());
 		}
-		
+
 		private ImmutableChange GenerateChange()
 		{
 			var change = new ImmutableChange
@@ -66,7 +68,9 @@ namespace Crash.Server.Tests.Hubs
 			};
 			var releaseChange = new ImmutableChange
 			{
-				Id = addChange.Id, Action = ChangeAction.Release, Type = CrashHub.CrashGeometryChange
+				Id = addChange.Id,
+				Action = ChangeAction.Release,
+				Type = CrashHub.CrashGeometryChange
 			};
 
 			var changeCount = context.Changes.Count();
@@ -103,9 +107,9 @@ namespace Crash.Server.Tests.Hubs
 
 			Assert.Multiple(() =>
 			{
-				Assert.Contains("Lukas", users);
-				Assert.Contains("Morteza", users);
-				Assert.Contains("Curtis", users);
+				Assert.That("Lukas", Does.Contain(users));
+				Assert.That("Morteza", Does.Contain(users));
+				Assert.That("Curtis", Does.Contain(users));
 			});
 		}
 
