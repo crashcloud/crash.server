@@ -37,7 +37,7 @@ namespace Crash.Server
 		/// <summary>Current Logging Level for the server</summary>
 		public LogLevel LoggingLevel { get; private set; }
 
-		public string[] Args { get; private set; } = Array.Empty<string>();
+		public string[] Args { get; private set; } = [];
 		public bool OpenBrowser { get; private set; } = false;
 
 		public Arguments() { }
@@ -208,7 +208,7 @@ namespace Crash.Server
 			var result = await parser.InvokeAsync(args);
 			if (result != 0) return new() { Exit = true }; ;
 
-			var flatArgs = string.Join(", ", args ?? Array.Empty<string>())?.ToLowerInvariant();
+			var flatArgs = string.Join(", ", args ?? [])?.ToLowerInvariant();
 			bool helpRun = flatArgs?.Contains("help") ?? false;
 			if (helpRun)
 			{
@@ -217,13 +217,10 @@ namespace Crash.Server
 			return validatedArgs;
 		}
 
-		private static char[] Splitters { get; } = new char[] { '+', '-' };
+		private static char[] Splitters { get; } = ['+', '-'];
 		private static bool TryGetVersionInfo(out string name, out string version, out string suffix, out string commit)
 		{
 			// TODO : Suffix
-			var assem = typeof(Program).Assembly;
-			var cas = assem.GetCustomAttributes();
-
 			var assemblyName = typeof(Program).Assembly.GetName();
 			var assemblyVersion = assemblyName.Version;
 

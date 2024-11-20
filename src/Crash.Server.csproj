@@ -6,7 +6,7 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Title>Crash.Server</Title>
-		<LangVersion>11</LangVersion>
+		<LangVersion>12</LangVersion>
 		<Description>The Crash Server</Description>
 		<PackageProjectUrl>https://github.com/crashcloud/crash.server</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/crashcloud/crash.server</RepositoryUrl>
@@ -73,10 +73,6 @@
 		<PackageReference Include="System.Text.Json" Version="9.0.0" />
 		<PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
 		<PackageReference Include="System.Linq.Async" Version="6.0.1" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Using Include="Crash.Changes" />
 	</ItemGroup>
 
 </Project>

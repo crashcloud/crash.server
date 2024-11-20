@@ -1,7 +1,7 @@
 ﻿using System.Text.Encodings.Web;
-using System.Text.Json;
 
 using Crash.Changes.Utils;
+using Crash.Server.Data;
 
 namespace Crash.Server.Model
 {
@@ -105,5 +105,30 @@ namespace Crash.Server.Model
 				combinedChange.Action
 			);
 		}
+
+		public static Option<MutableChange> CombineRecords(IEnumerable<IChange> changes)
+		{
+			if (changes is null) return Option<MutableChange>.None;
+			if (!changes.Any()) return Option<MutableChange>.None;
+			if (changes.Count() == 1) return Option<MutableChange>.Some(CreateMutableFromChange(changes.First()));
+
+			MutableChange mutableChange = new MutableChange();
+			for (int i = 0; i < changes.Count(); i++)
+			{
+				if (i == 0)
+				{
+					mutableChange = CombineRecords(changes.ElementAt(i), changes.ElementAt(i + 1));
+					i++;
+				}
+				else
+				{
+					mutableChange = CombineRecords(mutableChange, changes.ElementAt(i));
+				}
+			}
+
+			return Option<MutableChange>.Some(mutableChange);
+
+		}
+
 	}
 }

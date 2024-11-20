@@ -9,10 +9,10 @@ namespace Crash.Server.Tests.Endpoints
 		[TestCaseSource(nameof(ValidAddChanges))]
 		public async Task Delete_Successful(Change change)
 		{
-			var currCount = _crashHub.Database.Changes.Count();
+			var currCount = CrashHub.Database.Changes.Count();
 
-			await _crashHub.PushChange(change);
-			Assert.That(_crashHub.Database.Changes.Count(), Is.EqualTo(currCount + 1));
+			await CrashHub.PushChange(change);
+			Assert.That(CrashHub.Database.Changes.Count(), Is.EqualTo(currCount + 1));
 
 			var deleteChange = new Change(change)
 			{
@@ -20,9 +20,9 @@ namespace Crash.Server.Tests.Endpoints
 				Id = change.Id,
 				Type = CrashHub.CrashGeometryChange
 			};
-			await _crashHub.PushChange(deleteChange);
-			Assert.That(_crashHub.Database.Changes.Count(), Is.EqualTo(currCount + 2));
-			Assert.That(_crashHub.Database.TryGetChange(change.Id, out var latestChange), Is.True);
+			await CrashHub.PushChange(deleteChange);
+			Assert.That(CrashHub.Database.Changes.Count(), Is.EqualTo(currCount + 2));
+			Assert.That(CrashHub.Database.TryGetChange(change.Id, out var latestChange), Is.True);
 
 			Assert.That(latestChange, Is.Not.Null);
 			Assert.That(latestChange.Id, Is.EqualTo(latestChange.Id));
@@ -33,33 +33,33 @@ namespace Crash.Server.Tests.Endpoints
 		[Test]
 		public async Task Delete_Failure_MissingId()
 		{
-			var currCount = _crashHub.Database.Changes.Count();
+			var currCount = CrashHub.Database.Changes.Count();
 			var invalidIdDeleteChange = new ImmutableChange
 			{
 				Id = Guid.Empty,
 				Action = ChangeAction.Remove,
 				Type = CrashHub.CrashGeometryChange
 			};
-			await _crashHub.Database.AddChangeAsync(invalidIdDeleteChange);
-			Assert.That(_crashHub.Database.Changes.Count(), Is.EqualTo(currCount));
+			await CrashHub.Database.AddChangeAsync(invalidIdDeleteChange);
+			Assert.That(CrashHub.Database.Changes.Count(), Is.EqualTo(currCount));
 		}
 
 		[Test]
 		public async Task Delete_Failure_MissingType()
 		{
-			var currCount = _crashHub.Database.Changes.Count();
+			var currCount = CrashHub.Database.Changes.Count();
 			var invalidIdDeleteChange = new Change { Id = Guid.NewGuid(), Action = ChangeAction.Remove, Type = null };
 
-			await _crashHub.PushChange(invalidIdDeleteChange);
-			Assert.That(_crashHub.Database.Changes.Count(), Is.EqualTo(currCount));
+			await CrashHub.PushChange(invalidIdDeleteChange);
+			Assert.That(CrashHub.Database.Changes.Count(), Is.EqualTo(currCount));
 		}
 
 		[TestCaseSource(nameof(ValidAddChanges))]
 		public async Task Delete_Failure(Change change)
 		{
-			var currCount = _crashHub.Database.Changes.Count();
+			var currCount = CrashHub.Database.Changes.Count();
 
-			await _crashHub.PushChange(new Change
+			await CrashHub.PushChange(new Change
 			{
 				Id = Guid.Empty,
 				Action = ChangeAction.Remove,
@@ -70,31 +70,31 @@ namespace Crash.Server.Tests.Endpoints
 			{
 				var user = Path.GetRandomFileName().Replace(".", "");
 				var guid = Guid.NewGuid();
-				await _crashHub.PushChange(new Change
+				await CrashHub.PushChange(new Change
 				{
 					Id = guid,
 					Action = ChangeAction.Remove,
 					Type = CrashHub.CrashGeometryChange
 				});
-				Assert.That(_crashHub.Database.Changes.Count(), Is.EqualTo(currCount));
+				Assert.That(CrashHub.Database.Changes.Count(), Is.EqualTo(currCount));
 			}
 
-			Assert.That(_crashHub.Database.Changes.Count(), Is.EqualTo(currCount));
+			Assert.That(CrashHub.Database.Changes.Count(), Is.EqualTo(currCount));
 		}
 
 		[TestCaseSource(nameof(ValidAddChanges))]
 		public async Task Delete_Failure_NotInDatabase(Change change)
 		{
-			var currCount = _crashHub.Database.Changes.Count();
+			var currCount = CrashHub.Database.Changes.Count();
 
-			await _crashHub.PushChange(new Change
+			await CrashHub.PushChange(new Change
 			{
 				Action = ChangeAction.Remove,
 				Id = change.Id,
 				Type = CrashHub.CrashGeometryChange
 			});
 
-			Assert.That(_crashHub.Database.Changes.Count(), Is.EqualTo(currCount));
+			Assert.That(CrashHub.Database.Changes.Count(), Is.EqualTo(currCount));
 		}
 	}
 }

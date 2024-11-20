@@ -9,13 +9,13 @@ namespace Crash.Server.Tests.Endpoints
 	public abstract class CrashHubEndpoints
 	{
 		private const string payload = "Payload Example";
-		protected CrashContext? _crashContext;
-		internal CrashHub? _crashHub;
+		protected CrashContext CrashContext { get; private set; }
+		internal CrashHub CrashHub { get; private set; }
 
 		[TearDown]
 		public void TearDown()
 		{
-			_crashHub?.Dispose();
+			CrashHub?.Dispose();
 		}
 
 		// TODO : Move to Test Data
@@ -148,8 +148,8 @@ namespace Crash.Server.Tests.Endpoints
 		[TearDown]
 		public void Cleanup()
 		{
-			_crashHub = null;
-			_crashContext = null;
+			CrashHub = null;
+			CrashContext = null;
 		}
 
 		internal static DbContextOptions<CrashContext> GetMockOptions()
@@ -163,8 +163,8 @@ namespace Crash.Server.Tests.Endpoints
 
 		private void SetUpContext()
 		{
-			_crashHub = MockCrashHub.GenerateHub();
-			_crashContext = _crashHub.Database;
+			CrashHub = MockCrashHub.GenerateHub();
+			CrashContext = CrashHub.Database;
 		}
 
 		private static ChangeAction getRandomAction()

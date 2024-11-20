@@ -84,11 +84,11 @@ namespace Crash.Server
 
 	}
 
-	internal sealed class CrashLoggerProvider : ILoggerProvider
+	public sealed class CrashLoggerProvider : ILoggerProvider
 	{
 		internal CrashLogger _logger;
 
-		internal CrashLoggerProvider(LogLevel loggingLevel)
+		public CrashLoggerProvider(LogLevel loggingLevel = LogLevel.Information)
 		{
 			_logger = new CrashLogger(loggingLevel);
 		}
