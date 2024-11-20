@@ -95,4 +95,19 @@ public class Collaborator
 		return change;
 	}
 
+	public async Task Delete(Change change)
+	{
+		var deleteChange = new Change()
+		{
+			Owner = Name,
+			Id = change.Id,
+			Type = change.Type,
+			Action = ChangeAction.Remove
+		};
+
+		var changes = new List<Change> { deleteChange };
+		await Client.StreamChangesAsync(changes.ToAsyncEnumerable());
+		Assert.AddItem(deleteChange);
+	}
+
 }
