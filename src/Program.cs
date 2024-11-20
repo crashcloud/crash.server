@@ -71,13 +71,11 @@ namespace Crash.Server
 
 				if (App.Environment.IsDevelopment())
 				{
-					App.MapGet("/logging", () => string.Join("\n", crashLogger._logger.Messages));
 					App.MapGet("/config", () => App.Configuration.AsEnumerable());
 					App.MapGet("/services", () =>
 					{
 						var crashHubOptionsService = App.Services.GetService<IConfigureOptions<HubOptions<CrashHub>>>();
 						var connectionHandler = App.Services.GetService<HubConnectionHandler<CrashHub>>();
-						;
 					});
 				}
 

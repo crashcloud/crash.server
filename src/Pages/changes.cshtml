@@ -15,15 +15,17 @@
 <body>
 <div>
 	<table>
-		<tr>
-			<td>Id</td>
-			<td>UniqueId</td>
-			<td>Action</td>
-			<td>Stamp</td>
-			<td>Type</td>
-			<td>Owner</td>
-			<td>Payload</td>
-		</tr>
+			<thead>
+				<tr>
+					<td>Id</td>
+					<td>UniqueId</td>
+					<td>Action</td>
+					<td>Stamp</td>
+					<td>Type</td>
+					<td>Owner</td>
+					<td>Payload</td>
+				</tr>
+			</thead>
 
 		@foreach (var change in Model.Context.Changes)
 		{

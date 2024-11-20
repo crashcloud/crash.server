@@ -14,10 +14,12 @@
 <body>
 <div>
 	<table>
-		<tr>
-			<td>Name</td>
-			<td>Follows</td>
-		</tr>
+			<thead>
+				<tr>
+					<td>Name</td>
+					<td>Follows</td>
+				</tr>
+			</thead>
 
 		@foreach (var user in Model.Context.Users)
 		{

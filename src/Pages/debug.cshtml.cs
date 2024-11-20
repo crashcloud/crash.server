@@ -1,6 +1,7 @@
 ﻿using Crash.Server.Model;
 
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Crash.Server.Pages
@@ -9,11 +10,13 @@ namespace Crash.Server.Pages
 	{
 		internal CrashContext Context { get; }
 		internal IWebHostEnvironment Env { get; }
+		internal CrashLogger Log { get; }
 
-		protected DebugBase(IWebHostEnvironment env, CrashContext context) // Injected from ASP.NET Core
+		protected DebugBase(IWebHostEnvironment env, CrashContext context, ILoggerProvider provider) // Injected from ASP.NET Core
 		{
 			Env = env;
 			Context = context;
+			Log = (provider as CrashLoggerProvider)?._logger;
 		}
 
 		public override void OnPageHandlerExecuting(PageHandlerExecutingContext context)
@@ -28,7 +31,7 @@ namespace Crash.Server.Pages
 
 	public class Debug : DebugBase
 	{
-		public Debug(IWebHostEnvironment env, CrashContext context) : base(env, context)
+		public Debug(IWebHostEnvironment env, CrashContext context, ILoggerProvider provider) : base(env, context, provider)
 		{
 		}
 	}

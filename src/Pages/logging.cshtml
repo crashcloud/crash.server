@@ -1,0 +1,56 @@
+﻿@page
+@using Crash.Server
+@model Crash.Server.Pages.Logging
+
+@{
+	Layout = null;
+}
+
+<!DOCTYPE html>
+
+<style>
+	td {
+		font-size: 8px;
+	}
+</style>
+
+<styusing Crash.Server; #line default e default yle>
+	<htmusing Crash.Server; #line default <head>
+		<title>Logs</title>
+		<link rel="stylesheet" href="~/css/debug-style.css" type="text/css" />
+		</head>
+
+		<body>
+			<div class="container">
+				<div class="row">
+					<div class="col-md-12">
+						<table class="table table-striped">
+							<thead>
+								<tr>
+									<th>Lvl</th>
+									<th>EventId</th>
+									<th>Message</th>
+									<th>Exception</th>
+								</tr>
+							</thead>
+							<tbody>
+								@foreach (var log in Model.Log.Messages)
+								{
+									var colour = CrashLogger.LogColour(log.Level);
+									var level = CrashLogger.LogToString(log.Level);
+
+									<tr>
+										<td style="color:@colour">@level</td>
+										<td>@log.EventId</td>
+										<td>@log.Message</td>
+										<td>@log.RealException</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</body>
+
+		</html>

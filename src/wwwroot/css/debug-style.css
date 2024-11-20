@@ -15,3 +15,10 @@ table {
 	border-radius: 2px;
 	background-color: white;
 }
+table thead {
+	font-weight: bold;
+}
+
+table thead tr td {
+	font-weight: bold;
+}

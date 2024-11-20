@@ -8,24 +8,25 @@
 
 <!DOCTYPE html>
 
-<link rel="stylesheet" href="~/css/debug-style.css" type="text/css" />
-
 <style>
 </style>
 <html>
 <head>
 	<title>Latest Changes</title>
+	<link rel="stylesheet" href="~/css/debug-style.css" type="text/css" />
 </head>
 <body>
 	<table>
-		<tr>
-			<td>Id</td>
-			<td>Action</td>
-			<td>Stamp</td>
-			<td>Type</td>
-			<td>Owner</td>
-			<td>Payload</td>
-		</tr>
+		<thead>
+			<tr>
+				<td>Id</td>
+				<td>Action</td>
+				<td>Stamp</td>
+				<td>Type</td>
+				<td>Owner</td>
+				<td>Payload</td>
+			</tr>
+		</thead>
 
 		@foreach (var change in Model.Context.LatestChanges)
 		{
