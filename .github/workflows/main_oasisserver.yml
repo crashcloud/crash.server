@@ -4,10 +4,8 @@
 name: Build and deploy ASP.Net Core app to Azure Web App - oasisserver
 
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+ schedule:
+    - cron: "0 23 * * *" # deploy every day @ 11 PM PST
 
 jobs:
   build:
