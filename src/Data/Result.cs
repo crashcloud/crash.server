@@ -13,6 +13,10 @@ public struct Result
 	public static Result<T> Err<T>(Exception error) => new(error);
 	public static Result<T> Err<T>(string error) => new(new Exception(error));
 
+	public static Result<bool> Bool(bool result, string message = "") => result ?
+								new(true) :
+								new(new Exception(message));
+
 }
 
 
@@ -21,6 +25,7 @@ public readonly struct Result<T>
 	public T ResultValue { get; }
 	public Exception ResultError { get; }
 	public bool IsSuccess { get; }
+	public bool IsFailure => !IsSuccess;
 
 	internal Result(T value)
 	{
@@ -45,4 +50,5 @@ public readonly struct Result<T>
 		error = ResultError;
 		return !IsSuccess;
 	}
+
 }

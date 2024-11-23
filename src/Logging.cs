@@ -109,5 +109,42 @@
 			Message = "Change is not valid `{change}")]
 		public static partial void ChangeIsNotValid(
 			this ILogger logger, IChange change);
+
+		[LoggerMessage(
+			EventId = 109,
+			Level = LogLevel.Error,
+			Message = "Change is null")]
+		public static partial void ChangeIsNull(
+			this ILogger logger);
+
+		[LoggerMessage(
+			EventId = 110,
+			Level = LogLevel.Error,
+			Message = "Change Id is not valid `{id}")]
+		public static partial void GuidIsNotValid(
+			this ILogger logger, Guid id);
+
+		[LoggerMessage(
+			EventId = 111,
+			Level = LogLevel.Error,
+			Message = "Change Action is not valid `{action}")]
+		public static partial void ChangeActionIsNotValid(
+			this ILogger logger, ChangeAction action);
+
+		[LoggerMessage(
+			EventId = 112,
+			Level = LogLevel.Error,
+			Message = "Change Payload is empty")]
+		public static partial void PayloadIsEmpty(
+			this ILogger logger);
+
+		[LoggerMessage(
+			EventId = 113,
+			Level = LogLevel.Critical,
+			Message = "Exception occured")]
+		public static partial void Exception(
+			this ILogger logger, Exception exception);
+
 	}
+
 }

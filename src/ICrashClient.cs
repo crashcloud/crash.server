@@ -7,7 +7,7 @@
 		Task Done(string user);
 
 		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
-		Task DoneRange(IEnumerable<Guid> ids);
+		Task DoneRange(IAsyncEnumerable<Guid> ids);
 
 		/// <summary>
 		///     Pushes a single changes at once
@@ -21,10 +21,10 @@
 		Task PushChangesThroughStream(IAsyncEnumerable<Change> changes);
 
 		/// <summary>Initialises the latest changes to a connecting client</summary>
-		Task InitializeChanges(IEnumerable<Change> changes);
+		Task InitializeChanges(IAsyncEnumerable<Change> changes);
 
 		/// <summary>Initialises the Users to a connecting client</summary>
-		Task InitializeUsers(IEnumerable<string> users);
+		Task InitializeUsers(IAsyncEnumerable<string> users);
 
 		/// <summary>Updates a User</summary>
 		/// <param name="user"></param>

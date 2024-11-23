@@ -27,9 +27,9 @@ namespace Crash.Server.Model
 		/// <summary>Creates a Lock Record</summary>
 		/// <param name="type">Likely the latest Type</param>
 		/// <param name="id">The id of the Change to lock</param>
-		public static ImmutableChange CreateLockRecord(string type, Guid id)
+		public static ImmutableChange CreateLockRecord(string type, Guid id, string user)
 		{
-			return new ImmutableChange { Id = id, Action = ChangeAction.Locked, Stamp = DateTime.UtcNow, Type = type };
+			return new ImmutableChange { Id = id, Action = ChangeAction.Locked, Stamp = DateTime.UtcNow, Type = type, Owner = user };
 		}
 
 		/// <summary>Creates an Unlock Record</summary>
