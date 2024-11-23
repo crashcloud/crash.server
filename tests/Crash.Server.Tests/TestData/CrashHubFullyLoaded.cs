@@ -117,15 +117,15 @@ namespace Crash.Server.Tests
 	{
 		public Task Done(string user) { return Task.CompletedTask; }
 
-		public Task DoneRange(IEnumerable<Guid> ids) { return Task.CompletedTask; }
+		public Task DoneRange(IAsyncEnumerable<Guid> ids) { return Task.CompletedTask; }
 
 		public Task PushChange(Change change) { return Task.CompletedTask; }
 
 		public Task PushChangesThroughStream(IAsyncEnumerable<Change> changeStream) { return Task.CompletedTask; }
 
-		public Task InitializeChanges(IEnumerable<Change> changes) { return Task.CompletedTask; }
+		public Task InitializeChanges(IAsyncEnumerable<Change> changes) { return Task.CompletedTask; }
 
-		public Task InitializeUsers(IEnumerable<string> users) { return Task.CompletedTask; }
+		public Task InitializeUsers(IAsyncEnumerable<string> users) { return Task.CompletedTask; }
 
 		public Task UpdateUser(string user) { return Task.CompletedTask; }
 	}
