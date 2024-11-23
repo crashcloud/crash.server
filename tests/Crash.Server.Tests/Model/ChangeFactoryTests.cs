@@ -115,7 +115,7 @@ namespace Crash.Server.Tests.Model
 		public void Create_Delete_Success()
 		{
 			// Act
-			var change = ChangeFactory.CreateDeleteRecord(Guid.NewGuid());
+			var change = ChangeFactory.CreateDeleteRecord("James", Guid.NewGuid());
 
 			// Assert
 			ValidateIds(change);

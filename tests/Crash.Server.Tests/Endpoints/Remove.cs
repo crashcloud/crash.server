@@ -11,16 +11,17 @@ namespace Crash.Server.Tests.Endpoints
 		{
 			var currCount = CrashHub.Database.Changes.Count();
 
-			await CrashHub.PushChange(change);
+			Assert.That(await CrashHub.PushChange(change), Is.True);
 			Assert.That(CrashHub.Database.Changes.Count(), Is.EqualTo(currCount + 1));
 
 			var deleteChange = new Change(change)
 			{
 				Action = ChangeAction.Remove,
 				Id = change.Id,
-				Type = CrashHub.CrashGeometryChange
+				Type = CrashHub.CrashGeometryChange,
+				Owner = Path.GetRandomFileName().Replace(".", ""),
 			};
-			await CrashHub.PushChange(deleteChange);
+			Assert.That(await CrashHub.PushChange(deleteChange), Is.True);
 			Assert.That(CrashHub.Database.Changes.Count(), Is.EqualTo(currCount + 2));
 			Assert.That(CrashHub.Database.TryGetChange(change.Id, out var latestChange), Is.True);
 
@@ -38,9 +39,10 @@ namespace Crash.Server.Tests.Endpoints
 			{
 				Id = Guid.Empty,
 				Action = ChangeAction.Remove,
-				Type = CrashHub.CrashGeometryChange
+				Type = CrashHub.CrashGeometryChange,
+				Owner = Path.GetRandomFileName().Replace(".", ""),
 			};
-			await CrashHub.Database.AddChangeAsync(invalidIdDeleteChange);
+			Assert.That(await CrashHub.Database.AddChangeAsync(invalidIdDeleteChange), Is.False);
 			Assert.That(CrashHub.Database.Changes.Count(), Is.EqualTo(currCount));
 		}
 
@@ -50,7 +52,7 @@ namespace Crash.Server.Tests.Endpoints
 			var currCount = CrashHub.Database.Changes.Count();
 			var invalidIdDeleteChange = new Change { Id = Guid.NewGuid(), Action = ChangeAction.Remove, Type = null };
 
-			await CrashHub.PushChange(invalidIdDeleteChange);
+			Assert.That(await CrashHub.PushChange(invalidIdDeleteChange), Is.False);
 			Assert.That(CrashHub.Database.Changes.Count(), Is.EqualTo(currCount));
 		}
 
@@ -59,23 +61,24 @@ namespace Crash.Server.Tests.Endpoints
 		{
 			var currCount = CrashHub.Database.Changes.Count();
 
-			await CrashHub.PushChange(new Change
+			Assert.That(await CrashHub.PushChange(new Change
 			{
 				Id = Guid.Empty,
 				Action = ChangeAction.Remove,
-				Type = CrashHub.CrashGeometryChange
-			});
+				Type = CrashHub.CrashGeometryChange,
+				Owner = Path.GetRandomFileName().Replace(".", ""),
+			}), Is.False);
 
 			for (var i = 0; i < 5; i++)
 			{
 				var user = Path.GetRandomFileName().Replace(".", "");
 				var guid = Guid.NewGuid();
-				await CrashHub.PushChange(new Change
+				Assert.That(await CrashHub.PushChange(new Change
 				{
 					Id = guid,
 					Action = ChangeAction.Remove,
 					Type = CrashHub.CrashGeometryChange
-				});
+				}), Is.False);
 				Assert.That(CrashHub.Database.Changes.Count(), Is.EqualTo(currCount));
 			}
 
@@ -87,12 +90,12 @@ namespace Crash.Server.Tests.Endpoints
 		{
 			var currCount = CrashHub.Database.Changes.Count();
 
-			await CrashHub.PushChange(new Change
+			Assert.That(await CrashHub.PushChange(new Change
 			{
 				Action = ChangeAction.Remove,
 				Id = change.Id,
 				Type = CrashHub.CrashGeometryChange
-			});
+			}), Is.False);
 
 			Assert.That(CrashHub.Database.Changes.Count(), Is.EqualTo(currCount));
 		}

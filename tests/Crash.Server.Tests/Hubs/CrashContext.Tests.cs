@@ -58,19 +58,22 @@ namespace Crash.Server.Tests.Hubs
 		[Test]
 		public async Task GetChanges_TwoInputsCombinedIntoOne()
 		{
+			var user = Path.GetRandomFileName().Replace(".", "");
 			var addPacket = new PayloadPacket() { Data = "Example Payload" };
 			var addChange = new ImmutableChange
 			{
 				Id = Guid.NewGuid(),
 				Action = ChangeAction.Add | ChangeAction.Temporary,
 				Payload = JsonSerializer.Serialize(addPacket),
-				Type = CrashHub.CrashGeometryChange
+				Type = CrashHub.CrashGeometryChange,
+				Owner = user
 			};
 			var releaseChange = new ImmutableChange
 			{
 				Id = addChange.Id,
 				Action = ChangeAction.Release,
-				Type = CrashHub.CrashGeometryChange
+				Type = CrashHub.CrashGeometryChange,
+				Owner = user
 			};
 
 			var changeCount = context.Changes.Count();
@@ -107,9 +110,9 @@ namespace Crash.Server.Tests.Hubs
 
 			Assert.Multiple(() =>
 			{
-				Assert.That("Lukas", Does.Contain(users));
-				Assert.That("Morteza", Does.Contain(users));
-				Assert.That("Curtis", Does.Contain(users));
+				Assert.That(users, Does.Contain("Lukas"));
+				Assert.That(users, Does.Contain("Morteza"));
+				Assert.That(users, Does.Contain("Curtis"));
 			});
 		}
 

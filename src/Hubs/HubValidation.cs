@@ -57,7 +57,7 @@ internal static class HubValidation
 		if (change.Action == ChangeAction.None)
 		{
 			hub.Logger.ChangeActionIsNotValid(change.Action);
-			return true;
+			return false;
 		}
 
 		return true;

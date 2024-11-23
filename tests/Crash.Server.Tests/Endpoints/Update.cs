@@ -58,8 +58,9 @@ namespace Crash.Server.Tests.Endpoints
 			{
 				Id = change.Id,
 				Type = change.Type,
-				Action = ChangeAction.Update,
-				Payload = payload
+				Action = ChangeAction.Update | ChangeAction.Add,
+				Payload = payload,
+				Owner = Path.GetRandomFileName().Replace(".", "")
 			};
 			await CrashHub.PushChange(transformChange);
 

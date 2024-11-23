@@ -30,13 +30,12 @@ namespace Crash.Server.Hubs
 		}
 
 		/// <summary>Delete Item in SqLite DB and notify other clients</summary>
-		private async Task<bool> Remove(Guid id)
+		private async Task<bool> Remove(string user, Guid id)
 		{
 			if (!this.ChangeExistsInDatabase(id, out _)) return false;
 
 			// Record
-			await Database.AddChangeAsync(ChangeFactory.CreateDeleteRecord(id));
-			return true;
+			return await Database.AddChangeAsync(ChangeFactory.CreateDeleteRecord(user, id));
 		}
 
 		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
@@ -99,10 +98,11 @@ namespace Crash.Server.Hubs
 
 		// Is this how you open a connection with the server?
 		// Or do you stream?
-		public async Task RequestUsers()
+		public async Task<bool> RequestUsers()
 		{
 			var users = Database.GetUsers().ToAsyncEnumerable();
 			await Clients.Caller.InitializeUsers(users);
+			return true;
 		}
 
 		// TODO : Save the last Camera alongside the User so when you log in it is where you left off
@@ -130,15 +130,16 @@ namespace Crash.Server.Hubs
 			return true;
 		}
 
-		public async Task PushChange(Change change)
+		public async Task<bool> PushChange(Change change)
 		{
-			if (!await PushChangeOnly(change)) { return; }
+			if (!await PushChangeOnly(change)) return false;
 			await Clients.Others.PushChange(change);
+			return true;
 		}
 
 		// https://learn.microsoft.com/en-us/aspnet/core/signalr/streaming?view=aspnetcore-8.0#client-to-server-streaming
 		// A hub method automatically becomes a client-to-server streaming hub method when it accepts IAsyncEnumerable<T>.
-		public async Task PushChangesThroughStream(IAsyncEnumerable<Change> changeStream)
+		public async Task<bool> PushChangesThroughStream(IAsyncEnumerable<Change> changeStream)
 		{
 			await foreach (var item in changeStream)
 			{
@@ -146,6 +147,7 @@ namespace Crash.Server.Hubs
 			}
 
 			await Clients.Others.PushChangesThroughStream(changeStream);
+			return true;
 		}
 
 		private async Task<bool> PushChangeOnly(Change change)
@@ -213,13 +215,16 @@ namespace Crash.Server.Hubs
 					// TODO : Chain Validation in here!
 					ChangeAction.Locked => await Lock(change.Owner, change.Id),
 					ChangeAction.Unlocked => await Unlock(change.Id),
-					ChangeAction.Remove => await Remove(change.Id),
+					ChangeAction.Remove => await Remove(change.Owner, change.Id),
 					ChangeAction.Release => await Done(change.Owner),
 					ChangeAction.Add => await Add(change),
 					ChangeAction.Update => await Update(change),
 					ChangeAction.Transform => await Transform(change),
 
-					ChangeAction.None or ChangeAction.Temporary or _ => false,
+					// No action needed
+					ChangeAction.Temporary => true,
+
+					ChangeAction.None or _ => false,
 				};
 
 				if (!result)
@@ -234,8 +239,6 @@ namespace Crash.Server.Hubs
 		/// <summary>On Connected send user Changes from DB</summary>
 		public override async Task OnConnectedAsync()
 		{
-			await base.OnConnectedAsync();
-
 			var changes = Database.GetChanges();
 			var changeStream = changes.Select(c => new Change(c)).ToAsyncEnumerable();
 			await Clients.Caller.InitializeChanges(changeStream);

@@ -45,14 +45,14 @@ namespace Crash.Server.Tests.Hubs
 		public void IsPayloadValid_ValidPayloads(string payload)
 		{
 			Change change = new() { Payload = payload };
-			Assert.That(Hub.IsPayloadEmpty(change), Is.True);
+			Assert.That(Hub.IsPayloadEmpty(change), Is.False);
 		}
 
 		[TestCaseSource(typeof(TestData), nameof(TestData.InvalidPayloads))]
 		public void IsPayloadValid_InvalidPayloads(string? payload)
 		{
 			Change change = new() { Payload = payload };
-			Assert.That(Hub.IsPayloadEmpty(change), Is.False);
+			Assert.That(Hub.IsPayloadEmpty(change), Is.True);
 		}
 	}
 }
