@@ -46,10 +46,10 @@ namespace Crash.Server.Tests.Endpoints
 		[TestCaseSource(nameof(ValidAddChanges))]
 		public async Task Update_Successful(Change change)
 		{
-			var currCount = _crashHub.Database.Changes.Count();
+			var currCount = CrashHub.Database.Changes.Count();
 
-			await _crashHub.PushChange(change);
-			Assert.That(_crashHub.Database.Changes.Count(), Is.EqualTo(currCount + 1));
+			await CrashHub.PushChange(change);
+			Assert.That(CrashHub.Database.Changes.Count(), Is.EqualTo(currCount + 1));
 
 			var updatesPacket = new PayloadPacket() { Updates = new Dictionary<string, string> { { "Key", "Value" } } };
 			var payload = JsonSerializer.Serialize(updatesPacket);
@@ -58,12 +58,13 @@ namespace Crash.Server.Tests.Endpoints
 			{
 				Id = change.Id,
 				Type = change.Type,
-				Action = ChangeAction.Update,
-				Payload = payload
+				Action = ChangeAction.Update | ChangeAction.Add,
+				Payload = payload,
+				Owner = Path.GetRandomFileName().Replace(".", "")
 			};
-			await _crashHub.PushChange(transformChange);
+			await CrashHub.PushChange(transformChange);
 
-			Assert.That(_crashHub.Database.TryGetChange(change.Id, out var latestChange), Is.True);
+			Assert.That(CrashHub.Database.TryGetChange(change.Id, out var latestChange), Is.True);
 
 			Assert.That(change.Id, Is.EqualTo(latestChange.Id));
 			Assert.That(PayloadUtils.TryGetPayloadFromChange(latestChange, out var payloadPacket));

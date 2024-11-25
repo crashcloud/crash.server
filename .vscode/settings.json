@@ -1,4 +1,5 @@
 {
     "dotnet.defaultSolution": "Crash.Server.sln",
-		"dotnet-test-explorer.testProjectPath": "tests/",
+    "dotnet-test-explorer.testProjectPath": "tests/",
+    "github.copilot.inlineSuggest.enable": true,
 }

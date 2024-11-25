@@ -19,32 +19,11 @@
           },
           "sourceFileMap": {
             "/Views": "${workspaceFolder}/Views"
-          }
-        },
-        {
-            "name": ".NET 9.0 (Mac)",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build",
-            "program": "${workspaceFolder}/src/bin/Debug/net9.0/Crash.Server",
-            "cwd": "${workspaceFolder}/src/bin/Debug/net9.0/",
-            "args": ["--urls", "http://0.0.0.0:8080", "--reset", "true"],
-            "stopAtEntry": false,
-            "serverReadyAction": {
-                "action": "openExternally",
-                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
-            },
-            "env": {
-                "ASPNETCORE_ENVIRONMENT": "Development"
-            },
-            "sourceFileMap": {
-                "/Views": "${workspaceFolder}/Views"
-            }
-        },
-        {
-          "name": ".NET Core Attach",
-          "type": "coreclr",
-          "request": "attach"
+          },
+					"logging": {
+						// Prevents lots of verbose messages
+							"moduleLoad": false
+					}
         },
     ],
     "compounds": []

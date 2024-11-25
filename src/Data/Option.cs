@@ -5,6 +5,7 @@ namespace Crash.Server.Data;
 #pragma warning disable CA1050 // Declare types in namespaces
 #pragma warning disable CA1716 // Identifiers should not match keywords
 #pragma warning disable CA1000 // Do not declare static members on generic types
+
 public readonly struct Option<T> where T : notnull
 {
 	public static Option<T> None => default;

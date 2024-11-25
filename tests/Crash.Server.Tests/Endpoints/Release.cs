@@ -13,11 +13,11 @@ namespace Crash.Server.Tests.Endpoints
 		public async Task Release_Successful(Change change)
 		{
 			Assert.Ignore("Strings are encoded wrongly");
-			var currCount = _crashHub.Database.Changes.Count();
+			var currCount = CrashHub.Database.Changes.Count();
 
-			await _crashHub.PushChange(change);
-			Assert.That(_crashHub.Database.Changes.Count(), Is.EqualTo(currCount + 1));
-			Assert.That(_crashHub.Database.TryGetChange(change.Id, out var changeOut), Is.True);
+			await CrashHub.PushChange(change);
+			Assert.That(CrashHub.Database.Changes.Count(), Is.EqualTo(currCount + 1));
+			Assert.That(CrashHub.Database.TryGetChange(change.Id, out var changeOut), Is.True);
 			Assert.That(EqualityUtils.CompareChanges(change, changeOut), Is.True);
 		}
 	}
