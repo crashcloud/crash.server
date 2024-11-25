@@ -4,6 +4,8 @@ using Crash.Changes.Extensions;
 using Crash.Server.Data;
 using Crash.Server.Model;
 
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 [assembly: InternalsVisibleTo("Crash.Server.Tests")]
@@ -11,8 +13,10 @@ using Microsoft.AspNetCore.SignalR;
 namespace Crash.Server.Hubs
 {
 	///<summary>Server Implementation of ICrashClient EndPoints</summary>
+	[Authorize]
 	public sealed class CrashHub(CrashContext database, ILogger<CrashHub> logger) : Hub<ICrashClient>
 	{
+
 		// TODO: Make this configurable
 		internal const string CrashGeometryChange = "CRASH.GEOMETRYCHANGE";
 		internal const string CrashCameraChange = "CRASH.CAMERACHANGE";
@@ -239,26 +243,41 @@ namespace Crash.Server.Hubs
 		/// <summary>On Connected send user Changes from DB</summary>
 		public override async Task OnConnectedAsync()
 		{
+			/*
 			var changes = Database.GetChanges();
 			var changeStream = changes.Select(c => new Change(c)).ToAsyncEnumerable();
 			await Clients.Caller.InitializeChanges(changeStream);
 
 			var users = Database.GetUsers().ToAsyncEnumerable();
 			await Clients.Caller.InitializeUsers(users);
+			*/
 
-			await base.OnConnectedAsync();
-			return;
+			await PerformInitialHandshake();
 		}
 
-		public override async Task OnDisconnectedAsync(Exception? exception)
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+		private async Task PerformInitialHandshake()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 		{
-			if (exception is null)
-				return;
-
-			Logger.Exception(exception);
-
-			await base.OnDisconnectedAsync(exception);
-			return;
+			try
+			{
+				var context = this.Context;
+				var httpContext = this.Context.GetHttpContext();
+				;
+			}
+			catch (Exception ex)
+			{
+				throw new HubException($"HandshakeInfo was invalid! {ex.Message}");
+			}
 		}
+
+		public override Task OnDisconnectedAsync(Exception? exception)
+		{
+			if (exception is not null)
+				Logger.Exception(exception);
+
+			return Task.CompletedTask;
+		}
+
 	}
 }

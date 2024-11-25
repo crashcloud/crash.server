@@ -20,11 +20,15 @@
 		/// </summary>
 		Task<bool> PushChangesThroughStream(IAsyncEnumerable<Change> changes);
 
+		Task<IAsyncEnumerable<Change>> InitializeChangeStream();
+
 		/// <summary>Initialises the latest changes to a connecting client</summary>
-		Task<bool> InitializeChanges(IAsyncEnumerable<Change> changes);
+		Task InitializeChanges(IAsyncEnumerable<Change> changes);
 
 		/// <summary>Initialises the Users to a connecting client</summary>
-		Task<bool> InitializeUsers(IAsyncEnumerable<string> users);
+		Task InitializeUsers(IAsyncEnumerable<string> users);
+
+		Task<string> GetMessage();
 
 	}
 }
