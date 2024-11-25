@@ -311,6 +311,12 @@ dotnet_diagnostic.CA1822.severity = suggestion
 # IDE0290: Use primary constructor
 dotnet_diagnostic.IDE0290.severity = suggestion
 
+# IDE0250: Make struct 'readonly'
+dotnet_diagnostic.IDE0250.severity = suggestion
+
+# IDE0059: Unnecessary assignment of a value
+dotnet_diagnostic.IDE0059.severity = suggestion
+
 [src/{Compilers,ExpressionEvaluator,Scripting}/**Test**/*.{cs,vb}]
 
 # IDE0060: Remove unused parameter

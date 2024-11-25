@@ -13,6 +13,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using System.Net.Http.Headers;
+using Crash.Server.Security;
 
 namespace Crash.Server
 {
@@ -70,79 +72,18 @@ namespace Crash.Server
 					.AddHubOptions<CrashHub>(ConfigureCrashHubOptions)
 					.AddJsonProtocol(ConfigureJsonOptions);
 
-				webBuilder.Services.AddAuthentication((options) =>
+				webBuilder.Services.AddAuthentication(options =>
 				{
-					options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-					options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-				}).AddJwtBearer(options =>
-					{
-#if DEBUG
-						options.RequireHttpsMetadata = false;
-#endif
-						// Configure the Authority to the expected value for
-						// the authentication provider. This ensures the token
-						// is appropriately validated.
-						options.Authority = "Authority URL"; // TODO: Update URL
+					options.DefaultAuthenticateScheme = RhinoAuthenticationHandler.Name;
+					options.DefaultChallengeScheme = RhinoAuthenticationHandler.Name;
+					options.AddScheme<RhinoAuthenticationHandler>(RhinoAuthenticationHandler.Name, RhinoAuthenticationHandler.Name);
+				}).AddJwtBearer(CrashJwtBearerOptions.GetOptions);
+				// .AddOAuth("test", (o) => {
+				// 	o.
+				// });
+				// .AddBearerToken((token) => {
 
-						// TODO : Fill out
-						options.TokenValidationParameters = new TokenValidationParameters
-						{
-							ValidateIssuer = true,
-							ValidateAudience = true,
-							ValidateLifetime = true,
-							ValidateIssuerSigningKey = true,
-							ValidIssuer = "https://accounts.rhino3d.com"
-							// ValidAudience = // It contains the OAuth 2.0 id of the client who requested the token.
-							// IssuerSigningKey = new SymmetricSecurityKey(key)
-						};
-
-						// We have to hook the OnMessageReceived event in order to
-						// allow the JWT authentication handler to read the access
-						// token from the query string when a WebSocket or 
-						// Server-Sent Events request comes in.
-
-						// Sending the access token in the query string is required when using WebSockets or ServerSentEvents
-						// due to a limitation in Browser APIs. We restrict it to only calls to the
-						// SignalR hub in this code.
-						// See https://docs.microsoft.com/aspnet/core/signalr/security#access-token-logging
-						// for more information about security considerations when using
-						// the query string to transmit the access token.
-						options.Events = new JwtBearerEvents
-						{
-							OnMessageReceived = context =>
-							{
-								var bearerToken = context.Request.Headers["Authorization"];
-								;
-
-								// HttpClient client = new HttpClient();
-								// client.PostAsync("https://accounts.rhino3d.com/oauth2/token?code={ACCESS_CODE}")
-
-								// // If the request is for our hub...
-								// var path = context.HttpContext.Request.Path;
-								// if (!string.IsNullOrEmpty(accessToken) &&
-								// 	(path.StartsWithSegments("/hubs/chat")))
-								// {
-								// 	// Read the token out of the query string
-								// 	context.Token = accessToken;
-								// }
-
-								return Task.CompletedTask;
-							},
-							OnChallenge = context =>
-							{
-								return Task.CompletedTask;
-							},
-							OnTokenValidated = options =>
-							{
-								return Task.CompletedTask;
-							},
-							OnAuthenticationFailed = options =>
-							{
-								return Task.CompletedTask;
-							},
-
-						};
-					});
+				// });
 
 				webBuilder.Services.AddAuthorization((options) =>
 				{

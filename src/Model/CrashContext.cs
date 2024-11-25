@@ -4,17 +4,17 @@ using Crash.Changes.Extensions;
 using Crash.Server.Hubs;
 using Crash.Server.Pages;
 
+using Microsoft.EntityFrameworkCore.Design;
+
 namespace Crash.Server.Model
 {
 	/// <summary>Implementation of DbContext to be used as SqLite DB Session</summary>
 	public sealed class CrashContext : DbContext
 	{
-		private ILogger<CrashHub> Logger { get; }
 
 		/// <summary>Default Constructor</summary>
-		public CrashContext(DbContextOptions<CrashContext> options, ILogger<CrashHub> logger) : base(options)
+		public CrashContext(DbContextOptions<CrashContext> options) : base(options)
 		{
-			Logger = logger;
 			SaveChangesFailed += OnSaveChangesFailed;
 		}
 
@@ -23,6 +23,8 @@ namespace Crash.Server.Model
 
 		/// <summary>The Latest Changes</summary>
 		public DbSet<MutableChange> LatestChanges { get; set; }
+
+		public DbSet<ManageableUser> ManageableUsers { get; set; }
 
 		/// <summary>The Users</summary>
 		public DbSet<User> Users { get; set; }
@@ -43,13 +45,13 @@ namespace Crash.Server.Model
 		{
 			if (changeRecord.Id == Guid.Empty || changeRecord.UniqueId == Guid.Empty)
 			{
-				Logger.ChangeIsNotValid(changeRecord);
+				// Logger.ChangeIsNotValid(changeRecord);
 				return false;
 			}
 
 			if (string.IsNullOrEmpty(changeRecord.Owner))
 			{
-				Logger.UserIsNotValid(changeRecord.Owner);
+				// Logger.UserIsNotValid(changeRecord.Owner);
 				return false;
 			}
 
@@ -144,6 +146,17 @@ namespace Crash.Server.Model
 			await SaveChangesAsync();
 
 			return result;
+		}
+	}
+
+	public class CrashContextFactory : IDesignTimeDbContextFactory<CrashContext>
+	{
+		public CrashContext CreateDbContext(string[] args)
+		{
+			var optionsBuilder = new DbContextOptionsBuilder<CrashContext>();
+			optionsBuilder.UseSqlite();
+
+			return new CrashContext(optionsBuilder.Options);
 		}
 	}
 }
