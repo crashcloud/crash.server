@@ -12,6 +12,8 @@ internal static class CrashJwtBearerOptions
 		options.Validate(RhinoAuthenticationHandler.Name);
 #if DEBUG
 		options.RequireHttpsMetadata = false;
+#else
+		options.RequireHttpsMetadata = true;
 #endif
 		// TODO : Configure the Authority to the expected value for
 		// the authentication provider. This ensures the token
@@ -53,18 +55,6 @@ internal static class CrashJwtBearerOptions
 					throw new HubException("No Bearer token found");
 
 				context.Token = bearerToken;
-
-				// HttpClient client = new HttpClient();
-				// client.PostAsync("https://accounts.rhino3d.com/oauth2/token?code={ACCESS_CODE}")
-
-				// // If the request is for our hub...
-				// var path = context.HttpContext.Request.Path;
-				// if (!string.IsNullOrEmpty(accessToken) &&
-				// 	(path.StartsWithSegments("/hubs/chat")))
-				// {
-				// 	// Read the token out of the query string
-				// 	context.Token = accessToken;
-				// }
 
 				return Task.CompletedTask;
 			},

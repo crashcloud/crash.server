@@ -8,24 +8,13 @@ namespace Crash.Server.Security;
 internal static class CrashClaims
 {
 
-	private const string ClaimScheme = "CrashUser";
-
 	public static AuthenticationTicket GetTicket()
-		=> new(GetPrincipal(), GetPropertes(), ClaimScheme);
+		=> new(Roles.User, GetPropertes(), RhinoAuthenticationHandler.Name);
 
 	private static AuthenticationProperties GetPropertes() => new()
 	{
 		AllowRefresh = true,
-		IsPersistent = true
+		IsPersistent = true,
 	};
 
-	private static ClaimsPrincipal GetPrincipal()
-		=> new(GetIdentities());
-
-	private static List<ClaimsIdentity> GetIdentities()
-		=> [
-			new ClaimsIdentity([
-				new Claim(ClaimTypes.Name, ClaimScheme),
-			]),
-		];
 }

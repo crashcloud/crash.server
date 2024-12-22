@@ -22,30 +22,7 @@
 			</tr>
 		</thead>
 
-		@foreach (var user in Model.Context.ManageableUsers.Where(u => u.Status == AccessStatus.Allowed))
-		{
-			<tr>
-				<td>@user.Title</td>
-				<td>@user.EmailPattern</td>
-			</tr>
-		}
-
-		<tr>
-			<td>..</td>
-			<td><button>+</button>
-				<< /td>
-		</tr>
-	</table>
-	<h1>Ban List</h1>
-	<table>
-		<thead>
-			<tr>
-				<td>Address Pattern</td>
-				<td>Add/Remove</td>
-			</tr>
-		</thead>
-
-		@foreach (var user in Model.Context.ManageableUsers.Where(u => u.Status == AccessStatus.Banned))
+		@foreach (var user in Model.Context.ManageableUsers)
 		{
 			<tr>
 				<td>@user.Title</td>

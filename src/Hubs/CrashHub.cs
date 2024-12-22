@@ -3,6 +3,7 @@
 using Crash.Changes.Extensions;
 using Crash.Server.Data;
 using Crash.Server.Model;
+using Crash.Server.Security;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -13,8 +14,8 @@ using Microsoft.AspNetCore.SignalR;
 namespace Crash.Server.Hubs
 {
 	///<summary>Server Implementation of ICrashClient EndPoints</summary>
-	[Authorize]
-	public sealed class CrashHub(CrashContext database, ILogger<CrashHub> logger) : Hub<ICrashClient>
+	[Authorize(Roles = Roles.ViewOnlyRoleName)]
+	public sealed class CrashHub : Hub<ICrashClient>
 	{
 
 		// TODO: Make this configurable
@@ -22,8 +23,16 @@ namespace Crash.Server.Hubs
 		internal const string CrashCameraChange = "CRASH.CAMERACHANGE";
 		internal const string CrashDoneChange = "CRASH.DONECHANGE";
 
-		internal CrashContext Database { get; } = database;
-		internal ILogger<CrashHub> Logger { get; } = logger;
+		internal CrashContext Database { get; }
+		internal ILogger<CrashHub> Logger { get; }
+
+		public CrashHub(CrashContext database, ILogger<CrashHub> logger)
+		{
+			Database = database;
+			Logger = logger;
+			var args = this.Context.Features.Get<Arguments>();
+			;
+		}
 
 		/// <summary>Add Change to SqLite DB and notify other clients</summary>
 		private async Task<bool> Add(IChange change)
@@ -102,11 +111,11 @@ namespace Crash.Server.Hubs
 
 		// Is this how you open a connection with the server?
 		// Or do you stream?
-		public async Task<bool> RequestUsers()
+		[Authorize(Roles = Roles.ViewOnlyRoleName)]
+		public async Task RequestUsers()
 		{
 			var users = Database.GetUsers().ToAsyncEnumerable();
 			await Clients.Caller.InitializeUsers(users);
-			return true;
 		}
 
 		// TODO : Save the last Camera alongside the User so when you log in it is where you left off
@@ -134,16 +143,17 @@ namespace Crash.Server.Hubs
 			return true;
 		}
 
-		public async Task<bool> PushChange(Change change)
+		[Authorize(Roles = Roles.EditRoleName)]
+		public async Task PushChange(Change change)
 		{
-			if (!await PushChangeOnly(change)) return false;
+			if (!await PushChangeOnly(change)) return;
 			await Clients.Others.PushChange(change);
-			return true;
 		}
 
 		// https://learn.microsoft.com/en-us/aspnet/core/signalr/streaming?view=aspnetcore-8.0#client-to-server-streaming
 		// A hub method automatically becomes a client-to-server streaming hub method when it accepts IAsyncEnumerable<T>.
-		public async Task<bool> PushChangesThroughStream(IAsyncEnumerable<Change> changeStream)
+		[Authorize(Roles = Roles.EditRoleName)]
+		public async Task PushChangesThroughStream(IAsyncEnumerable<Change> changeStream)
 		{
 			await foreach (var item in changeStream)
 			{
@@ -151,7 +161,6 @@ namespace Crash.Server.Hubs
 			}
 
 			await Clients.Others.PushChangesThroughStream(changeStream);
-			return true;
 		}
 
 		private async Task<bool> PushChangeOnly(Change change)
@@ -241,36 +250,22 @@ namespace Crash.Server.Hubs
 		}
 
 		/// <summary>On Connected send user Changes from DB</summary>
-		public override async Task OnConnectedAsync()
-		{
-			/*
-			var changes = Database.GetChanges();
-			var changeStream = changes.Select(c => new Change(c)).ToAsyncEnumerable();
-			await Clients.Caller.InitializeChanges(changeStream);
-
-			var users = Database.GetUsers().ToAsyncEnumerable();
-			await Clients.Caller.InitializeUsers(users);
-			*/
-
-			await PerformInitialHandshake();
-		}
-
+		[Authorize(Roles = Roles.ViewOnlyRoleName)]
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-		private async Task PerformInitialHandshake()
+		public override async Task OnConnectedAsync()
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 		{
-			try
-			{
-				var context = this.Context;
-				var httpContext = this.Context.GetHttpContext();
-				;
-			}
-			catch (Exception ex)
-			{
-				throw new HubException($"HandshakeInfo was invalid! {ex.Message}");
-			}
+			var changes = Database.GetChanges();
+			var changeStream = changes.Select(c => new Change(c)).ToAsyncEnumerable();
+
+			// TODO : Fix connection bug with changes that cannot serialize changes async etc.
+			// await Clients.Caller.InitializeChanges(changeStream);
+
+			var users = Database.GetUsers().ToAsyncEnumerable();
+			// await Clients.Caller.InitializeUsers(users);
 		}
 
+		[Authorize(Roles = Roles.ViewOnlyRoleName)]
 		public override Task OnDisconnectedAsync(Exception? exception)
 		{
 			if (exception is not null)

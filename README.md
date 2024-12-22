@@ -22,10 +22,15 @@ git clone https://github.com/crashcloud/crash.server.git
 cd src
 ```
 
-4. run
+4. Ensure you have a valid local https certificate
+``` bash
+dotnet dev-certs https --trust
+```
+
+5. run
 
 ```bash
-dotnet watch --urls http://0.0.0.0:8080
+dotnet watch --urls https://0.0.0.0:8080
 ```
 
 ## Installation

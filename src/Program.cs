@@ -1,19 +1,10 @@
-﻿using System.CommandLine;
-using System.Diagnostics;
-using System.Net.Sockets;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Diagnostics;
 
 using Crash.Server.Cli;
 using Crash.Server.Hubs;
-using Crash.Server.Model;
 
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Net.Http.Headers;
 using Crash.Server.Security;
 
 namespace Crash.Server
@@ -61,9 +52,13 @@ namespace Crash.Server
 				var crashLogger = new CrashLoggerProvider(Handler.LoggingLevel);
 				webBuilder.Logging.AddProvider(crashLogger);
 
-				// Do we need this?
 				webBuilder.WebHost.UseUrls(Handler.URL);
-				webBuilder.Services.AddRazorPages();
+				webBuilder.Services.AddRazorPages(options =>
+				{
+					if (!Handler.UseAuth) return;
+
+					options.Conventions.AllowAnonymousToPage("/Index");
+				});
 
 				webBuilder.Services.AddDbContext<CrashContext>(options =>
 					options.UseSqlite($"Data Source={Handler.DatabasePath}"));
@@ -72,23 +67,22 @@ namespace Crash.Server
 					.AddHubOptions<CrashHub>(ConfigureCrashHubOptions)
 					.AddJsonProtocol(ConfigureJsonOptions);
 
-				webBuilder.Services.AddAuthentication(options =>
+				if (Handler.UseAuth)
 				{
-					options.DefaultAuthenticateScheme = RhinoAuthenticationHandler.Name;
-					options.DefaultChallengeScheme = RhinoAuthenticationHandler.Name;
-					options.AddScheme<RhinoAuthenticationHandler>(RhinoAuthenticationHandler.Name, RhinoAuthenticationHandler.Name);
-				}).AddJwtBearer(CrashJwtBearerOptions.GetOptions);
-				// .AddOAuth("test", (o) => {
-				// 	o.
-				// });
-				// .AddBearerToken((token) => {
+					webBuilder.Services.AddAuthentication(RhinoAuthenticationHandler.Options) // Rhino/McNeel Provides Auth
+									.AddPolicyScheme(Roles.Scheme, Roles.Scheme, Roles.ConfigurePolicy)
+									.AddJwtBearer(CrashJwtBearerOptions.GetOptions);
+					// .AddOAuth("test", (o) => {
+					// 	o.
+					// });
+					// .AddBearerToken((token) => {
 
-				// });
+					webBuilder.Services.AddAuthorization(CrashAuthorizationHandler.Options); // Crash Authenticates
 
-				webBuilder.Services.AddAuthorization((options) =>
-				{
-					;
-				});
+					// });
+				}
+
+				webBuilder.Services.AddSingleton<Arguments>(Handler);
 
 				App = webBuilder.Build();
 
@@ -102,14 +96,20 @@ namespace Crash.Server
 					});
 				}
 
-				// App.UseHttpsRedirection();
+#if !DEBUG
+				App.UseHttpsRedirection();
+#endif
 				App.UseStaticFiles();
-				// App.UseRouting();
-				App.MapRazorPages();
+				// App.UseRouting(); <-- What does this do?
+				App.MapRazorPages().RequireAuthorization();
 				App.MigrateDatabase<CrashContext>();
 				App.MapHub<CrashHub>("/Crash");
-				App.UseAuthentication();
-				App.UseAuthorization();
+
+				if (Handler.UseAuth)
+				{
+					App.UseAuthentication(); // This MUST be before AuthORIZATION
+					App.UseAuthorization();
+				}
 
 				webApplication = App;
 				return true;
@@ -153,15 +153,11 @@ namespace Crash.Server
 				var serverCreator = new CrashServerCreator(validatedArgs);
 				if (!serverCreator.TryCreateApplication(validatedArgs.Args, out var app)) return 1;
 
-				if (validatedArgs.OpenBrowser)
+				if (!validatedArgs.UseAuth)
 				{
-					var startInfo = new ProcessStartInfo
-					{
-						FileName = validatedArgs.URL,
-						UseShellExecute = true,
-						CreateNoWindow = true
-					};
-					Process.Start(startInfo);
+					Console.ForegroundColor = ConsoleColor.Red;
+					Console.WriteLine("\nAUTHENTICATION AND AUTHORIZATION IS DISABLED. THIS IS NOT RECOMMENDED FOR PRODUCTION.\n");
+					Console.ResetColor();
 				}
 
 				await app?.RunAsync();

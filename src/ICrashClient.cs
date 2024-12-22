@@ -4,21 +4,21 @@
 	public interface ICrashClient
 	{
 		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
-		Task<bool> Done(string user);
+		Task Done(string user);
 
 		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
-		Task<bool> DoneRange(IAsyncEnumerable<Guid> ids);
+		Task DoneRange(IAsyncEnumerable<Guid> ids);
 
 		/// <summary>
 		///     Pushes a single changes at once
 		/// </summary>
-		Task<bool> PushChange(Change change);
+		Task PushChange(Change change);
 
 		/// <summary>
 		///     Pushes many unique changes at once
 		///     An example of this may be copying 10 unique items
 		/// </summary>
-		Task<bool> PushChangesThroughStream(IAsyncEnumerable<Change> changes);
+		Task PushChangesThroughStream(IAsyncEnumerable<Change> changes);
 
 		Task<IAsyncEnumerable<Change>> InitializeChangeStream();
 

@@ -3,18 +3,16 @@ using System.Security;
 
 namespace Crash.Server.Model;
 
-public enum AccessStatus { Unknown, Allowed, Banned };
 
-
-public class ManageableUser
+public class ManageableUser(string title, string id, string emailPattern, string role)
 {
 
 	[Key]
-	public string Title { get; set; }
+	public string Id { get; set; } = id;
 
-	public string EmailPattern { get; set; }
+	public string Title { get; set; } = title;
 
-	public AccessStatus Status { get; set; }
+	public string EmailPattern { get; set; } = emailPattern;
 
-	// public PermissionSet TODO : <--
+	public string Role { get; set; } = role;
 }

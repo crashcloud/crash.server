@@ -1,10 +1,9 @@
 ﻿// https://learn.microsoft.com/en-us/ef/core/modeling/
 
-using Crash.Changes.Extensions;
-using Crash.Server.Hubs;
-using Crash.Server.Pages;
+using Crash.Server.Security;
 
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Crash.Server.Model
 {
@@ -16,6 +15,15 @@ namespace Crash.Server.Model
 		public CrashContext(DbContextOptions<CrashContext> options) : base(options)
 		{
 			SaveChangesFailed += OnSaveChangesFailed;
+			InsertAdminUser();
+		}
+
+		private void InsertAdminUser()
+		{
+			var args = this.GetService<Arguments>();
+			if (string.IsNullOrEmpty(args?.AdminUser)) return;
+
+			ManageableUsers.Add(new("Admin", "1", args.AdminUser, Roles.AdminRoleName));
 		}
 
 		/// <summary>The History of Changes</summary>
