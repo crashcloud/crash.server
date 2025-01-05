@@ -9,8 +9,10 @@ namespace Crash.Server.Tests.Endpoints
 	public abstract class CrashHubEndpoints
 	{
 		private const string payload = "Payload Example";
+
 		protected CrashContext CrashContext { get; private set; }
 		internal CrashHub CrashHub { get; private set; }
+
 
 		[TearDown]
 		public void TearDown()
