@@ -13,7 +13,7 @@ namespace Crash.Server.Tests
 		public static CrashHub GenerateHub()
 		{
 			var logger = GetLogger();
-			CrashHub hub = new(GetContext(logger), logger);
+			CrashHub hub = new(GetContext(), logger);
 
 			var mockClients = new Mock<IHubCallerClients<ICrashClient>>();
 			var mockClientProxy_All = new Mock<ICrashClient>();
@@ -29,11 +29,11 @@ namespace Crash.Server.Tests
 			return hub;
 		}
 
-		internal static CrashContext GetContext(CrashLogger logger)
+		internal static CrashContext GetContext()
 		{
 			var optionsBuilder = new DbContextOptionsBuilder<CrashContext>();
 			optionsBuilder.UseInMemoryDatabase(Guid.NewGuid().ToString());
-			CrashContext context = new(optionsBuilder.Options, logger);
+			CrashContext context = new(optionsBuilder.Options);
 			return context;
 		}
 
@@ -115,18 +115,23 @@ namespace Crash.Server.Tests
 
 	public class EmptyCrashClient : ICrashClient
 	{
-		public Task<bool> Done(string user) { return Task.FromResult(true); }
+		public Task Done(string user) { return Task.FromResult(true); }
 
-		public Task<bool> DoneRange(IAsyncEnumerable<Guid> ids) { return Task.FromResult(true); }
+		public Task DoneRange(IAsyncEnumerable<Guid> ids) { return Task.FromResult(true); }
 
-		public Task<bool> PushChange(Change change) { return Task.FromResult(true); }
+		public Task PushChange(Change change) { return Task.FromResult(true); }
 
-		public Task<bool> PushChangesThroughStream(IAsyncEnumerable<Change> changeStream) { return Task.FromResult(true); }
+		public Task PushChangesThroughStream(IAsyncEnumerable<Change> changeStream) { return Task.FromResult(true); }
 
-		public Task<bool> InitializeChanges(IAsyncEnumerable<Change> changes) { return Task.FromResult(true); }
+		public Task<IAsyncEnumerable<Change>> InitializeChangeStream() { return null; }
+		
+		public Task InitializeChanges(IAsyncEnumerable<Change> changes) { return null; }
 
-		public Task<bool> InitializeUsers(IAsyncEnumerable<string> users) { return Task.FromResult(true); }
+		public Task InitializeUsers(IAsyncEnumerable<string> users) { return Task.FromResult(true); }
 
-		public Task<bool> UpdateUser(string user) { return Task.FromResult(true); }
+		public Task UpdateUser(string user) { return Task.FromResult(true); }
+
+		public Task<string> GetMessage() => Task.FromResult<string>(string.Empty);
+		
 	}
 }

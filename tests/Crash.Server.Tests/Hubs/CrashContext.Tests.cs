@@ -27,7 +27,7 @@ namespace Crash.Server.Tests.Hubs
 		[SetUp]
 		public void SetUp()
 		{
-			context = MockCrashHub.GetContext(MockCrashHub.GetLogger());
+			context = MockCrashHub.GetContext();
 		}
 
 		private ImmutableChange GenerateChange()
