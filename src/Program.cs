@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-using Crash.Server.Cli;
+﻿using Crash.Server.Cli;
 using Crash.Server.Hubs;
 
 using Microsoft.AspNetCore.SignalR;
@@ -40,6 +38,7 @@ namespace Crash.Server
 
 			/// <summary>Creates an instance of the Crash WebApplication</summary>
 			internal bool TryCreateApplication(string[] args, out WebApplication? webApplication)
+			internal bool TryCreateApplication(string[] args, out WebApplication webApplication)
 			{
 				webApplication = null;
 				if (Handler.Exit) return false;
