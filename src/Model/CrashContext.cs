@@ -32,9 +32,14 @@ namespace Crash.Server.Model
 		/// <summary>The Latest Changes</summary>
 		public DbSet<MutableChange> LatestChanges { get; set; }
 
+		/// <summary>
+		/// Users Managed by Admins, not connected Users.
+		/// </summary>
 		public DbSet<ManageableUser> ManageableUsers { get; set; }
 
-		/// <summary>The Users</summary>
+		/// <summary>
+		/// Connected Users
+		/// </summary>
 		public DbSet<User> Users { get; set; }
 
 		private void OnSaveChangesFailed(object? sender, SaveChangesFailedEventArgs e)
