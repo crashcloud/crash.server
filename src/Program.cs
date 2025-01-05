@@ -53,8 +53,6 @@ namespace Crash.Server
 				webBuilder.WebHost.UseUrls(Handler.URL);
 				webBuilder.Services.AddRazorPages(options =>
 				{
-					if (!Handler.UseAuth) return;
-
 					options.Conventions.AllowAnonymousToPage("/Index");
 				});
 
@@ -80,6 +78,28 @@ namespace Crash.Server
 					// });
 				}
 
+				if (Handler.UseAuth)
+				{
+					webBuilder.Services.AddHsts(options =>
+					{
+						options.Preload = true;
+						options.IncludeSubDomains = true;
+						options.MaxAge = TimeSpan.FromDays(60);
+						// options.ExcludedHosts.Add("example.com");
+						// options.ExcludedHosts.Add("www.example.com");
+					});
+				}
+
+
+				// if (Handler.UseAuth)
+				// {
+				// 	webBuilder.Services.AddHttpsRedirection(options =>
+				// 	{
+				// 		options.RedirectStatusCode = 307; // Status307TemporaryRedirect;
+				// 		options.HttpsPort = 8080; // TODO : Is this right? Seems daft
+				// 	});
+				// }
+
 				webBuilder.Services.AddSingleton<Arguments>(Handler);
 
 				App = webBuilder.Build();
@@ -93,13 +113,17 @@ namespace Crash.Server
 						var connectionHandler = App.Services.GetService<HubConnectionHandler<CrashHub>>();
 					});
 				}
+				else
+				{
+					App.UseExceptionHandler("/Error");
+					App.UseHsts();
+				}
 
-#if !DEBUG
+				// https://learn.microsoft.com/en-us/aspnet/core/security/enforcing-ssl?view=aspnetcore-8.0&tabs=visual-studio%2Clinux-sles
 				App.UseHttpsRedirection();
-#endif
 				App.UseStaticFiles();
 				// App.UseRouting(); <-- What does this do?
-				App.MapRazorPages().RequireAuthorization();
+				App.MapRazorPages().AllowAnonymous().RequireAuthorization();
 				App.MigrateDatabase<CrashContext>();
 				App.MapHub<CrashHub>("/Crash");
 

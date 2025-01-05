@@ -1,6 +1,8 @@
 @page
+@using Microsoft.AspNetCore.Authorization
 @model Crash.Server.Pages.Index
 @inject IWebHostEnvironment Env
+@attribute [AllowAnonymous]
 
 @{
 	Layout = null;
