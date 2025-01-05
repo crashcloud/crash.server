@@ -4,7 +4,6 @@
 		<Title>Crash.Server.Tests</Title>
 		<TargetFrameworks>net9.0</TargetFrameworks>
 		<langVersion>12</langVersion>
-		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>
 
