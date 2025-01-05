@@ -31,7 +31,6 @@
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<ErrorReport>send</ErrorReport>
 		<NoWarn>CS8602</NoWarn>
-		<Nullable>enable</Nullable>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 	</PropertyGroup>
 

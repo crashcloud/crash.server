@@ -59,12 +59,12 @@ internal class RhinoAuthenticationHandler : IAuthenticationHandler
 		return AuthenticateResult.Fail("Not Authorized!");
 	}
 
-	public Task ChallengeAsync(AuthenticationProperties? properties)
+	public Task ChallengeAsync(AuthenticationProperties properties)
 	{
 		throw new NotImplementedException();
 	}
 
-	public Task ForbidAsync(AuthenticationProperties? properties)
+	public Task ForbidAsync(AuthenticationProperties properties)
 	{
 		properties ??= new AuthenticationProperties();
 
@@ -106,14 +106,14 @@ internal class RhinoAuthenticationHandler : IAuthenticationHandler
 
 	private const string AUTH_URL = "https://accounts.rhino3d.com/oauth2/auth";
 #pragma warning disable IDE0060 // Remove unused parameter
-	private async Task<string> HandleBrowserAuth(AuthenticationScheme scheme, HttpContext context)
-#pragma warning restore IDE0060 // Remove unusedxwx``z parameter
+	private static async Task<string> HandleBrowserAuth(AuthenticationScheme scheme, HttpContext context)
+#pragma warning restore IDE0060 // Remove unused parameter
 	{
 		var id = Guid.NewGuid();
 		HttpClient client = new HttpClient();
 
 
-		Dictionary<string, string?> queryParams = new()
+		Dictionary<string, string> queryParams = new()
 		{
 			{ "Content-Type", "application/x-www-form-urlencoded" },
 			{ "response_type", "code" },
@@ -166,9 +166,9 @@ internal class AllowAnonymouseHandler : IAuthenticationHandler
 	public Task<AuthenticateResult> AuthenticateAsync()
 		=> Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(), Roles.AnonymousRoleName)));
 
-	public Task ChallengeAsync(AuthenticationProperties? properties) => Task.CompletedTask;
+	public Task ChallengeAsync(AuthenticationProperties properties) => Task.CompletedTask;
 
-	public Task ForbidAsync(AuthenticationProperties? properties) => Task.CompletedTask;
+	public Task ForbidAsync(AuthenticationProperties properties) => Task.CompletedTask;
 
 	public Task InitializeAsync(AuthenticationScheme scheme, HttpContext context) => Task.CompletedTask;
 }

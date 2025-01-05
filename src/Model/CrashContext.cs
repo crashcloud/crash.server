@@ -42,7 +42,7 @@ namespace Crash.Server.Model
 		/// </summary>
 		public DbSet<User> Users { get; set; }
 
-		private void OnSaveChangesFailed(object? sender, SaveChangesFailedEventArgs e)
+		private void OnSaveChangesFailed(object sender, SaveChangesFailedEventArgs e)
 		{
 			// TODO: Handle Failures
 			;
@@ -75,7 +75,7 @@ namespace Crash.Server.Model
 			var noTracking = Users.AsNoTracking();
 			if (!noTracking.Any(c => c.Name == changeRecord.Owner))
 			{
-				await Users.AddAsync(new User { Name = changeRecord.Owner, Id = "", Follows = "" });
+				await Users.AddAsync(new User(changeRecord.Owner));
 				await SaveChangesAsync();
 				return true;
 			}
@@ -99,7 +99,7 @@ namespace Crash.Server.Model
 			await SaveChangesAsync();
 		}
 
-		internal bool TryGetChange(Guid changeId, out MutableChange? change)
+		internal bool TryGetChange(Guid changeId, out MutableChange change)
 		{
 			change = LatestChanges.Find(changeId);
 			return change is not null;

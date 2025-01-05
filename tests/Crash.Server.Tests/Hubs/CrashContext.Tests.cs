@@ -9,10 +9,10 @@ namespace Crash.Server.Tests.Hubs
 	[Parallelizable(ParallelScope.None)]
 	public class CrashContextTests
 	{
-		private readonly List<User> _users = new()
-		{
-			new User { Name = "Lukas" }, new User { Name = "Morteza" }, new User { Name = "Curtis" }
-		};
+		private readonly List<User> _users =
+		[
+			new User("Lukas"), new User("Morteza"), new User("Curtis")
+		];
 
 		private CrashContext context;
 

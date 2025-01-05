@@ -22,10 +22,10 @@ namespace Crash.Server.Model
 		public Guid Id { get; init; }
 
 		/// <inheritdoc />
-		public string? Owner { get; init; }
+		public string Owner { get; init; }
 
 		/// <inheritdoc />
-		public string? Payload { get; init; }
+		public string Payload { get; init; }
 
 		/// <inheritdoc />
 		public string Type { get; init; }

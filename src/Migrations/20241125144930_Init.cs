@@ -2,8 +2,6 @@
 
 using Microsoft.EntityFrameworkCore.Migrations;
 
-#nullable disable
-
 namespace Crash.Server.Migrations
 {
 	/// <inheritdoc />

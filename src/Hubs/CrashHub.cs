@@ -266,7 +266,7 @@ namespace Crash.Server.Hubs
 		}
 
 		[Authorize(Roles = Roles.ViewOnlyRoleName)]
-		public override Task OnDisconnectedAsync(Exception? exception)
+		public override Task OnDisconnectedAsync(Exception exception)
 		{
 			if (exception is not null)
 				Logger.Exception(exception);

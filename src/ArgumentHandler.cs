@@ -16,7 +16,7 @@ namespace Crash.Server
 		internal const string AppName = "Crash";
 		internal const string DbDirectory = "Databases";
 		internal const string DefaultURL = "http://0.0.0.0:8080";
-		private static Version? Vers { get; } = typeof(Arguments).Assembly.GetName().Version;
+		private static Version Vers { get; } = typeof(Arguments).Assembly.GetName().Version;
 		internal static string DbName => $"{Vers?.Major}_{Vers?.Minor}_{Vers?.Build}.db";
 
 		#endregion
@@ -61,7 +61,7 @@ namespace Crash.Server
 			args = args.Where(a => !string.IsNullOrEmpty(a)).ToArray();
 			var validatedArgs = new Arguments() { Args = args };
 
-			var uriOption = new Option<Uri?>(
+			var uriOption = new Option<Uri>(
 				name: "--urls",
 				description: "Supply a custom URL for the server"
 			);
@@ -97,7 +97,7 @@ namespace Crash.Server
 				}
 			});
 
-			var pathOption = new Option<FileInfo?>(
+			var pathOption = new Option<FileInfo>(
 				name: "--path",
 				description: "Supply a custom Path for the Database file");
 			pathOption.AddAlias("-p");
