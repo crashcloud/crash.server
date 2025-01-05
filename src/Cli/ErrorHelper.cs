@@ -30,7 +30,7 @@ internal class ErrorHelper
 			GetPaddedNewLine(ArgsMessage.Length)
 		};
 
-		bool helpFound = false;
+		var helpFound = false;
 
 		foreach (var handler in ErrorHandlers)
 		{
@@ -81,7 +81,7 @@ internal class ErrorHelper
 		return helpFound;
 	}
 
-	private string GetPaddedNewLine(int length, char padding = ' ')
+	private static string GetPaddedNewLine(int length, char padding = ' ')
 	{
 		var spaces = new char[length];
 		Array.Fill(spaces, padding);
@@ -107,11 +107,11 @@ internal class ErrorHelper
 		return false;
 	}
 
-	private List<ErrorHandler> GetErrorHandlers() => new()
-	{
+	private static List<ErrorHandler> GetErrorHandlers() =>
+	[
 		new ErrorHandler(ex => ex is SocketException, "It is possible your port is unavailable. Is the port correct?", @"[\d.]:"),
 		new ErrorHandler(ex => ex is SocketException, "It is possible your address is unreachable. Is the address correct? Can you ping it successfully?", @"://[\d.]+:"),
 		// new ErrorHandler(ex => ex is Exception, "It is possible your address is unreachable. Is the address correct? Can you ping it successfully?", @"://[\d.]:"),
-	};
+	];
 
 }

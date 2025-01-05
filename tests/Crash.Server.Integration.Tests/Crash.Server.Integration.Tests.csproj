@@ -3,6 +3,8 @@
 	<PropertyGroup>
 		<Title>Crash.Server.Integration.Tests</Title>
 		<TargetFrameworks>net9.0</TargetFrameworks>
+		<langVersion>12</langVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -14,6 +16,8 @@
 		</PackageReference>
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
 		<PackageReference Include="coverlet.collector" Version="6.0.0" />
+
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>

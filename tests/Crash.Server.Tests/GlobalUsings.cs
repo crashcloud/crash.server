@@ -12,3 +12,5 @@ global using Crash.Changes.Extensions;
 global using Crash.Server.Model;
 global using Crash.Geometry;
 global using Crash.Changes;
+
+[assembly: System.Runtime.CompilerServices.InternalsVisibleToAttribute("Crash.Server.Integration.Tests")]

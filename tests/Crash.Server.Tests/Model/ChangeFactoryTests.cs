@@ -115,7 +115,7 @@ namespace Crash.Server.Tests.Model
 		public void Create_Delete_Success()
 		{
 			// Act
-			var change = ChangeFactory.CreateDeleteRecord(Guid.NewGuid());
+			var change = ChangeFactory.CreateDeleteRecord("James", Guid.NewGuid());
 
 			// Assert
 			ValidateIds(change);
@@ -130,7 +130,7 @@ namespace Crash.Server.Tests.Model
 		public void Create_Lock_Success()
 		{
 			// Act
-			var change = ChangeFactory.CreateLockRecord(nameof(ChangeFactoryTests), Guid.NewGuid());
+			var change = ChangeFactory.CreateLockRecord(nameof(ChangeFactoryTests), Guid.NewGuid(), "Joe");
 
 			// Assert
 			ValidateIds(change);

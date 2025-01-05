@@ -36,6 +36,25 @@
             "${workspaceFolder}/src/Crash.Server.csproj",
           ],
           "problemMatcher": "$msCompile"
-        }
+        },
+        {
+					"label": "Delete Databases",
+					"type": "shell",
+					"command" : "shell",
+					"osx": {
+						"args": [
+							"rm", 
+							"-f",
+							"~/Library/Application\\ Support/Databases/*.db"
+						]
+					},
+					"windows": {
+						"args": [
+							"Remove-Item",
+							"-Path $env:LOCALAPPDATA/Databases/*.db",
+							"-Force" 
+					]
+					},
+			}
     ]
 }

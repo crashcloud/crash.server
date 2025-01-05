@@ -4,29 +4,29 @@ using System.Text.Json;
 namespace Crash.Server.Model
 {
 	/// <summary>A User inside the Database. Other implementations will exist elsewhere.</summary>
-	public sealed class User : IEquatable<string>, IEquatable<User>
+	public sealed class User(string name, string id = "", string follows = "") : IEquatable<string>, IEquatable<User>
 	{
 		/// <summary>The Id of the User</summary>
-		public string? Id { get; set; }
+		public string Id { get; set; } = id;
 
 		/// <summary>The Name of the User</summary>
 		[Key]
-		public string Name { get; set; }
+		public string Name { get; set; } = name;
 
 		/// <summary>The Users </summary>
-		public string? Follows { get; set; }
+		public string Follows { get; set; } = follows;
 
 		/// <summary>Creates a User given a change</summary>
 		/// <param name="change"></param>
 		/// <returns></returns>
-		internal static User? FromChange(Change change)
+		internal static User FromChange(Change change)
 		{
 			if (string.IsNullOrEmpty(change?.Payload)) return null;
 
 			return JsonSerializer.Deserialize<User>(change.Payload);
 		}
 
-		public override bool Equals(object? obj)
+		public override bool Equals(object obj)
 			=> obj switch
 			{
 				User user => Equals(user),
@@ -36,9 +36,9 @@ namespace Crash.Server.Model
 
 		public override int GetHashCode() => Name.ToUpperInvariant().GetHashCode();
 
-		public bool Equals(string? other)
+		public bool Equals(string other)
 			=> string.Equals(Name, other, StringComparison.OrdinalIgnoreCase);
 
-		public bool Equals(User? other) => Equals(other?.Name);
+		public bool Equals(User other) => Equals(other?.Name);
 	}
 }

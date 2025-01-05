@@ -1,22 +1,18 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Text.RegularExpressions;
-
-using Microsoft.Extensions.Logging;
 
 namespace Crash.Server
 {
 	public sealed class CrashLogger : ILogger, IDisposable
 	{
 
-		public record struct LogMessage(LogLevel Level, string Message, string EventId, Exception? RealException = null);
+		public record struct LogMessage(LogLevel Level, string Message, string EventId, Exception RealException = null);
 
 		private readonly LogLevel _currentLevel;
 		private readonly List<LogMessage> _logMessages;
 		public IReadOnlyList<LogMessage> Messages => _logMessages;
 
-		public IDisposable? BeginScope<TState>(TState state) where TState : notnull
+		public IDisposable BeginScope<TState>(TState state) where TState : notnull
 		{
 			return this;
 		}
@@ -24,7 +20,7 @@ namespace Crash.Server
 		public CrashLogger(LogLevel loggingLevel = LogLevel.Information)
 		{
 			_currentLevel = Debugger.IsAttached ? LogLevel.Trace : loggingLevel;
-			_logMessages = new List<LogMessage>();
+			_logMessages = [];
 		}
 
 		public bool IsEnabled(LogLevel logLevel)
@@ -32,7 +28,7 @@ namespace Crash.Server
 			return logLevel >= _currentLevel;
 		}
 
-		public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+		public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
 		{
 			var eventItem = eventId.Name?.Split(".")?.LastOrDefault() ?? string.Empty;
 			var formattedMessage = MessageSimplifier(formatter.Invoke(state, exception));
@@ -84,11 +80,11 @@ namespace Crash.Server
 
 	}
 
-	internal sealed class CrashLoggerProvider : ILoggerProvider
+	public sealed class CrashLoggerProvider : ILoggerProvider
 	{
 		internal CrashLogger _logger;
 
-		internal CrashLoggerProvider(LogLevel loggingLevel)
+		public CrashLoggerProvider(LogLevel loggingLevel = LogLevel.Information)
 		{
 			_logger = new CrashLogger(loggingLevel);
 		}

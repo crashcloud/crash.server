@@ -14,7 +14,7 @@ namespace Crash.Server
 		public static IHost MigrateDatabase<T>(this IHost webHost) where T : DbContext
 		{
 			Batteries.Init();
-			var serviceScopeFactory = (IServiceScopeFactory?)webHost
+			var serviceScopeFactory = (IServiceScopeFactory)webHost
 				.Services.GetService(typeof(IServiceScopeFactory));
 
 			if (serviceScopeFactory == null)

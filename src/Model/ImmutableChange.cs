@@ -34,10 +34,10 @@ namespace Crash.Server.Model
 
 		public Guid Id { get; init; }
 
-		public string? Owner { get; init; }
+		public string Owner { get; init; }
 
 		[Timestamp]
-		public string? Payload { get; init; }
+		public string Payload { get; init; }
 
 		public string Type { get; init; }
 

@@ -178,6 +178,9 @@ dotnet_diagnostic.IDE0028.severity = suggestion
 # IDE0270: Use coalesce expression
 dotnet_diagnostic.IDE0270.severity = suggestion
 
+# IDE0305: Simplify collection initialization
+dotnet_diagnostic.IDE0305.severity = suggestion
+
 [*.cs]
 # Newline settings
 csharp_new_line_before_open_brace = all
@@ -303,7 +306,16 @@ dotnet_diagnostic.IDE0011.severity = none
 dotnet_diagnostic.IDE0007.severity = suggestion
 
 # CA1822: Mark members as static
-dotnet_diagnostic.CA1822.severity = suggestion
+dotnet_diagnostic.CA1822.severity = none
+
+# IDE0290: Use primary constructor
+dotnet_diagnostic.IDE0290.severity = suggestion
+
+# IDE0250: Make struct 'readonly'
+dotnet_diagnostic.IDE0250.severity = suggestion
+
+# IDE0059: Unnecessary assignment of a value
+dotnet_diagnostic.IDE0059.severity = suggestion
 
 [src/{Compilers,ExpressionEvaluator,Scripting}/**Test**/*.{cs,vb}]
 

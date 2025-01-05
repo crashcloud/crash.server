@@ -2,9 +2,7 @@
 
 namespace Crash.Server.Data;
 
-#pragma warning disable CA1050 // Declare types in namespaces
 #pragma warning disable CA1716 // Identifiers should not match keywords
-#pragma warning disable CA1000 // Do not declare static members on generic types
 #pragma warning disable CA2201 // Do not raise reserved exception types
 
 public struct Result
@@ -12,6 +10,10 @@ public struct Result
 	public static Result<T> Ok<T>(T value) => new(value);
 	public static Result<T> Err<T>(Exception error) => new(error);
 	public static Result<T> Err<T>(string error) => new(new Exception(error));
+
+	public static Result<bool> Bool(bool result, string message = "") => result ?
+								new(true) :
+								new(new Exception(message));
 
 }
 
@@ -21,6 +23,7 @@ public readonly struct Result<T>
 	public T ResultValue { get; }
 	public Exception ResultError { get; }
 	public bool IsSuccess { get; }
+	public bool IsFailure => !IsSuccess;
 
 	internal Result(T value)
 	{
@@ -45,4 +48,5 @@ public readonly struct Result<T>
 		error = ResultError;
 		return !IsSuccess;
 	}
+
 }

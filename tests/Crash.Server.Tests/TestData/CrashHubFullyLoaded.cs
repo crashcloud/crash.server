@@ -13,7 +13,7 @@ namespace Crash.Server.Tests
 		public static CrashHub GenerateHub()
 		{
 			var logger = GetLogger();
-			CrashHub hub = new(GetContext(logger), logger);
+			CrashHub hub = new(GetContext(), logger);
 
 			var mockClients = new Mock<IHubCallerClients<ICrashClient>>();
 			var mockClientProxy_All = new Mock<ICrashClient>();
@@ -29,11 +29,11 @@ namespace Crash.Server.Tests
 			return hub;
 		}
 
-		internal static CrashContext GetContext(CrashLogger logger)
+		internal static CrashContext GetContext()
 		{
 			var optionsBuilder = new DbContextOptionsBuilder<CrashContext>();
 			optionsBuilder.UseInMemoryDatabase(Guid.NewGuid().ToString());
-			CrashContext context = new(optionsBuilder.Options, logger);
+			CrashContext context = new(optionsBuilder.Options);
 			return context;
 		}
 
@@ -115,18 +115,23 @@ namespace Crash.Server.Tests
 
 	public class EmptyCrashClient : ICrashClient
 	{
-		public Task Done(string user) { return Task.CompletedTask; }
+		public Task Done(string user) { return Task.FromResult(true); }
 
-		public Task DoneRange(IEnumerable<Guid> ids) { return Task.CompletedTask; }
+		public Task DoneRange(IAsyncEnumerable<Guid> ids) { return Task.FromResult(true); }
 
-		public Task PushChange(Change change) { return Task.CompletedTask; }
+		public Task PushChange(Change change) { return Task.FromResult(true); }
 
-		public Task PushChangesThroughStream(IAsyncEnumerable<Change> changeStream) { return Task.CompletedTask; }
+		public Task PushChangesThroughStream(IAsyncEnumerable<Change> changeStream) { return Task.FromResult(true); }
 
-		public Task InitializeChanges(IEnumerable<Change> changes) { return Task.CompletedTask; }
+		public Task<IAsyncEnumerable<Change>> InitializeChangeStream() { return null; }
+		
+		public Task InitializeChanges(IAsyncEnumerable<Change> changes) { return null; }
 
-		public Task InitializeUsers(IEnumerable<string> users) { return Task.CompletedTask; }
+		public Task InitializeUsers(IAsyncEnumerable<string> users) { return Task.FromResult(true); }
 
-		public Task UpdateUser(string user) { return Task.CompletedTask; }
+		public Task UpdateUser(string user) { return Task.FromResult(true); }
+
+		public Task<string> GetMessage() => Task.FromResult<string>(string.Empty);
+		
 	}
 }

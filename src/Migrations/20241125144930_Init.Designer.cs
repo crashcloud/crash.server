@@ -6,19 +6,17 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-#nullable disable
-
 namespace Crash.Server.Migrations
 {
     [DbContext(typeof(CrashContext))]
-    [Migration("20230830034514_Initialized")]
-    partial class Initialized
+    [Migration("20241125144930_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "7.0.9");
+            modelBuilder.HasAnnotation("ProductVersion", "7.0.0");
 
             modelBuilder.Entity("Crash.Server.Model.ImmutableChange", b =>
                 {
@@ -36,17 +34,37 @@ namespace Crash.Server.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Payload")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Stamp")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Type")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("UniqueId");
 
                     b.ToTable("Changes");
+                });
+
+            modelBuilder.Entity("Crash.Server.Model.ManageableUser", b =>
+                {
+                    b.Property<string>("Title")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EmailPattern")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Title");
+
+                    b.ToTable("ManageableUsers");
                 });
 
             modelBuilder.Entity("Crash.Server.Model.MutableChange", b =>
@@ -68,6 +86,7 @@ namespace Crash.Server.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Type")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

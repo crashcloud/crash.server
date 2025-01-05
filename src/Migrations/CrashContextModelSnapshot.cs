@@ -5,8 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-#nullable disable
-
 namespace Crash.Server.Migrations
 {
     [DbContext(typeof(CrashContext))]
@@ -15,72 +13,78 @@ namespace Crash.Server.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "7.0.9");
+            modelBuilder.HasAnnotation("ProductVersion", "7.0.0");
 
             modelBuilder.Entity("Crash.Server.Model.ImmutableChange", b =>
                 {
                     b.Property<Guid>("UniqueId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .IsRequired(true);
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Action")
-                        .HasColumnType("INTEGER")
-                        .IsRequired(true);
+                        .HasColumnType("INTEGER");
 
                     b.Property<Guid>("Id")
-                        .HasColumnType("TEXT")
-                        .IsRequired(true);
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Owner")
-                        .HasColumnType("TEXT")
-                        .IsUnicode();
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Payload")
-                        .HasColumnType("TEXT")
-                        .IsUnicode();
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Stamp")
-                        .HasColumnType("TEXT")
-                        .IsRequired(true);
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Type")
-                        .HasColumnType("TEXT")
-                        .IsRequired(true);
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.HasKey("UniqueId");
-                    
+
                     b.ToTable("Changes");
+                });
+
+            modelBuilder.Entity("Crash.Server.Model.ManageableUser", b =>
+                {
+                    b.Property<string>("Title")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EmailPattern")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Title");
+
+                    b.ToTable("ManageableUsers");
                 });
 
             modelBuilder.Entity("Crash.Server.Model.MutableChange", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .IsRequired(true);
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Action")
-                        .HasColumnType("INTEGER")
-                        .IsRequired(true);
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Owner")
-                        .HasColumnType("TEXT")
-                        .IsRequired(true)
-                        .IsUnicode();
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Payload")
-                        .HasColumnType("TEXT")
-                        .IsRequired(true)
-                        .IsUnicode();
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Stamp")
-                        .HasColumnType("TEXT")
-                        .IsRequired(true);
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Type")
-                        .HasColumnType("TEXT")
-                        .IsRequired(true);
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -90,13 +94,10 @@ namespace Crash.Server.Migrations
             modelBuilder.Entity("Crash.Server.Model.User", b =>
                 {
                     b.Property<string>("Name")
-                        .HasColumnType("TEXT")
-                        .IsRequired(true)
-                        .IsUnicode();
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Follows")
-                        .HasColumnType("TEXT")
-                        .IsUnicode();
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");

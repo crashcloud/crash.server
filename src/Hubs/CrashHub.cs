@@ -3,7 +3,10 @@
 using Crash.Changes.Extensions;
 using Crash.Server.Data;
 using Crash.Server.Model;
+using Crash.Server.Security;
 
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 [assembly: InternalsVisibleTo("Crash.Server.Tests")]
@@ -11,15 +14,17 @@ using Microsoft.AspNetCore.SignalR;
 namespace Crash.Server.Hubs
 {
 	///<summary>Server Implementation of ICrashClient EndPoints</summary>
+	[Authorize(Roles = Roles.ViewOnlyRoleName)]
 	public sealed class CrashHub : Hub<ICrashClient>
 	{
+
 		// TODO: Make this configurable
 		internal const string CrashGeometryChange = "CRASH.GEOMETRYCHANGE";
 		internal const string CrashCameraChange = "CRASH.CAMERACHANGE";
 		internal const string CrashDoneChange = "CRASH.DONECHANGE";
 
-		internal readonly CrashContext Database;
-		internal readonly ILogger<CrashHub> Logger;
+		internal CrashContext Database { get; }
+		internal ILogger<CrashHub> Logger { get; }
 
 		public CrashHub(CrashContext database, ILogger<CrashHub> logger)
 		{
@@ -28,141 +33,95 @@ namespace Crash.Server.Hubs
 		}
 
 		/// <summary>Add Change to SqLite DB and notify other clients</summary>
-		private async Task<Result<bool>> Add(IChange change)
+		private async Task<bool> Add(IChange change)
 		{
-			// Validate
-			if (!HubUtils.IsChangeValid(change) ||
-				!change.HasFlag(ChangeAction.Add))
-			{
-				Logger.CouldNotAddChange();
-				return Result.Err<bool>($"Change {change} is not valid!");
-			}
-
 			// Record
 			await Database.AddChangeAsync(new ImmutableChange(change));
-			return Result.Ok(true);
+			return true;
 		}
 
 		/// <summary>Delete Item in SqLite DB and notify other clients</summary>
-		private async Task<Result<bool>> Remove(Guid id)
+		private async Task<bool> Remove(string user, Guid id)
 		{
-			// Cannot delete what does not already exist
-			if (!Database.TryGetChange(id, out _))
-			{
-				Logger.ChangeDoesNotExist(id);
-				return Result.Err<bool>($"Change {id} does not exist!");
-			}
+			if (!this.ChangeExistsInDatabase(id, out _)) return false;
 
 			// Record
-			await Database.AddChangeAsync(ChangeFactory.CreateDeleteRecord(id));
-			return Result.Ok(true);
+			return await Database.AddChangeAsync(ChangeFactory.CreateDeleteRecord(user, id));
 		}
 
 		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
-		private async Task<Result<bool>> Done(string user)
+		private async Task<bool> Done(string user)
 		{
-			// Validate
-			if (!HubUtils.IsUserValid(user))
-			{
-				Logger.UserIsNotValid(user);
-				return Result.Err<bool>($"User {user} is not valid!");
-			}
-
 			// Record
 			if (!await Database.DoneAsync(user))
 			{
 				Logger.CouldNotRelease();
-				return Result.Err<bool>($"Could not release changes for {user}!");
+				return false;
 			}
 
 			// Update
 			await Clients.Others.Done(user);
-			return Result.Ok(true);
+			return true;
 		}
 
-		// TODO : Does this not require a user?
 		/// <summary>Lock Item in SqLite DB and notify other clients</summary>
-		private async Task<Result<bool>> Lock(string user, Guid id)
+		/// NOTE : A user is required, we need to know WHO locked it
+		private async Task<bool> Lock(string user, Guid id)
 		{
-			// Validate
-			if (!HubUtils.IsUserValid(user))
-			{
-				Logger.UserIsNotValid(user);
-				return Result.Err<bool>($"User {user} is not valid!");
-			}
-
-			// Lock or Unlock impossible if nothing to Lock or Unlock
-			if (!Database.TryGetChange(id, out var latestChange))
-			{
-				Logger.ChangeDoesNotExist(id);
-				return Result.Err<bool>($"Change {id} does not exist!");
-			}
+			if (!this.ChangeExistsInDatabase(id, out var existingChange)) return false;
 
 			// Record
-			var lockChange = ChangeFactory.CreateLockRecord(latestChange.Type, latestChange.Id);
+			var lockChange = ChangeFactory.CreateLockRecord(existingChange.Type, existingChange.Id, user);
 			await Database.AddChangeAsync(lockChange);
-			return Result.Ok(true);
+			return true;
 		}
 
-		// TODO : Does this not require a user?
 		/// <summary>Unlock Item in SqLite DB and notify other clients</summary>
-		private async Task<Result<bool>> Unlock(string user, Guid id)
+		/// NOTE : An admin might unlock, hence, a user is not required. Validation should be done elsewhere
+		private async Task<bool> Unlock(Guid id)
 		{
-			// Validate
-			if (!HubUtils.IsUserValid(user))
-			{
-				Logger.UserIsNotValid(user);
-				return Result.Err<bool>($"User {user} is not valid!");
-			}
-
-			// Lock or Unlock impossible if nothing to Lock or Unlock
-			if (!Database.TryGetChange(id, out var latestChange))
-			{
-				Logger.ChangeDoesNotExist(id);
-				return Result.Err<bool>($"Change {id} does not exist!");
-			}
+			if (!this.ChangeExistsInDatabase(id, out var existingChange)) return false;
 
 			// Record
-			var lockChange = ChangeFactory.CreateUnlockRecord(latestChange.Type, latestChange.Id);
+			var lockChange = ChangeFactory.CreateUnlockRecord(existingChange.Type, existingChange.Id);
 			await Database.AddChangeAsync(lockChange);
-			return Result.Ok(true);
+			return true;
 		}
 
 		/// <summary>Update Item in SqLite DB and notify other clients</summary>
-		private async Task<Result<bool>> Transform(IChange change)
+		private async Task<bool> Transform(IChange change)
 		{
+			if (!this.IsPayloadEmpty(change)) return false;
+
 			// Record
 			await Database.AddChangeAsync(new ImmutableChange(change));
-			return Result.Ok(true);
+			return true;
 		}
 
 		/// <summary>Update Item in SqLite DB and notify other clients</summary>
-		private async Task<Result<bool>> Update(IChange change)
+		private async Task<bool> Update(IChange change)
 		{
+			if (!this.IsPayloadEmpty(change)) return false;
+
 			await Database.AddChangeAsync(new ImmutableChange(change));
-			return Result.Ok(true);
+			return true;
 		}
 
 		// Is this how you open a connection with the server?
 		// Or do you stream?
+		[Authorize(Roles = Roles.ViewOnlyRoleName)]
 		public async Task RequestUsers()
 		{
-			var users = Database.GetUsers();
+			var users = Database.GetUsers().ToAsyncEnumerable();
 			await Clients.Caller.InitializeUsers(users);
 		}
 
 		// TODO : Save the last Camera alongside the User so when you log in it is where you left off
 		/// <summary>Add Change to SqLite DB and notify other clients</summary>
-		private async Task<Result<bool>> CameraChange(Change change)
+		private async Task<bool> CameraChange(Change change)
 		{
 			try
 			{
-				if (change.Owner is null)
-				{
-					Logger.UserIsNotValid(change.Owner);
-					return Result.Err<bool>($"User {change.Owner} is not valid!");
-				}
-
 				// Update
 				var userName = change.Owner;
 
@@ -175,20 +134,23 @@ namespace Crash.Server.Hubs
 			}
 			catch (Exception ex)
 			{
-				return Result.Err<bool>(ex);
+				Logger.Exception(ex);
+				return false;
 			}
 
-			return Result.Ok(true);
+			return true;
 		}
 
+		[Authorize(Roles = Roles.EditRoleName)]
 		public async Task PushChange(Change change)
 		{
-			if (!(await PushChangeOnly(change)).IsSuccess) { return; }
+			if (!await PushChangeOnly(change)) return;
 			await Clients.Others.PushChange(change);
 		}
 
 		// https://learn.microsoft.com/en-us/aspnet/core/signalr/streaming?view=aspnetcore-8.0#client-to-server-streaming
 		// A hub method automatically becomes a client-to-server streaming hub method when it accepts IAsyncEnumerable<T>.
+		[Authorize(Roles = Roles.EditRoleName)]
 		public async Task PushChangesThroughStream(IAsyncEnumerable<Change> changeStream)
 		{
 			await foreach (var item in changeStream)
@@ -199,37 +161,32 @@ namespace Crash.Server.Hubs
 			await Clients.Others.PushChangesThroughStream(changeStream);
 		}
 
-		private async Task<Result<bool>> PushChangeOnly(Change change)
+		private async Task<bool> PushChangeOnly(Change change)
 		{
-			if (change is null)
-			{
-				Logger.ChangeIsNotValid(change);
-				return Result.Err<bool>(new ArgumentNullException(nameof(change)));
-			}
-
-			if (change.Type is null)
-			{
-				Logger.ChangeIsNotValid(change);
-				return Result.Err<bool>(new ArgumentNullException($"{nameof(change)}.Type was null!"));
-			}
-
 			var type = change?.Type?.ToUpperInvariant();
-			return type switch
+
+			var result = type switch
 			{
+				null or "" => Result.Bool(false),
+
 				CrashCameraChange => change.Action switch
 				{
-					ChangeAction.Add => await CameraChange(change),
-					_ => Result.Err<bool>($"No action defined for {change.Action}")
+					ChangeAction.Add => Result.Bool(await CameraChange(change)),
+					_ => Result.Bool(false, $"No action defined for {change.Action}")
 				},
 
-				// TODO : Add tests to check 3rd Party Plugins work
-				CrashGeometryChange or CrashDoneChange or _ => await HandleDefaultChange(change!),
+				CrashGeometryChange or CrashDoneChange or _ => Result.Bool(await HandleDefaultChange(change!)),
 			};
+
+			if (result.ResultError is not null)
+				Logger.Exception(result.ResultError);
+
+			return result.ResultValue;
 		}
 
 		private static List<ChangeAction> GetChangesInActionableOrder(ChangeAction action)
 		{
-			List<ChangeAction> changes = new();
+			List<ChangeAction> changes = [];
 
 			// Add Absolutely must be first!
 			if (action.HasFlag(ChangeAction.Add)) { changes.Add(ChangeAction.Add); }
@@ -254,107 +211,66 @@ namespace Crash.Server.Hubs
 			return changes;
 		}
 
-		private async Task<Result<bool>> HandleDefaultChange(Change change)
+		private async Task<bool> HandleDefaultChange(Change change)
 		{
+			if (!this.IsUserValid(change)) return false;
 			var currentActions = new List<ChangeAction>();
 
 			var orderedActions = GetChangesInActionableOrder(change.Action);
 
-			List<Result<bool>> results = new();
+			List<bool> results = [];
 			foreach (var action in orderedActions)
 			{
-				var result = action switch
+				bool result = action switch
 				{
+					// TODO : Chain Validation in here!
 					ChangeAction.Locked => await Lock(change.Owner, change.Id),
-					ChangeAction.Unlocked => await Unlock(change.Owner, change.Id),
-					ChangeAction.Remove => await Remove(change.Id),
+					ChangeAction.Unlocked => await Unlock(change.Id),
+					ChangeAction.Remove => await Remove(change.Owner, change.Id),
 					ChangeAction.Release => await Done(change.Owner),
 					ChangeAction.Add => await Add(change),
 					ChangeAction.Update => await Update(change),
 					ChangeAction.Transform => await Transform(change),
 
-					ChangeAction.None or ChangeAction.Temporary => Result.Err<bool>($"No action defined for {action}"),
+					// No action needed
+					ChangeAction.Temporary => true,
 
-					_ => Result.Err<bool>(new NotImplementedException($"No action defined for {change.Action}")),
+					ChangeAction.None or _ => false,
 				};
+
+				if (!result)
+					Logger.CouldNotAddChange();
 
 				results.Add(result);
 			}
 
-			var errors = results!.Where(r => !r.IsSuccess).Select(r => r.ResultError);
-			if (errors.Any())
-				return Result.Ok(true);
-
-			return Result.Err<bool>($"Multiple errors {string.Join("\n", errors)}");
-		}
-
-		/// <summary>Adds or Updates a User in the User Db</summary>
-		internal async Task UpdateUser(Change change)
-		{
-			// validate
-			if (!HubUtils.IsChangeValid(change))
-			{
-				Logger.ChangeIsNotValid(change);
-				return;
-			}
-
-			if (!HubUtils.IsUserValid(change.Owner))
-			{
-				Logger.UserIsNotValid(change.Owner);
-				return;
-			}
-
-			var existingUser = await Database.Users.FindAsync(change.Owner);
-			if (existingUser is null)
-			{
-				var user = User.FromChange(change);
-				if (user is null || !HubUtils.IsUserValid(user.Name))
-				{
-					Logger.UserIsNotValid(user?.Name);
-					return;
-				}
-
-				user.Id = Context.ConnectionId;
-
-				// Update
-				await Database.Users.AddAsync(existingUser);
-				await Database.SaveChangesAsync();
-			}
-
-			// TODO : What if user is not null?
-
-			// TODO : Is this required currently?
-			// Useful for connected/disconnected
-			// await Clients.Others.UpdateUser(change);
+			return results.All(r => r);
 		}
 
 		/// <summary>On Connected send user Changes from DB</summary>
+		[Authorize(Roles = Roles.ViewOnlyRoleName)]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 		public override async Task OnConnectedAsync()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 		{
-			await base.OnConnectedAsync();
-
 			var changes = Database.GetChanges();
-			var changeStream = changes.Select(c => new Change(c));
-			await Clients.Caller.InitializeChanges(changeStream);
+			var changeStream = changes.Select(c => new Change(c)).ToAsyncEnumerable();
 
-			var users = Database.GetUsers();
-			await Clients.Caller.InitializeUsers(users);
+			// TODO : Fix connection bug with changes that cannot serialize changes async etc.
+			// await Clients.Caller.InitializeChanges(changeStream);
+
+			var users = Database.GetUsers().ToAsyncEnumerable();
+			// await Clients.Caller.InitializeUsers(users);
 		}
 
-		public override Task OnDisconnectedAsync(Exception? exception)
+		[Authorize(Roles = Roles.ViewOnlyRoleName)]
+		public override Task OnDisconnectedAsync(Exception exception)
 		{
-			if (exception is null)
-				return Task.CompletedTask;
+			if (exception is not null)
+				Logger.Exception(exception);
 
-			var disconnectedMessage = $"Exception : {exception.Message}\n" +
-										 $"Inner : {exception?.InnerException?.Message}\n" +
-										 $"Source : {exception.Source}\n" +
-										 $"Trace : {exception.StackTrace}\n" +
-										 $"Data : {string.Join(", ", exception.Data)}";
-
-			Logger.Critical(disconnectedMessage);
-
-			return base.OnDisconnectedAsync(exception);
+			return Task.CompletedTask;
 		}
+
 	}
 }

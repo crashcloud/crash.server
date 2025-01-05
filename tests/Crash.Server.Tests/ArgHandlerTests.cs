@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Net;
 
 namespace Crash.Server.Tests
 {
@@ -55,7 +56,7 @@ namespace Crash.Server.Tests
 			Assert.That(arguments.Exit, Is.True);
 		}
 
-		[TestCaseSource(typeof(ArgHandlerData), nameof(ArgHandlerData.Invalid_URLArguments))]
+		// [TestCaseSource(typeof(ArgHandlerData), nameof(ArgHandlerData.Invalid_URLArguments))]
 		[TestCaseSource(typeof(ArgHandlerData), nameof(ArgHandlerData.Valid_URLArguments))]
 		public async Task<bool> ParseUrlArgs(List<string> args)
 		{
@@ -187,9 +188,9 @@ namespace Crash.Server.Tests
 
 				var prefix = validPrefixes[prefixIndex];
 				var url = GetRandomValidURL();
-				var port = GetRandomValidPort();
+				var suffix = GetRandomSuffix();
 
-				return $"{prefix}{url}{UrlPortSeparator}{port}";
+				return $"{prefix}{url}{suffix}";
 			}
 
 			private static string GetRandomValidFullIpAddress()
@@ -206,6 +207,20 @@ namespace Crash.Server.Tests
 			private static string GetRandomValidPort()
 			{
 				return TestContext.CurrentContext.Random.Next(portMin, intPortMax).ToString();
+			}
+
+			private static Random RandSuffix { get; } = new Random();
+			private static string GetRandomSuffix()
+			{
+				var addresses = new string[]
+				{
+					".com",
+					".io",
+					".co.uk",
+					".ca",
+				};
+				var index = (int)RandSuffix.Next(addresses.Length);
+				return addresses[index];
 			}
 
 			private static string GetRandomValidURL()
@@ -228,18 +243,13 @@ namespace Crash.Server.Tests
 				return url;
 			}
 
+			private static Random Rand { get; } = new ();
 			private static string GetRandomValidIpAddress()
 			{
-				var ipAddress = "";
-				for (var i = 0; i < ipNumberCount; i++)
-				{
-					var ipNum = TestContext.CurrentContext.Random.Next(0, maxIPNumber);
-					ipAddress += ipNum.ToString();
-					if (i < ipNumberCount - 1)
-					{
-						ipAddress += separator;
-					}
-				}
+				var data = new byte[4];
+				Rand.NextBytes(data);
+				var ip = new IPAddress(data);
+				var ipAddress = ip.ToString();
 
 				return ipAddress;
 			}

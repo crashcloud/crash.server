@@ -1,21 +1,36 @@
 ﻿// https://learn.microsoft.com/en-us/ef/core/modeling/
 
-using Crash.Changes.Extensions;
-using Crash.Server.Hubs;
-using Crash.Server.Pages;
+using Crash.Server.Security;
+
+using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Crash.Server.Model
 {
 	/// <summary>Implementation of DbContext to be used as SqLite DB Session</summary>
 	public sealed class CrashContext : DbContext
 	{
-		private ILogger<CrashHub> Logger { get; }
 
 		/// <summary>Default Constructor</summary>
-		public CrashContext(DbContextOptions<CrashContext> options, ILogger<CrashHub> logger) : base(options)
+		public CrashContext(DbContextOptions<CrashContext> options) : base(options)
 		{
-			Logger = logger;
 			SaveChangesFailed += OnSaveChangesFailed;
+			InsertAdminUser();
+		}
+
+		private void InsertAdminUser()
+		{
+			try
+			{
+				var args = this.GetService<Arguments>();
+				if (string.IsNullOrEmpty(args?.AdminUser)) return;
+
+				ManageableUsers.Add(new("Admin", "1", args.AdminUser, Roles.AdminRoleName));
+			}
+			catch
+			{
+
+			}
 		}
 
 		/// <summary>The History of Changes</summary>
@@ -24,10 +39,17 @@ namespace Crash.Server.Model
 		/// <summary>The Latest Changes</summary>
 		public DbSet<MutableChange> LatestChanges { get; set; }
 
-		/// <summary>The Users</summary>
+		/// <summary>
+		/// Users Managed by Admins, not connected Users.
+		/// </summary>
+		public DbSet<ManageableUser> ManageableUsers { get; set; }
+
+		/// <summary>
+		/// Connected Users
+		/// </summary>
 		public DbSet<User> Users { get; set; }
 
-		private void OnSaveChangesFailed(object? sender, SaveChangesFailedEventArgs e)
+		private void OnSaveChangesFailed(object sender, SaveChangesFailedEventArgs e)
 		{
 			// TODO: Handle Failures
 			;
@@ -43,13 +65,13 @@ namespace Crash.Server.Model
 		{
 			if (changeRecord.Id == Guid.Empty || changeRecord.UniqueId == Guid.Empty)
 			{
-				Logger.ChangeIsNotValid(changeRecord);
+				// Logger.ChangeIsNotValid(changeRecord);
 				return false;
 			}
 
 			if (string.IsNullOrEmpty(changeRecord.Owner))
 			{
-				Logger.UserIsNotValid(changeRecord.Owner);
+				// Logger.UserIsNotValid(changeRecord.Owner);
 				return false;
 			}
 
@@ -60,7 +82,7 @@ namespace Crash.Server.Model
 			var noTracking = Users.AsNoTracking();
 			if (!noTracking.Any(c => c.Name == changeRecord.Owner))
 			{
-				await Users.AddAsync(new User { Name = changeRecord.Owner, Id = "", Follows = "" });
+				await Users.AddAsync(new User(changeRecord.Owner));
 				await SaveChangesAsync();
 				return true;
 			}
@@ -84,7 +106,7 @@ namespace Crash.Server.Model
 			await SaveChangesAsync();
 		}
 
-		internal bool TryGetChange(Guid changeId, out MutableChange? change)
+		internal bool TryGetChange(Guid changeId, out MutableChange change)
 		{
 			change = LatestChanges.Find(changeId);
 			return change is not null;
@@ -144,6 +166,17 @@ namespace Crash.Server.Model
 			await SaveChangesAsync();
 
 			return result;
+		}
+	}
+
+	public class CrashContextFactory : IDesignTimeDbContextFactory<CrashContext>
+	{
+		public CrashContext CreateDbContext(string[] args)
+		{
+			var optionsBuilder = new DbContextOptionsBuilder<CrashContext>();
+			optionsBuilder.UseSqlite();
+
+			return new CrashContext(optionsBuilder.Options);
 		}
 	}
 }
