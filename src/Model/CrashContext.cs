@@ -20,10 +20,17 @@ namespace Crash.Server.Model
 
 		private void InsertAdminUser()
 		{
-			var args = this.GetService<Arguments>();
-			if (string.IsNullOrEmpty(args?.AdminUser)) return;
+			try
+			{
+				var args = this.GetService<Arguments>();
+				if (string.IsNullOrEmpty(args?.AdminUser)) return;
 
-			ManageableUsers.Add(new("Admin", "1", args.AdminUser, Roles.AdminRoleName));
+				ManageableUsers.Add(new("Admin", "1", args.AdminUser, Roles.AdminRoleName));
+			}
+			catch
+			{
+
+			}
 		}
 
 		/// <summary>The History of Changes</summary>

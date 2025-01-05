@@ -30,8 +30,6 @@ namespace Crash.Server.Hubs
 		{
 			Database = database;
 			Logger = logger;
-			var args = this.Context.Features.Get<Arguments>();
-			;
 		}
 
 		/// <summary>Add Change to SqLite DB and notify other clients</summary>
