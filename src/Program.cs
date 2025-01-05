@@ -37,7 +37,6 @@ namespace Crash.Server
 			}
 
 			/// <summary>Creates an instance of the Crash WebApplication</summary>
-			internal bool TryCreateApplication(string[] args, out WebApplication? webApplication)
 			internal bool TryCreateApplication(string[] args, out WebApplication webApplication)
 			{
 				webApplication = null;
