@@ -194,7 +194,7 @@ namespace Crash.Server
 			rootCommand.SetHandler((InvocationContext context) =>
 			{
 				// Environment Options
-				validatedArgs.URL = context.ParseResult.FindResultFor(uriOption).GetValueOrDefault<string>() ?? Arguments.DefaultURL;
+				validatedArgs.URL = context.ParseResult.FindResultFor(uriOption).GetValueOrDefault<Uri>()?.ToString() ?? Arguments.DefaultURL;
 
 				var path = context.ParseResult.FindResultFor(pathOption).GetValueOrDefault<FileInfo>();
 				if (path is not null)

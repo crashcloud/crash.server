@@ -190,7 +190,7 @@ namespace Crash.Server.Tests
 				var url = GetRandomValidURL();
 				var suffix = GetRandomSuffix();
 
-				return $"{prefix}{url}{UrlPortSeparator}{suffix}";
+				return $"{prefix}{url}{suffix}";
 			}
 
 			private static string GetRandomValidFullIpAddress()
