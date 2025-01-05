@@ -138,7 +138,7 @@ namespace Crash.Server.Tests.Immutability
 			return new ValueTuple<Stack<Change>, Change>(firstHistory, liveChange);
 		}
 
-		private static Change getNewChange(Guid id, ChangeAction action, string? payload)
+		private static Change getNewChange(Guid id, ChangeAction action, string payload)
 		{
 			return new Change
 			{

@@ -14,7 +14,7 @@ namespace Crash.Server.Tests.Hubs
 		}
 
 		[TestCaseSource(typeof(TestData), nameof(TestData.InvalidUserNames))]
-		public void IsUserValid_InvalidUsers(string? userName)
+		public void IsUserValid_InvalidUsers(string userName)
 		{
 			Assert.That(HubUtils.IsUserValid(userName), Is.False);
 		}
@@ -46,7 +46,7 @@ namespace Crash.Server.Tests.Hubs
 		}
 
 		[TestCaseSource(typeof(TestData), nameof(TestData.InvalidPayloads))]
-		public void IsPayloadValid_InvalidPayloads(string? payload)
+		public void IsPayloadValid_InvalidPayloads(string payload)
 		{
 			Change change = new() { Payload = payload };
 			Assert.That(HubUtils.IsPayloadValid(change), Is.False);
