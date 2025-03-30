@@ -1,8 +1,11 @@
-﻿using Crash.Server.Model;
+﻿using Crash.Server.Security;
+
+using Microsoft.AspNetCore.Authorization;
 
 namespace Crash.Server.Pages
 {
 
+	[Authorize(Roles = Roles.AdminRoleName)]
 	public class Logging : DebugBase
 	{
 

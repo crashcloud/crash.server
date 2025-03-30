@@ -9,6 +9,9 @@ public class Connect : BaseTest
 	public async Task SimpleBoxSend()
 	{
 		var s = Scenario.Create();
+		var c = await s.AddCollaboratorAsync("Joe");
+		var chng = await c.SendCone();
+
 		var c = await s.AddCollaboratorAsync("Jake");
 		var change = await c.SendBox();
 		var c2 = await s.AddCollaboratorAsync("Rachel");

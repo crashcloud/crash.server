@@ -1,5 +1,7 @@
 ﻿using Crash.Server.Model;
+using Crash.Server.Security;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -7,6 +9,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Crash.Server.Pages
 {
+
+	[Authorize(Roles = Roles.AdminRoleName)]
 	public abstract class DebugBase : PageModel
 	{
 		internal CrashContext Context { get; }

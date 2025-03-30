@@ -8,7 +8,6 @@ internal class CrashAuthorizationHandler
 	public static void Options(AuthorizationOptions options)
 	{
 		options.InvokeHandlersAfterFailure = true;
-		// options.FallbackPolicy // <- Is this required?
 
 		options.AddPolicy(Policies.AdminPolicyName, (options) =>
 		{
@@ -33,7 +32,6 @@ internal class CrashAuthorizationHandler
 
 		options.AddPolicy(Policies.AnonymousPolicyName, (options) =>
 		{
-			options.RequireAuthenticatedUser();
 			options.RequireRole(Roles.AnonymousRoleName);
 			// options.RequireClaim(ClaimTypes.Role, Roles.AnonymousRole);
 		});

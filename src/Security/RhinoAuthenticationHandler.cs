@@ -51,7 +51,7 @@ internal class RhinoAuthenticationHandler : IAuthenticationHandler
 
 				// NOTE : This returns A USER Role
 				// TODO : Add more roles
-				var success = AuthenticateResult.Success(CrashClaims.GetTicket());
+				var success = AuthenticateResult.Success(CrashClaims.GetRhinoTicket());
 				return success;
 			}
 		}
@@ -112,7 +112,6 @@ internal class RhinoAuthenticationHandler : IAuthenticationHandler
 		var id = Guid.NewGuid();
 		HttpClient client = new HttpClient();
 
-
 		Dictionary<string, string> queryParams = new()
 		{
 			{ "Content-Type", "application/x-www-form-urlencoded" },
@@ -149,26 +148,13 @@ internal class RhinoAuthenticationHandler : IAuthenticationHandler
 
 	public static void Options(AuthenticationOptions options)
 	{
-		options.DefaultAuthenticateScheme = RhinoAuthenticationHandler.Name;
-		options.DefaultChallengeScheme = RhinoAuthenticationHandler.Name;
-		options.DefaultSignInScheme = RhinoAuthenticationHandler.Name;
-		options.RequireAuthenticatedSignIn = true;
+		options.DefaultAuthenticateScheme = AllowAnonymouseHandler.Name;
+		options.DefaultChallengeScheme = AllowAnonymouseHandler.Name;
+		options.DefaultSignInScheme = AllowAnonymouseHandler.Name;
+		options.RequireAuthenticatedSignIn = false;
 
+		options.AddScheme<AllowAnonymouseHandler>(AllowAnonymouseHandler.Name, AllowAnonymouseHandler.Name);
 		options.AddScheme<RhinoAuthenticationHandler>(RhinoAuthenticationHandler.Name, RhinoAuthenticationHandler.Name);
-		options.AddScheme<AllowAnonymouseHandler>(Roles.AnonymousRoleName, Roles.AnonymousRoleName);
 	}
 
-}
-
-// TODO : Likely not correctly implemented
-internal class AllowAnonymouseHandler : IAuthenticationHandler
-{
-	public Task<AuthenticateResult> AuthenticateAsync()
-		=> Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(), Roles.AnonymousRoleName)));
-
-	public Task ChallengeAsync(AuthenticationProperties properties) => Task.CompletedTask;
-
-	public Task ForbidAsync(AuthenticationProperties properties) => Task.CompletedTask;
-
-	public Task InitializeAsync(AuthenticationScheme scheme, HttpContext context) => Task.CompletedTask;
 }
